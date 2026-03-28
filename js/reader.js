@@ -134,18 +134,25 @@ function renderPages() {
 
   pages.forEach((page, index) => {
     const img = document.createElement("img");
-    // Proxy image through Netlify function to bypass CORS
-    const originalUrl = `${baseUrl}/data/${hash}/${page}`;
-    const imageUrl = `/api/image/${originalUrl.replace("https://", "")}`;
-    console.log(`[Reader] Loading image ${index + 1}:`, imageUrl);
-    img.src = imageUrl;
+    // Construct image URL: {baseUrl}/data/{hash}/{page}
+    const imageUrl = `${baseUrl}/data/${hash}/${page}`;
+    // Proxy through Netlify function using query parameter
+    const proxyUrl = `/api/proxy?imageUrl=${encodeURIComponent(imageUrl)}`;
+
+    console.log(`[Reader] Page ${index + 1}:`, {
+      imageUrl,
+      proxyUrl,
+    });
+
+    img.src = proxyUrl;
     img.alt = `Page ${index + 1}`;
     img.loading = index < 3 ? "eager" : "lazy";
     img.dataset.page = index;
+    img.referrerPolicy = "no-referrer";
 
     img.onerror = () => {
-      console.error(`[Reader] Failed to load image:`, imageUrl);
-      img.src = getPlaceholderImage(800, 1200, "Failed to load");
+      console.error(`[Reader] Failed to load image ${index + 1}:`, proxyUrl);
+      img.src = getPlaceholderImage(800, 1200, `Page ${index + 1} Failed`);
     };
 
     readerImages.appendChild(img);

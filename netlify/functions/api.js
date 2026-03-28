@@ -25,10 +25,10 @@ exports.handler = async (event, context) => {
     .replace("/.netlify/functions/api", "")
     .replace("/api", "");
 
-  // Handle image proxy requests
-  if (incomingPath.startsWith("/image/")) {
-    const imagePath = incomingPath.replace("/image/", "");
-    const imageUrl = `https://${imagePath}`;
+  // Handle image proxy requests via query parameter ?imageUrl=...
+  const queryParams = event.queryStringParameters || {};
+  if (queryParams.imageUrl) {
+    const imageUrl = decodeURIComponent(queryParams.imageUrl);
 
     console.log("[Proxy] Image URL:", imageUrl);
 
