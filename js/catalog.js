@@ -21,9 +21,12 @@ const LOAD_COOLDOWN = 1000;
 
 function renderMangaCard(manga) {
   const coverArt = findRelationship(manga, "cover_art");
+  console.log(`[Cover] Manga ${manga.id}: coverArt =`, coverArt);
+
   const coverUrl = coverArt
     ? getCoverUrl(manga.id, coverArt, "256")
     : getPlaceholderImage(256, 384, "No Cover");
+  console.log(`[Cover] Manga ${manga.id}: coverUrl =`, coverUrl);
 
   const title =
     manga.attributes.title?.en ||
@@ -41,7 +44,11 @@ function renderMangaCard(manga) {
     `;
 
   const img = card.querySelector("img");
+  img.addEventListener("load", () => {
+    console.log(`[Cover] Loaded: ${coverUrl}`);
+  });
   img.addEventListener("error", () => {
+    console.error(`[Cover] Failed: ${coverUrl}, falling back to placeholder`);
     img.src = getPlaceholderImage(256, 384, "No Cover");
   });
 
