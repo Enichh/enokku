@@ -3,6 +3,8 @@ import {
   fetchTopManga,
   fetchTopManwha,
   fetchRecentlyUpdated,
+  fetchMostFollowedManga,
+  fetchMostFollowedManwha,
   searchManga,
   getCoverUrl,
   findRelationship,
@@ -18,6 +20,8 @@ const trendingRow = document.getElementById("trendingRow");
 const topMangaRow = document.getElementById("topMangaRow");
 const topManwhaRow = document.getElementById("topManwhaRow");
 const recentlyUpdatedRow = document.getElementById("recentlyUpdatedRow");
+const mostFollowedMangaRow = document.getElementById("mostFollowedMangaRow");
+const mostFollowedManwhaRow = document.getElementById("mostFollowedManwhaRow");
 const searchResultsSection = document.getElementById("searchResultsSection");
 const searchResultsRow = document.getElementById("searchResultsRow");
 const searchInput = document.getElementById("searchInput");
@@ -95,6 +99,16 @@ async function loadAllSections() {
     loadSection(fetchTopManga, topMangaRow, "top manga"),
     loadSection(fetchTopManwha, topManwhaRow, "top manwha"),
     loadSection(fetchRecentlyUpdated, recentlyUpdatedRow, "recently updated"),
+    loadSection(
+      fetchMostFollowedManga,
+      mostFollowedMangaRow,
+      "most followed manga",
+    ),
+    loadSection(
+      fetchMostFollowedManwha,
+      mostFollowedManwhaRow,
+      "most followed manwha",
+    ),
   ]);
 }
 
