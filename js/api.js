@@ -115,8 +115,7 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
     params.append("contentRating[]", "suggestive");
     params.append("contentRating[]", "erotica");
     params.append("contentRating[]", "pornographic");
-    // Include empty and future chapters
-    params.append("includeEmptyPages", "1");
+    // Include future chapters
     params.append("includeFutureUpdates", "1");
     // Include unavailable chapters (important for complete listing)
     params.append("includeUnavailable", "1");

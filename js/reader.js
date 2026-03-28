@@ -30,6 +30,9 @@ if (!chapterId) {
 }
 
 async function loadChapter() {
+  console.log("[Reader] === loadChapter START ===");
+  console.log("[Reader] chapterId:", chapterId, "mangaId:", mangaId);
+
   readerImages.innerHTML = `
         <div class="loading">
             <div class="spinner"></div>
@@ -38,7 +41,10 @@ async function loadChapter() {
     `;
 
   try {
+    console.log("[Reader] Fetching chapter details for:", chapterId);
     const { data: chapter } = await fetchChapterDetails(chapterId);
+    console.log("[Reader] Chapter data:", JSON.stringify(chapter, null, 2));
+
     const chapterNum = chapter.attributes.chapter || "?";
     const chapterTitleText = chapter.attributes.title || "";
 
@@ -46,7 +52,7 @@ async function loadChapter() {
 
     console.log("[Reader] Fetching pages for chapter:", chapterId);
     const pagesData = await fetchChapterPages(chapterId);
-    console.log("[Reader] Pages data:", pagesData);
+    console.log("[Reader] Pages data:", JSON.stringify(pagesData, null, 2));
 
     baseUrl = pagesData.baseUrl;
     hash = pagesData.chapter.hash;
@@ -54,11 +60,13 @@ async function loadChapter() {
 
     console.log("[Reader] baseUrl:", baseUrl);
     console.log("[Reader] hash:", hash);
+    console.log("[Reader] pages count:", pages?.length);
     console.log("[Reader] pages:", pages);
 
     await loadChapterNavigation();
 
     if (!pages || pages.length === 0) {
+      console.error("[Reader] No pages available for chapter:", chapterId);
       readerImages.innerHTML =
         '<div class="error"><p>No pages available for this chapter</p></div>';
       return;
@@ -67,16 +75,31 @@ async function loadChapter() {
     renderPages();
     updatePageIndicator();
     updateChapterButtons();
+    console.log("[Reader] === loadChapter SUCCESS ===");
   } catch (error) {
+    console.error("[Reader] === loadChapter FAILED ===", error);
     readerImages.innerHTML = `<div class="error"><p>Error loading chapter: ${error.message}</p></div>`;
   }
 }
 
 async function loadChapterNavigation() {
-  if (!mangaId) return;
+  console.log("[Reader] === loadChapterNavigation START ===");
+  if (!mangaId) {
+    console.log("[Reader] No mangaId, skipping navigation");
+    return;
+  }
 
   try {
+    console.log(
+      "[Reader] Fetching manga feed for navigation, mangaId:",
+      mangaId,
+    );
     const { data: chapters } = await fetchMangaFeed(mangaId);
+    console.log("[Reader] Raw chapters count:", chapters?.length);
+    console.log(
+      "[Reader] First chapter sample:",
+      chapters?.[0] ? JSON.stringify(chapters[0], null, 2) : "none",
+    );
 
     allChapters = chapters.sort((a, b) => {
       const aNum = parseFloat(a.attributes.chapter) || 0;
@@ -94,8 +117,13 @@ async function loadChapterNavigation() {
       "of",
       allChapters.length,
     );
+    console.log(
+      "[Reader] Chapter IDs list:",
+      allChapters.map((c) => ({ id: c.id, chapter: c.attributes.chapter })),
+    );
+    console.log("[Reader] === loadChapterNavigation SUCCESS ===");
   } catch (error) {
-    console.error("[Reader] Failed to load chapter navigation:", error);
+    console.error("[Reader] === loadChapterNavigation FAILED ===", error);
   }
 }
 
@@ -130,6 +158,7 @@ function updateChapterButtons() {
 }
 
 function renderPages() {
+  console.log("[Reader] === renderPages START, count:", pages.length);
   readerImages.innerHTML = "";
 
   pages.forEach((page, index) => {
@@ -139,7 +168,7 @@ function renderPages() {
     // Proxy through Netlify function using query parameter
     const proxyUrl = `/api/proxy?imageUrl=${encodeURIComponent(imageUrl)}`;
 
-    console.log(`[Reader] Page ${index + 1}:`, {
+    console.log(`[Reader] Page ${index + 1}/${pages.length}:`, {
       imageUrl,
       proxyUrl,
     });
@@ -150,6 +179,10 @@ function renderPages() {
     img.dataset.page = index;
     img.referrerPolicy = "no-referrer";
 
+    img.onload = () => {
+      console.log(`[Reader] Page ${index + 1} loaded successfully`);
+    };
+
     img.onerror = () => {
       console.error(`[Reader] Failed to load image ${index + 1}:`, proxyUrl);
       img.src = getPlaceholderImage(800, 1200, `Page ${index + 1} Failed`);
@@ -157,6 +190,7 @@ function renderPages() {
 
     readerImages.appendChild(img);
   });
+  console.log("[Reader] === renderPages COMPLETE ===");
 }
 
 function updatePageIndicator() {
