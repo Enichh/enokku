@@ -36,10 +36,17 @@ async function loadChapter() {
 
     chapterTitle.textContent = `Chapter ${chapterNum}${chapterTitleText ? ` - ${chapterTitleText}` : ""}`;
 
+    console.log("[Reader] Fetching pages for chapter:", chapterId);
     const pagesData = await fetchChapterPages(chapterId);
+    console.log("[Reader] Pages data:", pagesData);
+
     baseUrl = pagesData.baseUrl;
     hash = pagesData.chapter.hash;
     pages = pagesData.chapter.data;
+
+    console.log("[Reader] baseUrl:", baseUrl);
+    console.log("[Reader] hash:", hash);
+    console.log("[Reader] pages:", pages);
 
     if (!pages || pages.length === 0) {
       readerImages.innerHTML =
@@ -74,12 +81,17 @@ function renderPages() {
 
   pages.forEach((page, index) => {
     const img = document.createElement("img");
-    img.src = `${baseUrl}/data/${hash}/${page}`;
+    // Proxy image through Netlify function to bypass CORS
+    const originalUrl = `${baseUrl}/data/${hash}/${page}`;
+    const imageUrl = `/api/image/${originalUrl.replace("https://", "")}`;
+    console.log(`[Reader] Loading image ${index + 1}:`, imageUrl);
+    img.src = imageUrl;
     img.alt = `Page ${index + 1}`;
     img.loading = index < 3 ? "eager" : "lazy";
     img.dataset.page = index;
 
     img.onerror = () => {
+      console.error(`[Reader] Failed to load image:`, imageUrl);
       img.src = getPlaceholderImage(800, 1200, "Failed to load");
     };
 

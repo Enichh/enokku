@@ -25,6 +25,58 @@ exports.handler = async (event, context) => {
     .replace("/.netlify/functions/api", "")
     .replace("/api", "");
 
+  // Handle image proxy requests
+  if (incomingPath.startsWith("/image/")) {
+    const imagePath = incomingPath.replace("/image/", "");
+    const imageUrl = `https://${imagePath}`;
+
+    console.log("[Proxy] Image URL:", imageUrl);
+
+    try {
+      const response = await fetch(imageUrl, {
+        headers: {
+          "User-Agent": "MangaDex-Static-Client/1.0",
+          Referer: "https://mangadex.org/",
+        },
+      });
+
+      if (!response.ok) {
+        return {
+          statusCode: response.status,
+          body: JSON.stringify({ error: "Image not found" }),
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json",
+          },
+        };
+      }
+
+      const imageBuffer = await response.arrayBuffer();
+      const contentType = response.headers.get("content-type") || "image/jpeg";
+
+      return {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": contentType,
+          "Cache-Control": "public, max-age=3600",
+        },
+        body: Buffer.from(imageBuffer).toString("base64"),
+        isBase64Encoded: true,
+      };
+    } catch (error) {
+      console.error("Image proxy error:", error);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: "Failed to fetch image" }),
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+        },
+      };
+    }
+  }
+
   // Use multiValueQueryStringParameters to preserve array params like includes[]
   const params = event.multiValueQueryStringParameters || {};
   const singleParams = event.queryStringParameters || {};
