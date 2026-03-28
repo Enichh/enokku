@@ -3,87 +3,155 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Manga Reader - Catalog</title>
+    <meta
+      name="description"
+      content="Free manga and manhwa reader - Browse top trending manga, manwha, and recently updated series"
+    />
+    <meta
+      name="keywords"
+      content="manga, manhwa, manwha, reader, free manga, online manga, manga reader"
+    />
+    <meta name="author" content="MangaReader" />
+    <meta name="theme-color" content="#ff6b35" />
+
+    <meta
+      property="og:title"
+      content="MangaReader - Free Manga & Manhwa Reader"
+    />
+    <meta
+      property="og:description"
+      content="Browse thousands of manga and manhwa titles. Top trending, recently updated, and most followed series."
+    />
+    <meta property="og:type" content="website" />
+
+    <title>MangaReader - Free Manga & Manhwa Reader</title>
+
     <link rel="icon" href="data:," />
     <link rel="stylesheet" href="css/style.css" />
+
+    <link rel="preconnect" href="https://api.mangadex.org" />
+    <link rel="preconnect" href="https://uploads.mangadex.org" />
   </head>
   <body>
-    <header>
-      <nav>
-        <a href="index.html" class="logo">MangaReader</a>
-        <div class="search-container">
-          <input
-            type="text"
-            class="search-input"
-            id="searchInput"
-            placeholder="Search manga..."
-          />
-        </div>
-      </nav>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header class="site-header">
+      <div class="container">
+        <nav aria-label="Main navigation">
+          <a href="index.html" class="logo" aria-label="MangaReader Home"
+            >MangaReader</a
+          >
+          <div class="search-container">
+            <input
+              type="search"
+              class="search-input"
+              id="searchInput"
+              placeholder="Search manga..."
+              aria-label="Search manga"
+              autocomplete="off"
+            />
+          </div>
+        </nav>
+      </div>
     </header>
 
-    <main>
-      <div id="searchResultsSection" class="search-results-section hidden">
-        <h2>Search Results</h2>
-        <div id="searchResultsRow" class="manga-row"></div>
-      </div>
-
-      <div id="homeSections">
-        <section class="manga-section">
-          <h2>Top Trending</h2>
-          <div id="trendingRow" class="manga-row">
-            <div class="loading-small">
-              <div class="spinner-small"></div>
-            </div>
-          </div>
+    <main id="main-content">
+      <div class="container">
+        <section
+          id="searchResultsSection"
+          class="search-results-section hidden"
+          aria-live="polite"
+        >
+          <h2>Search Results</h2>
+          <div id="searchResultsRow" class="manga-row"></div>
         </section>
 
-        <section class="manga-section">
-          <h2>Top Manga</h2>
-          <div id="topMangaRow" class="manga-row">
-            <div class="loading-small">
-              <div class="spinner-small"></div>
+        <div id="homeSections">
+          <section class="manga-section" aria-labelledby="trending-heading">
+            <h2 id="trending-heading">Top Trending</h2>
+            <div id="trendingRow" class="manga-row" role="list">
+              <div class="loading-small">
+                <div class="spinner-small"></div>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <section class="manga-section">
-          <h2>Top Manwha</h2>
-          <div id="topManwhaRow" class="manga-row">
-            <div class="loading-small">
-              <div class="spinner-small"></div>
+          <section class="manga-section" aria-labelledby="top-manga-heading">
+            <h2 id="top-manga-heading">Top Manga</h2>
+            <div id="topMangaRow" class="manga-row" role="list">
+              <div class="loading-small">
+                <div class="spinner-small"></div>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <section class="manga-section">
-          <h2>Recently Updated</h2>
-          <div id="recentlyUpdatedRow" class="manga-row">
-            <div class="loading-small">
-              <div class="spinner-small"></div>
+          <section class="manga-section" aria-labelledby="top-manwha-heading">
+            <h2 id="top-manwha-heading">Top Manwha</h2>
+            <div id="topManwhaRow" class="manga-row" role="list">
+              <div class="loading-small">
+                <div class="spinner-small"></div>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <section class="manga-section">
-          <h2>Most Followed Manga</h2>
-          <div id="mostFollowedMangaRow" class="manga-row">
-            <div class="loading-small">
-              <div class="spinner-small"></div>
+          <section
+            class="manga-section"
+            aria-labelledby="recently-updated-heading"
+          >
+            <h2 id="recently-updated-heading">Recently Updated</h2>
+            <div id="recentlyUpdatedRow" class="manga-row" role="list">
+              <div class="loading-small">
+                <div class="spinner-small"></div>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <section class="manga-section">
-          <h2>Most Followed Manwha</h2>
-          <div id="mostFollowedManwhaRow" class="manga-row">
-            <div class="loading-small">
-              <div class="spinner-small"></div>
+          <section
+            class="manga-section"
+            aria-labelledby="most-followed-manga-heading"
+          >
+            <h2 id="most-followed-manga-heading">Most Followed Manga</h2>
+            <div id="mostFollowedMangaRow" class="manga-row" role="list">
+              <div class="loading-small">
+                <div class="spinner-small"></div>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+
+          <section
+            class="manga-section"
+            aria-labelledby="most-followed-manwha-heading"
+          >
+            <h2 id="most-followed-manwha-heading">Most Followed Manwha</h2>
+            <div id="mostFollowedManwhaRow" class="manga-row" role="list">
+              <div class="loading-small">
+                <div class="spinner-small"></div>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>
+          &copy; 2024 MangaReader. Powered by
+          <a href="https://mangadex.org" target="_blank" rel="noopener"
+            >MangaDex API</a
+          >.
+        </p>
+      </div>
+    </footer>
+
+    <noscript>
+      <div class="noscript-warning">
+        <p>
+          JavaScript is required to use MangaReader. Please enable JavaScript in
+          your browser settings.
+        </p>
+      </div>
+    </noscript>
 
     <script type="module" src="js/home.js"></script>
   </body>
