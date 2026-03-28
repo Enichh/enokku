@@ -110,6 +110,10 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
     // Include empty and future chapters
     params.append("includeEmptyPages", "1");
     params.append("includeFutureUpdates", "1");
+    // Include unavailable chapters (important for complete listing)
+    params.append("includeUnavailable", "1");
+    // Include external URL chapters
+    params.append("includeExternalUrl", "1");
     params.append("order[chapter]", "asc");
     params.append("order[createdAt]", "asc");
     params.append("limit", limit.toString());
