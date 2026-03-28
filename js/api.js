@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://api.mangadex.org";
+const API_BASE_URL = "/api";
 const COVER_BASE_URL = "https://uploads.mangadex.org/covers";
 
 async function fetchMangaList(params = {}) {
