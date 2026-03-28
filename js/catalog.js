@@ -33,12 +33,17 @@ function renderMangaCard(manga) {
   const card = document.createElement("div");
   card.className = "manga-card";
   card.innerHTML = `
-        <img src="${coverUrl}" alt="${title}" loading="lazy" onerror="this.src='${getPlaceholderImage(256, 384, "No Cover")}'">
+        <img src="${coverUrl}" alt="${title}" loading="lazy">
         <div class="info">
             <div class="title">${title}</div>
             <div class="meta">${manga.attributes.year || "N/A"} · ${manga.attributes.status || "Unknown"}</div>
         </div>
     `;
+
+  const img = card.querySelector("img");
+  img.addEventListener("error", () => {
+    img.src = getPlaceholderImage(256, 384, "No Cover");
+  });
 
   card.addEventListener("click", () => {
     window.location.href = `manga.html?id=${manga.id}`;

@@ -60,7 +60,7 @@ async function loadMangaDetails() {
 
     mangaDetailsContainer.innerHTML = `
             <div class="manga-cover">
-                <img src="${coverUrl}" alt="${title}" onerror="this.src='${getPlaceholderImage(512, 768, "No Cover")}'">
+                <img id="mangaCoverImg" src="${coverUrl}" alt="${title}">
             </div>
             <div class="manga-info">
                 <h1>${title}</h1>
@@ -70,6 +70,11 @@ async function loadMangaDetails() {
                 <div class="description">${truncateText(description, 500)}</div>
             </div>
         `;
+
+    const img = mangaDetailsContainer.querySelector("#mangaCoverImg");
+    img.addEventListener("error", () => {
+      img.src = getPlaceholderImage(512, 768, "No Cover");
+    });
 
     loadChapters();
   } catch (error) {
