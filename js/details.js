@@ -60,7 +60,7 @@ async function loadMangaDetails() {
 
     mangaDetailsContainer.innerHTML = `
             <div class="manga-cover">
-                <img id="mangaCoverImg" src="${coverUrl}" alt="${title}">
+                <img id="mangaCoverImg" src="${coverUrl}" alt="${title}" referrerpolicy="no-referrer">
             </div>
             <div class="manga-info">
                 <h1>${title}</h1>
