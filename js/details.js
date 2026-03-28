@@ -84,36 +84,52 @@ async function loadMangaDetails() {
 }
 
 async function loadChapters() {
+  console.log(`[Details] Loading chapters for manga: ${mangaId}`);
   try {
-    const { data: chapters } = await fetchMangaFeed(mangaId);
+    const response = await fetchMangaFeed(mangaId);
+    console.log(`[Details] Feed response:`, response);
+
+    const chapters = response.data;
+    console.log(`[Details] Chapters array:`, chapters);
 
     if (!chapters || chapters.length === 0) {
+      console.warn(`[Details] No chapters found for manga: ${mangaId}`);
       chapterListContainer.innerHTML =
         '<div class="empty"><p>No chapters available</p></div>';
       return;
     }
 
+    console.log(`[Details] Found ${chapters.length} chapters`);
+
     allChapters = chapters.sort((a, b) => {
-      const aNum = parseFloat(a.attributes.chapter) || 0;
-      const bNum = parseFloat(b.attributes.chapter) || 0;
+      const aNum = parseFloat(a.attributes?.chapter) || 0;
+      const bNum = parseFloat(b.attributes?.chapter) || 0;
       if (aNum !== bNum) return aNum - bNum;
       return (
-        new Date(a.attributes.publishAt) - new Date(b.attributes.publishAt)
+        new Date(a.attributes?.publishAt || Date.now()) -
+        new Date(b.attributes?.publishAt || Date.now())
       );
     });
 
+    console.log(`[Details] Sorted ${allChapters.length} chapters`);
     renderChapterPage(0);
   } catch (error) {
+    console.error(`[Details] Error loading chapters:`, error);
     chapterListContainer.innerHTML = `<div class="error"><p>Error loading chapters: ${error.message}</p></div>`;
   }
 }
 
 function renderChapterPage(page) {
+  console.log(`[Details] Rendering chapter page ${page}`);
   currentPage = page;
   const totalPages = Math.ceil(allChapters.length / chaptersPerPage);
   const startIndex = page * chaptersPerPage;
   const endIndex = Math.min(startIndex + chaptersPerPage, allChapters.length);
   const pageChapters = allChapters.slice(startIndex, endIndex);
+
+  console.log(
+    `[Details] Showing chapters ${startIndex + 1} to ${endIndex} of ${allChapters.length}`,
+  );
 
   let html = `
     <h2>Chapters (${allChapters.length} total)</h2>
@@ -128,10 +144,11 @@ function renderChapterPage(page) {
   `;
 
   pageChapters.forEach((chapter) => {
-    const chapterNum = chapter.attributes.chapter || "?";
-    const chapterTitle = chapter.attributes.title || "";
-    const pages = chapter.attributes.pages || 0;
-    const publishedAt = formatDate(chapter.attributes.publishAt);
+    const attrs = chapter.attributes || {};
+    const chapterNum = attrs.chapter || "?";
+    const chapterTitle = attrs.title || "";
+    const pages = attrs.pages || 0;
+    const publishedAt = formatDate(attrs.publishAt);
 
     html += `
       <div class="chapter-item" data-chapter-id="${chapter.id}">
@@ -165,6 +182,8 @@ function renderChapterPage(page) {
       window.location.href = `reader.html?id=${chapter.id}&manga=${mangaId}`;
     });
   });
+
+  console.log(`[Details] Rendered ${pageChapters.length} chapters`);
 }
 
 window.goToChapterPage = function (page) {

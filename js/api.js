@@ -26,7 +26,13 @@ async function fetchMangaList(params = {}) {
 
   const response = await fetch(`${API_BASE_URL}/manga?${queryString}`);
   if (!response.ok) throw new Error("Failed to fetch manga list");
-  return response.json();
+  const data = await response.json();
+  if (!data || !Array.isArray(data)) {
+    throw new Error(
+      "Invalid API response format: missing or invalid data array",
+    );
+  }
+  return data;
 }
 
 async function searchManga(title, limit = 30) {
@@ -88,16 +94,27 @@ async function fetchMangaDetails(mangaId) {
     `${API_BASE_URL}/manga/${mangaId}?includes[]=cover_art&includes[]=author&includes[]=artist`,
   );
   if (!response.ok) throw new Error("Failed to fetch manga details");
-  return response.json();
+  const data = await response.json();
+  if (!data || typeof data !== "object") {
+    throw new Error(
+      "Invalid API response format: missing or invalid data object",
+    );
+  }
+  return data;
 }
 
 async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
+  console.log(`[API] Fetching manga feed for: ${mangaId}`);
   const allChapters = [];
   let offset = 0;
   const limit = 100;
   let hasMore = true;
 
-  while (hasMore) {
+  let iterations = 0;
+  const MAX_ITERATIONS = 50; // Safety limit: max 5000 chapters
+
+  while (hasMore && iterations < MAX_ITERATIONS) {
+    iterations++;
     const params = new URLSearchParams();
     translatedLanguage.forEach((lang) => {
       params.append("translatedLanguage[]", lang);
@@ -119,34 +136,72 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
     params.append("limit", limit.toString());
     params.append("offset", offset.toString());
 
-    const response = await fetch(
-      `${API_BASE_URL}/manga/${mangaId}/feed?${params}`,
-    );
-    if (!response.ok) throw new Error("Failed to fetch manga feed");
-    const data = await response.json();
+    const url = `${API_BASE_URL}/manga/${mangaId}/feed?${params}`;
+    console.log(`[API] Feed URL: ${url}`);
 
-    allChapters.push(...data.data);
+    try {
+      const response = await fetch(url);
+      console.log(`[API] Response status: ${response.status}`);
 
-    if (data.data.length < limit) {
-      hasMore = false;
-    } else {
-      offset += limit;
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[API] Error response: ${errorText}`);
+        throw new Error(`Failed to fetch manga feed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`[API] Response data:`, {
+        result: data.result,
+        total: data.total,
+        dataLength: data.data?.length,
+      });
+
+      if (!data.data || !Array.isArray(data.data)) {
+        console.error(`[API] Invalid data format:`, data);
+        throw new Error(
+          "Invalid API response format: missing or invalid data array",
+        );
+      }
+
+      allChapters.push(...data.data);
+
+      if (data.data.length < limit) {
+        hasMore = false;
+      } else {
+        offset += limit;
+      }
+    } catch (error) {
+      console.error(`[API] Fetch error:`, error);
+      throw error;
     }
   }
 
+  console.log(`[API] Total chapters fetched: ${allChapters.length}`);
   return { data: allChapters };
 }
 
 async function fetchChapterDetails(chapterId) {
   const response = await fetch(`${API_BASE_URL}/chapter/${chapterId}`);
   if (!response.ok) throw new Error("Failed to fetch chapter details");
-  return response.json();
+  const data = await response.json();
+  if (!data || typeof data !== "object") {
+    throw new Error(
+      "Invalid API response format: missing or invalid data object",
+    );
+  }
+  return data;
 }
 
 async function fetchChapterPages(chapterId) {
   const response = await fetch(`${API_BASE_URL}/at-home/server/${chapterId}`);
   if (!response.ok) throw new Error("Failed to fetch chapter pages");
-  return response.json();
+  const data = await response.json();
+  if (!data || typeof data !== "object") {
+    throw new Error(
+      "Invalid API response format: missing or invalid data object",
+    );
+  }
+  return data;
 }
 
 function getCoverUrl(mangaId, coverArt, size = "256") {
