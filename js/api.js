@@ -26,13 +26,7 @@ async function fetchMangaList(params = {}) {
 
   const response = await fetch(`${API_BASE_URL}/manga?${queryString}`);
   if (!response.ok) throw new Error("Failed to fetch manga list");
-  const data = await response.json();
-  if (!data || !Array.isArray(data)) {
-    throw new Error(
-      "Invalid API response format: missing or invalid data array",
-    );
-  }
-  return data;
+  return response.json();
 }
 
 async function searchManga(title, limit = 30) {
