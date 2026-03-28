@@ -19,6 +19,9 @@ const chapterListContainer = document.getElementById("chapterList");
 const searchInput = document.getElementById("searchInput");
 
 const mangaId = getUrlParam("id");
+let allChapters = [];
+let currentPage = 0;
+const chaptersPerPage = 50;
 
 if (!mangaId) {
   showError("mangaDetails", "No manga ID provided");
@@ -92,7 +95,7 @@ async function loadChapters() {
       return;
     }
 
-    const sortedChapters = chapters.sort((a, b) => {
+    allChapters = chapters.sort((a, b) => {
       const aNum = parseFloat(a.attributes.chapter) || 0;
       const bNum = parseFloat(b.attributes.chapter) || 0;
       if (aNum !== bNum) return aNum - bNum;
@@ -101,33 +104,77 @@ async function loadChapters() {
       );
     });
 
-    chapterListContainer.innerHTML = "<h2>Chapters</h2>";
-
-    sortedChapters.forEach((chapter) => {
-      const chapterNum = chapter.attributes.chapter || "?";
-      const chapterTitle = chapter.attributes.title || "";
-      const pages = chapter.attributes.pages || 0;
-      const publishedAt = formatDate(chapter.attributes.publishAt);
-
-      const chapterItem = document.createElement("div");
-      chapterItem.className = "chapter-item";
-      chapterItem.innerHTML = `
-                <div>
-                    <div class="chapter-title">Chapter ${chapterNum}${chapterTitle ? ` - ${chapterTitle}` : ""}</div>
-                    <div class="chapter-meta">${pages} pages · ${publishedAt}</div>
-                </div>
-            `;
-
-      chapterItem.addEventListener("click", () => {
-        window.location.href = `reader.html?id=${chapter.id}&manga=${mangaId}`;
-      });
-
-      chapterListContainer.appendChild(chapterItem);
-    });
+    renderChapterPage(0);
   } catch (error) {
     chapterListContainer.innerHTML = `<div class="error"><p>Error loading chapters: ${error.message}</p></div>`;
   }
 }
+
+function renderChapterPage(page) {
+  currentPage = page;
+  const totalPages = Math.ceil(allChapters.length / chaptersPerPage);
+  const startIndex = page * chaptersPerPage;
+  const endIndex = Math.min(startIndex + chaptersPerPage, allChapters.length);
+  const pageChapters = allChapters.slice(startIndex, endIndex);
+
+  let html = `
+    <h2>Chapters (${allChapters.length} total)</h2>
+    <div class="chapter-pagination">
+      <button onclick="goToChapterPage(0)" ${page === 0 ? "disabled" : ""}>First</button>
+      <button onclick="goToChapterPage(${page - 1})" ${page === 0 ? "disabled" : ""}>Previous</button>
+      <span class="page-info">Page ${page + 1} of ${totalPages}</span>
+      <button onclick="goToChapterPage(${page + 1})" ${page >= totalPages - 1 ? "disabled" : ""}>Next</button>
+      <button onclick="goToChapterPage(${totalPages - 1})" ${page >= totalPages - 1 ? "disabled" : ""}>Last</button>
+    </div>
+    <div class="chapter-items">
+  `;
+
+  pageChapters.forEach((chapter) => {
+    const chapterNum = chapter.attributes.chapter || "?";
+    const chapterTitle = chapter.attributes.title || "";
+    const pages = chapter.attributes.pages || 0;
+    const publishedAt = formatDate(chapter.attributes.publishAt);
+
+    html += `
+      <div class="chapter-item" data-chapter-id="${chapter.id}">
+        <div>
+          <div class="chapter-title">Chapter ${chapterNum}${chapterTitle ? ` - ${chapterTitle}` : ""}</div>
+          <div class="chapter-meta">${pages} pages · ${publishedAt}</div>
+        </div>
+      </div>
+    `;
+  });
+
+  html += "</div>";
+
+  html += `
+    <div class="chapter-pagination bottom">
+      <button onclick="goToChapterPage(0)" ${page === 0 ? "disabled" : ""}>First</button>
+      <button onclick="goToChapterPage(${page - 1})" ${page === 0 ? "disabled" : ""}>Previous</button>
+      <span class="page-info">Page ${page + 1} of ${totalPages}</span>
+      <button onclick="goToChapterPage(${page + 1})" ${page >= totalPages - 1 ? "disabled" : ""}>Next</button>
+      <button onclick="goToChapterPage(${totalPages - 1})" ${page >= totalPages - 1 ? "disabled" : ""}>Last</button>
+    </div>
+  `;
+
+  chapterListContainer.innerHTML = html;
+
+  pageChapters.forEach((chapter) => {
+    const el = chapterListContainer.querySelector(
+      `[data-chapter-id="${chapter.id}"]`,
+    );
+    el.addEventListener("click", () => {
+      window.location.href = `reader.html?id=${chapter.id}&manga=${mangaId}`;
+    });
+  });
+}
+
+window.goToChapterPage = function (page) {
+  const totalPages = Math.ceil(allChapters.length / chaptersPerPage);
+  if (page < 0 || page >= totalPages) return;
+  renderChapterPage(page);
+  chapterListContainer.scrollIntoView({ behavior: "smooth" });
+};
 
 const debouncedSearch = debounce((query) => {
   if (query) {

@@ -254,6 +254,54 @@ main {
   color: var(--text-muted);
 }
 
+.chapter-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 0;
+  flex-wrap: wrap;
+}
+
+.chapter-pagination.bottom {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  margin-top: 1rem;
+}
+
+.chapter-pagination button {
+  padding: 0.5rem 1rem;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.9rem;
+}
+
+.chapter-pagination button:hover {
+  background-color: var(--accent);
+}
+
+.chapter-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--bg-tertiary);
+}
+
+.chapter-pagination .page-info {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  padding: 0 0.5rem;
+}
+
+.chapter-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .reader {
   max-width: 900px;
   margin: 0 auto;
