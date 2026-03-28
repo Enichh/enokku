@@ -23,14 +23,50 @@
     </header>
 
     <main>
-      <div id="mangaGrid" class="manga-grid">
-        <div class="loading">
-          <div class="spinner"></div>
-          <p>Loading manga...</p>
-        </div>
+      <div id="searchResultsSection" class="search-results-section hidden">
+        <h2>Search Results</h2>
+        <div id="searchResultsRow" class="manga-row"></div>
+      </div>
+
+      <div id="homeSections">
+        <section class="manga-section">
+          <h2>Top Trending</h2>
+          <div id="trendingRow" class="manga-row">
+            <div class="loading-small">
+              <div class="spinner-small"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="manga-section">
+          <h2>Top Manga</h2>
+          <div id="topMangaRow" class="manga-row">
+            <div class="loading-small">
+              <div class="spinner-small"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="manga-section">
+          <h2>Top Manwha</h2>
+          <div id="topManwhaRow" class="manga-row">
+            <div class="loading-small">
+              <div class="spinner-small"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="manga-section">
+          <h2>Recently Updated</h2>
+          <div id="recentlyUpdatedRow" class="manga-row">
+            <div class="loading-small">
+              <div class="spinner-small"></div>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
 
-    <script type="module" src="js/catalog.js"></script>
+    <script type="module" src="js/home.js"></script>
   </body>
 </html>

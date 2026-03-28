@@ -207,6 +207,97 @@ main {
   color: var(--text-muted);
 }
 
+/* Homepage Sections */
+.search-results-section {
+  margin-bottom: 2rem;
+}
+
+.search-results-section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  padding-left: 0.5rem;
+  border-left: 4px solid var(--accent);
+}
+
+.search-results-section.hidden,
+#homeSections.hidden {
+  display: none;
+}
+
+.manga-section {
+  margin-bottom: 2.5rem;
+}
+
+.manga-section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  padding-left: 0.75rem;
+  border-left: 4px solid var(--accent);
+  color: var(--text-primary);
+}
+
+.manga-row {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--bg-tertiary);
+}
+
+.manga-row::-webkit-scrollbar {
+  height: 8px;
+}
+
+.manga-row::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+.manga-row::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+.manga-row .manga-card {
+  flex: 0 0 160px;
+  min-width: 160px;
+}
+
+.manga-row .manga-card img {
+  aspect-ratio: 3/4;
+}
+
+.manga-row .manga-card .title {
+  font-size: 0.85rem;
+}
+
+/* Small loading spinner for rows */
+.loading-small,
+.error-small,
+.empty-small {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  width: 100%;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.spinner-small {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--bg-tertiary);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.error-small {
+  color: var(--error);
+}
+
 .manga-details {
   display: grid;
   grid-template-columns: 280px 1fr;

@@ -37,6 +37,36 @@ async function searchManga(title, limit = 30) {
   });
 }
 
+async function fetchTopTrending(limit = 10) {
+  return fetchMangaList({
+    limit,
+    order: { followedCount: "desc" },
+  });
+}
+
+async function fetchTopManga(limit = 10) {
+  return fetchMangaList({
+    limit,
+    originalLanguage: ["ja"],
+    order: { rating: "desc" },
+  });
+}
+
+async function fetchTopManwha(limit = 10) {
+  return fetchMangaList({
+    limit,
+    originalLanguage: ["ko"],
+    order: { rating: "desc" },
+  });
+}
+
+async function fetchRecentlyUpdated(limit = 10) {
+  return fetchMangaList({
+    limit,
+    order: { latestUploadedChapter: "desc" },
+  });
+}
+
 async function fetchMangaDetails(mangaId) {
   const response = await fetch(
     `${API_BASE_URL}/manga/${mangaId}?includes[]=cover_art&includes[]=author&includes[]=artist`,
@@ -128,6 +158,10 @@ export {
   COVER_BASE_URL,
   fetchMangaList,
   searchManga,
+  fetchTopTrending,
+  fetchTopManga,
+  fetchTopManwha,
+  fetchRecentlyUpdated,
   fetchMangaDetails,
   fetchMangaFeed,
   fetchChapterDetails,
