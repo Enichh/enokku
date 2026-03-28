@@ -24,7 +24,38 @@ exports.handler = async (event, context) => {
   const incomingPath = event.path
     .replace("/.netlify/functions/api", "")
     .replace("/api", "");
-  const queryString = event.rawQueryString ? `?${event.rawQueryString}` : "";
+
+  // Use multiValueQueryStringParameters to preserve array params like includes[]
+  const params = event.multiValueQueryStringParameters || {};
+  const singleParams = event.queryStringParameters || {};
+
+  const queryPairs = [];
+
+  // Handle multi-value params (arrays)
+  Object.entries(params).forEach(([key, values]) => {
+    if (Array.isArray(values)) {
+      values.forEach((value) =>
+        queryPairs.push(
+          `${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
+        ),
+      );
+    } else {
+      queryPairs.push(
+        `${encodeURIComponent(key)}=${encodeURIComponent(values)}`,
+      );
+    }
+  });
+
+  // Handle single-value params not in multiValue
+  Object.entries(singleParams).forEach(([key, value]) => {
+    if (!params[key]) {
+      queryPairs.push(
+        `${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
+      );
+    }
+  });
+
+  const queryString = queryPairs.length > 0 ? `?${queryPairs.join("&")}` : "";
 
   const mangadexUrl = `https://api.mangadex.org${incomingPath}${queryString}`;
 
