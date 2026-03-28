@@ -16,4 +16,4 @@
   [headers.values]
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
-    Content-Security-Policy = "default-src 'self'; connect-src 'self'; img-src 'self' https://uploads.mangadex.org data: blob: https://*.mangadex.org; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+    Content-Security-Policy = "default-src 'self'; connect-src 'self'; img-src 'self' https://uploads.mangadex.org data: blob: https://*.mangadex.org https://*.mangadex.network; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"

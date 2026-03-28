@@ -4,7 +4,12 @@ import {
   getCoverUrl,
   findRelationship,
 } from "./api.js";
-import { debounce, showLoading, showError } from "./utils.js";
+import {
+  debounce,
+  showLoading,
+  showError,
+  getPlaceholderImage,
+} from "./utils.js";
 
 const mangaGrid = document.getElementById("mangaGrid");
 const searchInput = document.getElementById("searchInput");
@@ -18,7 +23,7 @@ function renderMangaCard(manga) {
   const coverArt = findRelationship(manga, "cover_art");
   const coverUrl = coverArt
     ? getCoverUrl(manga.id, coverArt, "256")
-    : "https://via.placeholder.com/256x384?text=No+Cover";
+    : getPlaceholderImage(256, 384, "No Cover");
 
   const title =
     manga.attributes.title?.en ||
@@ -28,7 +33,7 @@ function renderMangaCard(manga) {
   const card = document.createElement("div");
   card.className = "manga-card";
   card.innerHTML = `
-        <img src="${coverUrl}" alt="${title}" loading="lazy" onerror="this.src='https://via.placeholder.com/256x384?text=No+Cover'">
+        <img src="${coverUrl}" alt="${title}" loading="lazy" onerror="this.src='${getPlaceholderImage(256, 384, "No Cover")}'">
         <div class="info">
             <div class="title">${title}</div>
             <div class="meta">${manga.attributes.year || "N/A"} · ${manga.attributes.status || "Unknown"}</div>
