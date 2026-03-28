@@ -106,8 +106,8 @@ async function loadChapters() {
       const bNum = parseFloat(b.attributes?.chapter) || 0;
       if (aNum !== bNum) return aNum - bNum;
       return (
-        new Date(a.attributes?.publishAt || Date.now()) -
-        new Date(b.attributes?.publishAt || Date.now())
+        new Date(a.attributes?.publishAt || 0) -
+        new Date(b.attributes?.publishAt || 0)
       );
     });
 

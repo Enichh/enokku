@@ -110,11 +110,7 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
   const limit = 100;
   let hasMore = true;
 
-  let iterations = 0;
-  const MAX_ITERATIONS = 50; // Safety limit: max 5000 chapters
-
-  while (hasMore && iterations < MAX_ITERATIONS) {
-    iterations++;
+  while (hasMore) {
     const params = new URLSearchParams();
     translatedLanguage.forEach((lang) => {
       params.append("translatedLanguage[]", lang);
@@ -158,9 +154,7 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
 
       if (!data.data || !Array.isArray(data.data)) {
         console.error(`[API] Invalid data format:`, data);
-        throw new Error(
-          "Invalid API response format: missing or invalid data array",
-        );
+        break;
       }
 
       allChapters.push(...data.data);
