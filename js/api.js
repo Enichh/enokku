@@ -178,14 +178,40 @@ async function fetchChapterDetails(chapterId) {
 }
 
 async function fetchChapterPages(chapterId) {
+  console.log(`[API] Fetching chapter pages from at-home for: ${chapterId}`);
   const response = await fetch(`${API_BASE_URL}/at-home/server/${chapterId}`);
-  if (!response.ok) throw new Error("Failed to fetch chapter pages");
+
+  if (!response.ok) {
+    const status = response.status;
+    const errorText = await response.text().catch(() => "Unknown error");
+    console.error(`[API] at-home server error ${status}:`, errorText);
+
+    if (status === 404) {
+      throw new Error(
+        "Chapter pages unavailable - may be hosted externally or removed",
+      );
+    }
+    throw new Error(`Failed to fetch chapter pages: ${status}`);
+  }
+
   const data = await response.json();
+  console.log(`[API] at-home response:`, JSON.stringify(data, null, 2));
+
   if (!data || typeof data !== "object") {
     throw new Error(
       "Invalid API response format: missing or invalid data object",
     );
   }
+
+  if (
+    !data.baseUrl ||
+    !data.chapter?.hash ||
+    !Array.isArray(data.chapter?.data)
+  ) {
+    console.error(`[API] Invalid at-home data structure:`, data);
+    throw new Error("Invalid chapter pages data structure");
+  }
+
   return data;
 }
 

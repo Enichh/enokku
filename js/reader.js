@@ -45,6 +45,26 @@ async function loadChapter() {
     const { data: chapter } = await fetchChapterDetails(chapterId);
     console.log("[Reader] Chapter data:", JSON.stringify(chapter, null, 2));
 
+    // Check if chapter is unavailable
+    if (chapter.attributes?.isUnavailable) {
+      console.warn("[Reader] Chapter is unavailable:", chapterId);
+      const externalUrl = chapter.attributes?.externalUrl;
+      if (externalUrl) {
+        readerImages.innerHTML = `
+          <div class="error">
+            <p>Chapter hosted externally</p>
+            <p><a href="${externalUrl}" target="_blank" rel="noopener">Read on external site</a></p>
+          </div>`;
+      } else {
+        readerImages.innerHTML = `
+          <div class="error">
+            <p>Chapter pages are unavailable</p>
+            <p>This chapter may have been removed or is not hosted on MangaDex.</p>
+          </div>`;
+      }
+      return;
+    }
+
     const chapterNum = chapter.attributes.chapter || "?";
     const chapterTitleText = chapter.attributes.title || "";
 
