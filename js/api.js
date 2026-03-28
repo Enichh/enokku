@@ -56,6 +56,14 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
     translatedLanguage.forEach((lang) => {
       params.append("translatedLanguage[]", lang);
     });
+    // Include all content ratings to get complete chapter list
+    params.append("contentRating[]", "safe");
+    params.append("contentRating[]", "suggestive");
+    params.append("contentRating[]", "erotica");
+    params.append("contentRating[]", "pornographic");
+    // Include empty and future chapters
+    params.append("includeEmptyPages", "1");
+    params.append("includeFutureUpdates", "1");
     params.append("order[chapter]", "asc");
     params.append("order[createdAt]", "asc");
     params.append("limit", limit.toString());
