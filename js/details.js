@@ -92,9 +92,18 @@ async function loadChapters() {
       return;
     }
 
+    const sortedChapters = chapters.sort((a, b) => {
+      const aNum = parseFloat(a.attributes.chapter) || 0;
+      const bNum = parseFloat(b.attributes.chapter) || 0;
+      if (aNum !== bNum) return aNum - bNum;
+      return (
+        new Date(a.attributes.publishAt) - new Date(b.attributes.publishAt)
+      );
+    });
+
     chapterListContainer.innerHTML = "<h2>Chapters</h2>";
 
-    chapters.forEach((chapter) => {
+    sortedChapters.forEach((chapter) => {
       const chapterNum = chapter.attributes.chapter || "?";
       const chapterTitle = chapter.attributes.title || "";
       const pages = chapter.attributes.pages || 0;

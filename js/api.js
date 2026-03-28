@@ -45,17 +45,38 @@ async function fetchMangaDetails(mangaId) {
   return response.json();
 }
 
-async function fetchMangaFeed(mangaId) {
-  const params = new URLSearchParams();
-  params.append("translatedLanguage[]", "en");
-  params.append("order[chapter]", "asc");
-  params.append("limit", "100");
+async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
+  const allChapters = [];
+  let offset = 0;
+  const limit = 100;
+  let hasMore = true;
 
-  const response = await fetch(
-    `${API_BASE_URL}/manga/${mangaId}/feed?${params}`,
-  );
-  if (!response.ok) throw new Error("Failed to fetch manga feed");
-  return response.json();
+  while (hasMore) {
+    const params = new URLSearchParams();
+    translatedLanguage.forEach((lang) => {
+      params.append("translatedLanguage[]", lang);
+    });
+    params.append("order[chapter]", "asc");
+    params.append("order[createdAt]", "asc");
+    params.append("limit", limit.toString());
+    params.append("offset", offset.toString());
+
+    const response = await fetch(
+      `${API_BASE_URL}/manga/${mangaId}/feed?${params}`,
+    );
+    if (!response.ok) throw new Error("Failed to fetch manga feed");
+    const data = await response.json();
+
+    allChapters.push(...data.data);
+
+    if (data.data.length < limit) {
+      hasMore = false;
+    } else {
+      offset += limit;
+    }
+  }
+
+  return { data: allChapters };
 }
 
 async function fetchChapterDetails(chapterId) {
