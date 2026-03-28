@@ -106,10 +106,9 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
 
   while (hasMore) {
     const params = new URLSearchParams();
-    // TEMP: Comment out language filter to test
-    // translatedLanguage.forEach((lang) => {
-    //   params.append("translatedLanguage[]", lang);
-    // });
+    translatedLanguage.forEach((lang) => {
+      params.append("translatedLanguage[]", lang);
+    });
     // Include all content ratings to get complete chapter list
     params.append("contentRating[]", "safe");
     params.append("contentRating[]", "suggestive");
