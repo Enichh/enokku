@@ -71,8 +71,22 @@ async function fetchChapterPages(chapterId) {
 }
 
 function getCoverUrl(mangaId, coverArt, size = "256") {
-  if (!coverArt || !coverArt.attributes) return null;
+  console.log(
+    "[getCoverUrl] mangaId:",
+    mangaId,
+    "coverArt:",
+    JSON.stringify(coverArt, null, 2),
+  );
+  if (!coverArt) {
+    console.log("[getCoverUrl] coverArt is null/undefined");
+    return null;
+  }
+  if (!coverArt.attributes) {
+    console.log("[getCoverUrl] coverArt.attributes is missing");
+    return null;
+  }
   const filename = coverArt.attributes.fileName;
+  console.log("[getCoverUrl] filename:", filename);
   return `${COVER_BASE_URL}/${mangaId}/${filename}.${size}.jpg`;
 }
 
