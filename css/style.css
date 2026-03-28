@@ -363,6 +363,25 @@ main {
   color: var(--text-muted);
 }
 
+.reader-footer {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  margin-top: 1rem;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.reader-footer .reader-controls {
+  display: flex;
+  gap: 1rem;
+}
+
+.reader-footer .reader-controls button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+}
+
 @media (max-width: 768px) {
   .manga-grid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));

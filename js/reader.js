@@ -1,4 +1,8 @@
-import { fetchChapterDetails, fetchChapterPages } from "./api.js";
+import {
+  fetchChapterDetails,
+  fetchChapterPages,
+  fetchMangaFeed,
+} from "./api.js";
 import { getUrlParam, getPlaceholderImage } from "./utils.js";
 
 const chapterTitle = document.getElementById("chapterTitle");
@@ -6,6 +10,8 @@ const readerImages = document.getElementById("readerImages");
 const pageIndicator = document.getElementById("pageIndicator");
 const prevChapterBtn = document.getElementById("prevChapter");
 const nextChapterBtn = document.getElementById("nextChapter");
+const prevChapterBottomBtn = document.getElementById("prevChapterBottom");
+const nextChapterBottomBtn = document.getElementById("nextChapterBottom");
 const backToMangaBtn = document.getElementById("backToManga");
 
 const chapterId = getUrlParam("id");
@@ -15,6 +21,8 @@ let pages = [];
 let baseUrl = "";
 let currentPage = 0;
 let hash = "";
+let allChapters = [];
+let currentChapterIndex = -1;
 
 if (!chapterId) {
   readerImages.innerHTML =
@@ -48,6 +56,8 @@ async function loadChapter() {
     console.log("[Reader] hash:", hash);
     console.log("[Reader] pages:", pages);
 
+    await loadChapterNavigation();
+
     if (!pages || pages.length === 0) {
       readerImages.innerHTML =
         '<div class="error"><p>No pages available for this chapter</p></div>';
@@ -56,24 +66,67 @@ async function loadChapter() {
 
     renderPages();
     updatePageIndicator();
-
-    prevChapterBtn.disabled = !chapter.attributes.prevChapter;
-    nextChapterBtn.disabled = !chapter.attributes.nextChapter;
-
-    prevChapterBtn.onclick = () => {
-      if (chapter.attributes.prevChapter) {
-        window.location.href = `reader.html?id=${chapter.attributes.prevChapter}&manga=${mangaId}`;
-      }
-    };
-
-    nextChapterBtn.onclick = () => {
-      if (chapter.attributes.nextChapter) {
-        window.location.href = `reader.html?id=${chapter.attributes.nextChapter}&manga=${mangaId}`;
-      }
-    };
+    updateChapterButtons();
   } catch (error) {
     readerImages.innerHTML = `<div class="error"><p>Error loading chapter: ${error.message}</p></div>`;
   }
+}
+
+async function loadChapterNavigation() {
+  if (!mangaId) return;
+
+  try {
+    const { data: chapters } = await fetchMangaFeed(mangaId);
+
+    allChapters = chapters.sort((a, b) => {
+      const aNum = parseFloat(a.attributes.chapter) || 0;
+      const bNum = parseFloat(b.attributes.chapter) || 0;
+      if (aNum !== bNum) return aNum - bNum;
+      return (
+        new Date(a.attributes.publishAt) - new Date(b.attributes.publishAt)
+      );
+    });
+
+    currentChapterIndex = allChapters.findIndex((c) => c.id === chapterId);
+    console.log(
+      "[Reader] Current chapter index:",
+      currentChapterIndex,
+      "of",
+      allChapters.length,
+    );
+  } catch (error) {
+    console.error("[Reader] Failed to load chapter navigation:", error);
+  }
+}
+
+function updateChapterButtons() {
+  const hasPrev = currentChapterIndex > 0;
+  const hasNext =
+    currentChapterIndex >= 0 && currentChapterIndex < allChapters.length - 1;
+
+  prevChapterBtn.disabled = !hasPrev;
+  nextChapterBtn.disabled = !hasNext;
+  prevChapterBottomBtn.disabled = !hasPrev;
+  nextChapterBottomBtn.disabled = !hasNext;
+
+  const goToPrev = () => {
+    if (hasPrev) {
+      const prevChapter = allChapters[currentChapterIndex - 1];
+      window.location.href = `reader.html?id=${prevChapter.id}&manga=${mangaId}`;
+    }
+  };
+
+  const goToNext = () => {
+    if (hasNext) {
+      const nextChapter = allChapters[currentChapterIndex + 1];
+      window.location.href = `reader.html?id=${nextChapter.id}&manga=${mangaId}`;
+    }
+  };
+
+  prevChapterBtn.onclick = goToPrev;
+  nextChapterBtn.onclick = goToNext;
+  prevChapterBottomBtn.onclick = goToPrev;
+  nextChapterBottomBtn.onclick = goToNext;
 }
 
 function renderPages() {
