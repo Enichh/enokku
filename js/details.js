@@ -3,6 +3,7 @@ import {
   fetchMangaFeed,
   getCoverUrl,
   findRelationship,
+  getEnglishTitle,
 } from "./api.js";
 import {
   getUrlParam,
@@ -40,10 +41,7 @@ async function loadMangaDetails() {
       ? getCoverUrl(mangaId, coverArt, "512")
       : getPlaceholderImage(512, 768, "No Cover");
 
-    const title =
-      manga.attributes.title?.en ||
-      Object.values(manga.attributes.title)[0] ||
-      "Unknown Title";
+    const title = getEnglishTitle(manga);
 
     const altTitles =
       manga.attributes.altTitles?.map((t) => Object.values(t)[0]).join(", ") ||

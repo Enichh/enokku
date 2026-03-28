@@ -3,6 +3,7 @@ import {
   searchManga,
   getCoverUrl,
   findRelationship,
+  getEnglishTitle,
 } from "./api.js";
 import {
   debounce,
@@ -28,10 +29,7 @@ function renderMangaCard(manga) {
     : getPlaceholderImage(256, 384, "No Cover");
   console.log(`[Cover] Manga ${manga.id}: coverUrl =`, coverUrl);
 
-  const title =
-    manga.attributes.title?.en ||
-    Object.values(manga.attributes.title)[0] ||
-    "Unknown Title";
+  const title = getEnglishTitle(manga);
 
   const card = document.createElement("div");
   card.className = "manga-card";

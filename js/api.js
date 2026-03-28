@@ -173,6 +173,29 @@ function findRelationship(item, type) {
   return item.relationships?.find((r) => r.type === type);
 }
 
+function getEnglishTitle(manga) {
+  // First try the main title object
+  if (manga.attributes.title?.en) {
+    return manga.attributes.title.en;
+  }
+
+  // Then search through altTitles for English
+  if (manga.attributes.altTitles?.length > 0) {
+    const englishAlt = manga.attributes.altTitles.find((alt) => alt.en);
+    if (englishAlt?.en) {
+      return englishAlt.en;
+    }
+  }
+
+  // Fall back to first available title
+  const firstTitle = Object.values(manga.attributes.title)[0];
+  if (firstTitle) {
+    return firstTitle;
+  }
+
+  return "Unknown Title";
+}
+
 export {
   API_BASE_URL,
   COVER_BASE_URL,
@@ -190,4 +213,5 @@ export {
   fetchChapterPages,
   getCoverUrl,
   findRelationship,
+  getEnglishTitle,
 };
