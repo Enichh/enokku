@@ -112,6 +112,10 @@ exports.handler = async (event, context) => {
   const mangadexUrl = `https://api.mangadex.org${incomingPath}${queryString}`;
 
   console.log("[Proxy] URL:", mangadexUrl);
+  console.log("[Proxy] incomingPath:", incomingPath);
+  console.log("[Proxy] queryString:", queryString);
+  console.log("[Proxy] multiValueParams:", JSON.stringify(params));
+  console.log("[Proxy] singleParams:", JSON.stringify(singleParams));
 
   try {
     const response = await fetch(mangadexUrl, {
