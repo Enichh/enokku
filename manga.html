@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manga Reader - Details</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">MangaReader</a>
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search manga...">
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div id="mangaDetails" class="manga-details">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading manga details...</p>
+            </div>
+        </div>
+        
+        <div id="chapterList" class="chapter-list">
+        </div>
+    </main>
+
+    <script type="module" src="js/details.js"></script>
+</body>
+</html>

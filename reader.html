@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manga Reader - Read Chapter</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">MangaReader</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="reader">
+            <div class="reader-header">
+                <h1 id="chapterTitle">Loading...</h1>
+                <div class="reader-controls">
+                    <button id="prevChapter" disabled>Previous</button>
+                    <button id="nextChapter" disabled>Next</button>
+                    <button id="backToManga">Back to Manga</button>
+                </div>
+            </div>
+            <div id="readerImages" class="reader-images">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading chapter...</p>
+                </div>
+            </div>
+            <div class="page-indicator" id="pageIndicator"></div>
+        </div>
+    </main>
+
+    <script type="module" src="js/reader.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+[build]
+  publish = "."
+  command = "echo 'No build step required'"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    Content-Security-Policy = "default-src 'self'; connect-src 'self' https://api.mangadex.org https://uploads.mangadex.org; img-src 'self' https://uploads.mangadex.org data: blob:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
