@@ -151,12 +151,26 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
       const data = await fetchPage(offset, "asc");
       if (!data.data || !Array.isArray(data.data)) break;
 
-      const validChapters = data.data.filter(
-        (chapter) =>
+      let filteredCount = 0;
+      const validChapters = data.data.filter((chapter) => {
+        const isValid =
           chapter.attributes &&
           chapter.attributes.pages > 0 &&
           !chapter.attributes.isUnavailable &&
-          !chapter.attributes.externalUrl,
+          !chapter.attributes.externalUrl;
+
+        if (!isValid && chapter.attributes?.externalUrl) {
+          console.log(
+            `[API] Chapter ${chapter.attributes.chapter} external:`,
+            chapter.attributes.externalUrl.substring(0, 50),
+          );
+        }
+        if (!isValid) filteredCount++;
+        return isValid;
+      });
+
+      console.log(
+        `[API] Ascending: ${data.data.length} total, ${validChapters.length} valid, ${filteredCount} filtered`,
       );
 
       allChapters.push(...validChapters);
@@ -179,12 +193,20 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
       const data = await fetchPage(offset, "desc");
       if (!data.data || !Array.isArray(data.data)) break;
 
-      const validChapters = data.data.filter(
-        (chapter) =>
+      let filteredCount = 0;
+      const validChapters = data.data.filter((chapter) => {
+        const isValid =
           chapter.attributes &&
           chapter.attributes.pages > 0 &&
           !chapter.attributes.isUnavailable &&
-          !chapter.attributes.externalUrl,
+          !chapter.attributes.externalUrl;
+
+        if (!isValid) filteredCount++;
+        return isValid;
+      });
+
+      console.log(
+        `[API] Descending: ${data.data.length} total, ${validChapters.length} valid, ${filteredCount} filtered`,
       );
 
       // Add chapters we don't already have
