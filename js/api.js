@@ -116,9 +116,11 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
     params.append("contentRating[]", "erotica");
     params.append("contentRating[]", "pornographic");
     // Include future chapters
-    params.append("includeFutureUpdates", "1");
-    // Include unavailable chapters (important for complete listing)
-    params.append("includeUnavailable", "1");
+    params.append("includeFutureUpdates", "0");
+    // Include unavailable chapters
+    params.append("includeUnavailable", "0");
+    // Include external urls
+    params.append("includeExternalUrl", "0");
     // Sort by chapter number only
     params.append("order[chapter]", "asc");
     params.append("limit", limit.toString());
@@ -149,9 +151,14 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
         break;
       }
 
-      // Filter out chapters with 0 pages (typically external links to MangaPlus or similar)
+      // Filter out chapters with 0 pages, that are unavailable or have an externalUrl
+      // (typically external links to MangaPlus or deleted content)
       const validChapters = data.data.filter(
-        (chapter) => chapter.attributes && chapter.attributes.pages > 0,
+        (chapter) =>
+          chapter.attributes &&
+          chapter.attributes.pages > 0 &&
+          !chapter.attributes.isUnavailable &&
+          !chapter.attributes.externalUrl,
       );
 
       allChapters.push(...validChapters);
