@@ -303,17 +303,15 @@ main {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.two-column-sections:last-of-type {
+  margin-bottom: 0;
 }
 
 .two-column-sections .manga-section {
   margin-bottom: 0;
-  min-width: 0;
-}
-
-.two-column-sections .manga-row {
-  overflow-x: auto;
-  max-width: 100%;
-  width: 100%;
   min-width: 0;
 }
 
@@ -442,23 +440,13 @@ main {
   display: flex;
   gap: 1rem;
   overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   padding-bottom: 0.5rem;
-  scrollbar-width: thin;
-  scrollbar-color: var(--accent) var(--bg-tertiary);
 }
 
 .manga-row::-webkit-scrollbar {
-  height: 8px;
-}
-
-.manga-row::-webkit-scrollbar-track {
-  background: var(--bg-tertiary);
-  border-radius: 4px;
-}
-
-.manga-row::-webkit-scrollbar-thumb {
-  background: var(--accent);
-  border-radius: 4px;
+  display: none;
 }
 
 .manga-row .manga-card {
