@@ -101,58 +101,49 @@ async function fetchMangaDetails(mangaId) {
 async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
   console.log(`[API] Fetching manga feed for: ${mangaId}`);
   const allChapters = [];
-  let offset = 0;
   const limit = 100;
-  let hasMore = true;
+  const maxOffset = 500; // MangaDex feed endpoint limit
 
-  while (hasMore) {
+  // Helper to build params
+  const buildParams = (offset, order) => {
     const params = new URLSearchParams();
     translatedLanguage.forEach((lang) => {
       params.append("translatedLanguage[]", lang);
     });
-    // Include all content ratings to get complete chapter list
     params.append("contentRating[]", "safe");
     params.append("contentRating[]", "suggestive");
     params.append("contentRating[]", "erotica");
     params.append("contentRating[]", "pornographic");
-    // Include future chapters
     params.append("includeFutureUpdates", "0");
-    // Include unavailable chapters
     params.append("includeUnavailable", "0");
-    // Include external urls
     params.append("includeExternalUrl", "0");
-    // Sort by chapter number only
-    params.append("order[chapter]", "asc");
+    params.append("order[chapter]", order);
     params.append("limit", limit.toString());
     params.append("offset", offset.toString());
+    return params;
+  };
 
+  // Helper to fetch a page
+  const fetchPage = async (offset, order) => {
+    const params = buildParams(offset, order);
     const url = `${API_BASE_URL}/manga/${mangaId}/feed?${params}`;
-    console.log(`[API] Feed URL: ${url}`);
+    console.log(`[API] Feed URL (${order}, offset ${offset}): ${url}`);
 
-    try {
-      const response = await fetch(url);
-      console.log(`[API] Response status: ${response.status}`);
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch manga feed: ${response.status}`);
+    }
+    return response.json();
+  };
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`[API] Error response: ${errorText}`);
-        throw new Error(`Failed to fetch manga feed: ${response.status}`);
-      }
+  // Fetch from beginning (ascending) - gets chapters 1-500
+  try {
+    let offset = 0;
+    let hasMore = true;
+    while (hasMore && offset < maxOffset) {
+      const data = await fetchPage(offset, "asc");
+      if (!data.data || !Array.isArray(data.data)) break;
 
-      const data = await response.json();
-      console.log(`[API] Response data:`, {
-        result: data.result,
-        total: data.total,
-        dataLength: data.data?.length,
-      });
-
-      if (!data.data || !Array.isArray(data.data)) {
-        console.error(`[API] Invalid data format:`, data);
-        break;
-      }
-
-      // Filter out chapters with 0 pages, that are unavailable or have an externalUrl
-      // (typically external links to MangaPlus or deleted content)
       const validChapters = data.data.filter(
         (chapter) =>
           chapter.attributes &&
@@ -163,15 +154,45 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
 
       allChapters.push(...validChapters);
 
-      if (data.data.length < limit) {
+      if (data.data.length < limit || offset + limit >= maxOffset) {
         hasMore = false;
       } else {
         offset += limit;
       }
-    } catch (error) {
-      console.error(`[API] Fetch error:`, error);
-      throw error;
     }
+  } catch (error) {
+    console.error(`[API] Error fetching ascending:`, error);
+  }
+
+  // Fetch from end (descending) - gets chapters 500+ to most recent
+  try {
+    let offset = 0;
+    let hasMore = true;
+    while (hasMore && offset < maxOffset) {
+      const data = await fetchPage(offset, "desc");
+      if (!data.data || !Array.isArray(data.data)) break;
+
+      const validChapters = data.data.filter(
+        (chapter) =>
+          chapter.attributes &&
+          chapter.attributes.pages > 0 &&
+          !chapter.attributes.isUnavailable &&
+          !chapter.attributes.externalUrl,
+      );
+
+      // Add chapters we don't already have
+      const existingIds = new Set(allChapters.map((c) => c.id));
+      const newChapters = validChapters.filter((c) => !existingIds.has(c.id));
+      allChapters.push(...newChapters);
+
+      if (data.data.length < limit || offset + limit >= maxOffset) {
+        hasMore = false;
+      } else {
+        offset += limit;
+      }
+    }
+  } catch (error) {
+    console.error(`[API] Error fetching descending:`, error);
   }
 
   console.log(
