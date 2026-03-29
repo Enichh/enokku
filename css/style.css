@@ -1,15 +1,16 @@
 :root {
-  --bg-primary: #0d0d0d;
-  --bg-secondary: #1a1a1a;
-  --bg-tertiary: #2d2d2d;
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #141414;
+  --bg-tertiary: #1f1f1f;
   --text-primary: #ffffff;
   --text-secondary: #b3b3b3;
   --text-muted: #808080;
-  --accent: #ff6b35;
-  --accent-hover: #e55a2b;
-  --border: #333333;
+  --accent: #ff0000;
+  --accent-hover: #cc0000;
+  --accent-glow: rgba(255, 0, 0, 0.3);
+  --border: #2a2a2a;
   --error: #ff4444;
-  --success: #44ff44;
+  --success: #00ff44;
 }
 
 * {
@@ -159,6 +160,8 @@ nav {
   font-size: 1.5rem;
   font-weight: bold;
   color: var(--accent);
+  text-shadow: 0 0 10px var(--accent-glow);
+  letter-spacing: 1px;
 }
 
 .search-container {
@@ -203,10 +206,11 @@ main {
 .hero-content h1 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, var(--accent) 0%, #ff8f5a 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, #ff4444 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-shadow: 0 0 30px var(--accent-glow);
 }
 
 .hero-content p {
@@ -256,6 +260,7 @@ main {
 .tab-btn.active {
   background: var(--accent);
   color: white;
+  box-shadow: 0 0 15px var(--accent-glow);
 }
 
 @media (max-width: 768px) {
@@ -330,7 +335,8 @@ main {
 
 .manga-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px var(--accent-glow);
+  border-color: var(--accent);
 }
 
 .manga-card img {
