@@ -6,6 +6,7 @@ async function fetchMangaList(params = {}) {
     limit: 30,
     offset: 0,
     availableTranslatedLanguage: ["en"],
+    hasAvailableChapters: "true",
     includes: ["cover_art", "author"],
     order: { rating: "desc" },
     ...params,
@@ -148,7 +149,12 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
         break;
       }
 
-      allChapters.push(...data.data);
+      // Filter out chapters with 0 pages (typically external links to MangaPlus or similar)
+      const validChapters = data.data.filter(
+        (chapter) => chapter.attributes && chapter.attributes.pages > 0,
+      );
+
+      allChapters.push(...validChapters);
 
       if (data.data.length < limit) {
         hasMore = false;
