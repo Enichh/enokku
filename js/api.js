@@ -68,6 +68,13 @@ async function fetchRecentlyUpdated(limit = 10) {
   });
 }
 
+async function fetchRecentlyAdded(limit = 10) {
+  return fetchMangaList({
+    limit,
+    order: { createdAt: "desc" },
+  });
+}
+
 async function fetchMostFollowedManga(limit = 10) {
   return fetchMangaList({
     limit,
@@ -323,6 +330,7 @@ export {
   fetchTopManga,
   fetchTopManwha,
   fetchRecentlyUpdated,
+  fetchRecentlyAdded,
   fetchMostFollowedManga,
   fetchMostFollowedManwha,
   fetchMangaDetails,

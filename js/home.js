@@ -3,6 +3,7 @@ import {
   fetchTopManga,
   fetchTopManwha,
   fetchRecentlyUpdated,
+  fetchRecentlyAdded,
   fetchMostFollowedManga,
   fetchMostFollowedManwha,
   searchManga,
@@ -21,6 +22,7 @@ const trendingRow = document.getElementById("trendingRow");
 const topMangaRow = document.getElementById("topMangaRow");
 const topManwhaRow = document.getElementById("topManwhaRow");
 const recentlyUpdatedRow = document.getElementById("recentlyUpdatedRow");
+const recentlyAddedRow = document.getElementById("recentlyAddedRow");
 const mostFollowedMangaRow = document.getElementById("mostFollowedMangaRow");
 const mostFollowedManwhaRow = document.getElementById("mostFollowedManwhaRow");
 const searchResultsSection = document.getElementById("searchResultsSection");
@@ -42,6 +44,12 @@ const manhwaSections = [
     section: mostFollowedManwhaRow?.closest("section"),
   },
   { row: topManwhaRow, section: topManwhaRow?.closest("section") },
+];
+
+const mixedSections = [
+  { row: trendingRow, section: trendingRow?.closest("section") },
+  { row: recentlyUpdatedRow, section: recentlyUpdatedRow?.closest("section") },
+  { row: recentlyAddedRow, section: recentlyAddedRow?.closest("section") },
 ];
 
 function renderMangaCard(manga) {
@@ -113,6 +121,7 @@ async function loadAllSections() {
     loadSection(fetchTopManga, topMangaRow, "top manga"),
     loadSection(fetchTopManwha, topManwhaRow, "top manwha"),
     loadSection(fetchRecentlyUpdated, recentlyUpdatedRow, "recently updated"),
+    loadSection(fetchRecentlyAdded, recentlyAddedRow, "recently added"),
     loadSection(
       fetchMostFollowedManga,
       mostFollowedMangaRow,
@@ -173,6 +182,11 @@ function filterSections(filter) {
   manhwaSections.forEach(({ section }) => {
     if (section) {
       section.style.display = filter === "manga" ? "none" : "";
+    }
+  });
+  mixedSections.forEach(({ section }) => {
+    if (section) {
+      section.style.display = filter === "all" ? "" : "none";
     }
   });
 }
