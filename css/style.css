@@ -307,6 +307,14 @@ main {
 
 .two-column-sections .manga-section {
   margin-bottom: 0;
+  min-width: 0;
+}
+
+.two-column-sections .manga-row {
+  overflow-x: auto;
+  max-width: 100%;
+  width: 100%;
+  min-width: 0;
 }
 
 @media (max-width: 968px) {
