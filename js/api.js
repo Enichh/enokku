@@ -174,8 +174,26 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
     }
   }
 
-  console.log(`[API] Total chapters fetched: ${allChapters.length}`);
-  return { data: allChapters };
+  console.log(
+    `[API] Total chapters fetched before dedup: ${allChapters.length}`,
+  );
+
+  // Deduplicate chapters by chapter number, keeping the one with most pages
+  const chapterMap = new Map();
+  allChapters.forEach((chapter) => {
+    const chapterNum = chapter.attributes?.chapter || "unknown";
+    const existing = chapterMap.get(chapterNum);
+    if (
+      !existing ||
+      (chapter.attributes?.pages || 0) > (existing.attributes?.pages || 0)
+    ) {
+      chapterMap.set(chapterNum, chapter);
+    }
+  });
+
+  const dedupedChapters = Array.from(chapterMap.values());
+  console.log(`[API] Total chapters after dedup: ${dedupedChapters.length}`);
+  return { data: dedupedChapters };
 }
 
 async function fetchChapterDetails(chapterId) {
