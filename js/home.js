@@ -189,6 +189,16 @@ function filterSections(filter) {
       section.style.display = filter === "all" ? "" : "none";
     }
   });
+
+  // Handle two-column layout - make single column when filtering
+  const twoColumnContainers = document.querySelectorAll(".two-column-sections");
+  twoColumnContainers.forEach((container) => {
+    if (filter === "all") {
+      container.style.gridTemplateColumns = "1fr 1fr";
+    } else {
+      container.style.gridTemplateColumns = "1fr";
+    }
+  });
 }
 
 const tabButtons = document.querySelectorAll(".tab-btn");
