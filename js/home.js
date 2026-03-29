@@ -28,6 +28,22 @@ const searchResultsRow = document.getElementById("searchResultsRow");
 const searchInput = document.getElementById("searchInput");
 const homeSections = document.getElementById("homeSections");
 
+const mangaSections = [
+  {
+    row: mostFollowedMangaRow,
+    section: mostFollowedMangaRow?.closest("section"),
+  },
+  { row: topMangaRow, section: topMangaRow?.closest("section") },
+];
+
+const manhwaSections = [
+  {
+    row: mostFollowedManwhaRow,
+    section: mostFollowedManwhaRow?.closest("section"),
+  },
+  { row: topManwhaRow, section: topManwhaRow?.closest("section") },
+];
+
 function renderMangaCard(manga) {
   const coverArt = findRelationship(manga, "cover_art");
   const coverUrl = coverArt
@@ -146,6 +162,29 @@ const debouncedSearch = debounce((query) => {
 
 searchInput?.addEventListener("input", (e) => {
   debouncedSearch(e.target.value.trim());
+});
+
+function filterSections(filter) {
+  mangaSections.forEach(({ section }) => {
+    if (section) {
+      section.style.display = filter === "manhwa" ? "none" : "";
+    }
+  });
+  manhwaSections.forEach(({ section }) => {
+    if (section) {
+      section.style.display = filter === "manga" ? "none" : "";
+    }
+  });
+}
+
+const tabButtons = document.querySelectorAll(".tab-btn");
+tabButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    tabButtons.forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    const target = btn.dataset.target;
+    filterSections(target);
+  });
 });
 
 loadAllSections();
