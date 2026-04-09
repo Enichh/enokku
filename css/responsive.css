@@ -223,11 +223,14 @@
   }
 
   /* ===== Mobile Grid Layout for Two-Column Sections ===== */
-  
+
   /* Convert horizontal manga rows to compact grids in two-column sections */
   .two-column-sections .manga-row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);  /* Shows 3 cards per row by default */
+    grid-template-columns: repeat(
+      3,
+      1fr
+    ); /* Shows 3 cards per row by default */
     gap: 0.5rem;
     overflow-x: visible;
     padding-bottom: 0;
@@ -242,7 +245,7 @@
 
   /* Make cover images smaller */
   .two-column-sections .manga-card img {
-    aspect-ratio: 2/3;  /* Slightly taller ratio for better readability */
+    aspect-ratio: 2/3; /* Slightly taller ratio for better readability */
   }
 
   /* Title font size adjustment */
