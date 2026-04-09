@@ -18,8 +18,12 @@ class WeebCentralScraper {
   }
 
   async searchManga(query, limit = 10) {
+    console.log(`[WeebCentral] searchManga called with query: "${query}"`);
     try {
-      const response = await this.session.get(`${BASE_URL}/search/data`, {
+      const searchUrl = `${BASE_URL}/search/data`;
+      console.log(`[WeebCentral] Searching URL: ${searchUrl}`);
+
+      const response = await this.session.get(searchUrl, {
         params: {
           text: query,
           sort: "Best Match",
@@ -28,23 +32,34 @@ class WeebCentralScraper {
         },
       });
 
+      console.log(`[WeebCentral] Response status: ${response.status}`);
+
       const $ = cheerio.load(response.data);
       const results = [];
 
-      $("span.tooltip.tooltip-bottom").each((_, el) => {
+      // Try multiple selectors for search results
+      // Primary: links in search results that go to /series/ paths
+      $("a[href*='/series/']").each((_, el) => {
         const $el = $(el);
-        const title = $el.attr("data-tip");
-        const link = $el.find("a").attr("href");
+        const title = $el.text().trim();
+        const link = $el.attr("href");
 
         if (title && link && results.length < limit) {
-          results.push({
-            title,
-            url: link.startsWith("http") ? link : `${BASE_URL}${link}`,
-            source: "weebcentral",
-          });
+          // Avoid duplicates
+          const exists = results.find(
+            (r) => r.url === link || r.title === title,
+          );
+          if (!exists) {
+            results.push({
+              title,
+              url: link.startsWith("http") ? link : `${BASE_URL}${link}`,
+              source: "weebcentral",
+            });
+          }
         }
       });
 
+      console.log(`[WeebCentral] Found ${results.length} results`);
       return results;
     } catch (error) {
       console.error("[WeebCentral] Search error:", error.message);
@@ -187,13 +202,9 @@ class WeebCentralScraper {
   async findMangaByTitle(title) {
     console.log(`[WeebCentral] findMangaByTitle called with: "${title}"`);
 
-    const searchResults = await this.searchManga(title, 10);
+    const searchResults = await this.searchManga(title, 5);
     console.log(
       `[WeebCentral] Search returned ${searchResults.length} results`,
-    );
-    console.log(
-      `[WeebCentral] Results:`,
-      searchResults.map((r) => r.title),
     );
 
     if (searchResults.length === 0) {
@@ -201,30 +212,10 @@ class WeebCentralScraper {
       return null;
     }
 
-    const normalizedTitle = title.toLowerCase().replace(/[^a-z0-9]/g, "");
-    console.log(`[WeebCentral] Normalized search title: "${normalizedTitle}"`);
-
-    for (const result of searchResults) {
-      const resultTitle = result.title.toLowerCase();
-      const normalizedResult = resultTitle.replace(/[^a-z0-9]/g, "");
-
-      console.log(
-        `[WeebCentral] Checking: "${result.title}" (normalized: "${normalizedResult}")`,
-      );
-
-      if (
-        resultTitle.includes(title.toLowerCase()) ||
-        title.toLowerCase().includes(resultTitle) ||
-        normalizedResult.includes(normalizedTitle) ||
-        normalizedTitle.includes(normalizedResult)
-      ) {
-        console.log(`[WeebCentral] MATCH FOUND: "${result.title}"`);
-        return result;
-      }
-    }
-
+    // Search API already returns relevant results sorted by relevance
+    // Return the first (best match) result
     console.log(
-      `[WeebCentral] No match found, returning first result: "${searchResults[0].title}"`,
+      `[WeebCentral] Returning first result: "${searchResults[0].title}"`,
     );
     return searchResults[0];
   }
