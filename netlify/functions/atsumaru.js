@@ -71,6 +71,24 @@ class AtsumaruScraper {
         return null;
       }
 
+      let chapters = data.chapters || [];
+
+      if (data.hasMoreChapters && data.totalChapterCount > chapters.length) {
+        console.log(
+          `[Atsumaru] Fetching remaining ${data.totalChapterCount - chapters.length} chapters...`,
+        );
+        const remainingUrl = `${BASE_URL}/api/manga/chapters?id=${mangaId}&skip=${chapters.length}`;
+        console.log(`[Atsumaru] Requesting: ${remainingUrl}`);
+
+        const remainingResponse = await this.session.get(remainingUrl);
+        const remainingChapters = remainingResponse.data?.chapters || [];
+        console.log(
+          `[Atsumaru] Fetched ${remainingChapters.length} additional chapters`,
+        );
+
+        chapters = [...chapters, ...remainingChapters];
+      }
+
       return {
         id: data.id,
         title: data.title,
@@ -82,13 +100,14 @@ class AtsumaruScraper {
         image: data.poster?.image ? `${BASE_URL}/${data.poster.image}` : null,
         otherNames: data.otherNames || [],
         genres: data.genres?.map((g) => g.name) || [],
-        chapters: (data.chapters || []).map((ch) => ({
+        chapters: chapters.map((ch) => ({
           id: ch.id,
           number: ch.number,
           title: ch.title,
           pageCount: ch.pageCount,
           createdAt: ch.createdAt,
         })),
+        totalChapterCount: data.totalChapterCount,
         source: "atsumaru",
       };
     } catch (error) {

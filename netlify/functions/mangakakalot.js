@@ -8,9 +8,18 @@ class MangaKakalotScraper {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        Accept: "application/json",
-        "Accept-Language": "en-US,en;q=0.9",
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Accept-Encoding": "gzip, deflate, br",
         Referer: BASE_URL,
+        DNT: "1",
+        Connection: "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "same-origin",
+        "Cache-Control": "max-age=0",
       },
       timeout: 30000,
     });
@@ -30,12 +39,15 @@ class MangaKakalotScraper {
     try {
       const slug = this.titleToSlug(query);
       const searchUrl = `${BASE_URL}/search/story/${slug}`;
-      const response = await this.session.get(searchUrl, {
-        headers: {
-          Accept:
-            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        },
-      });
+      console.log(`[MangaKakalot] Requesting: ${searchUrl}`);
+
+      const response = await this.session.get(searchUrl);
+
+      console.log(`[MangaKakalot] Response status: ${response.status}`);
+      console.log(
+        `[MangaKakalot] Response preview:`,
+        response.data?.substring(0, 500),
+      );
 
       const html = response.data;
       const results = [];

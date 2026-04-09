@@ -12,12 +12,6 @@
   force = true
 
 [[redirects]]
-  from = "/weebcentral/*"
-  to = "/.netlify/functions/weebcentral-handler/:splat"
-  status = 200
-  force = true
-
-[[redirects]]
   from = "/atsumaru/*"
   to = "/.netlify/functions/atsumaru-handler/:splat"
   status = 200
