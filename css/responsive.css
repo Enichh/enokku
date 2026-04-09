@@ -1,3 +1,4 @@
+/* ===== General Mobile Adjustments ===== */
 @media (max-width: 768px) {
   .container {
     padding: 0 1rem;
@@ -57,8 +58,125 @@
   .manga-info h1 {
     font-size: 1.5rem;
   }
+
+  /* ===== Reader Page Mobile Fixes ===== */
+
+  /* Reader header container adjustments */
+  .reader-header {
+    padding: 1rem;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .reader-header .container {
+    padding: 0;
+  }
+
+  /* Navigation inside reader header */
+  .reader-header nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* Back button takes full width on very small screens */
+  .reader-header nav .btn-secondary {
+    flex: 0 0 auto;
+  }
+
+  /* Chapter title should wrap and not push buttons out */
+  .reader-header .chapter-title-header {
+    font-size: 1rem;
+    flex: 1 1 100%;
+    order: 3;
+    margin: 0.25rem 0 0;
+    text-align: left;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* Page indicator badge */
+  .reader-header .page-indicator {
+    margin-left: auto;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.75rem;
+  }
+
+  /* Chapter navigation top row */
+  .chapter-nav-top {
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .chapter-nav-top .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Reader images area */
+  .reader-images {
+    padding: 0.5rem 0;
+  }
+
+  .reader-images img {
+    border-radius: 0;
+  }
+
+  /* Reader footer */
+  .reader-footer {
+    padding: 1rem;
+    border-radius: 0 0 8px 8px;
+  }
+
+  .chapter-nav-bottom {
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .chapter-nav-bottom .btn-secondary {
+    width: 100%;
+    min-width: unset;
+  }
+
+  /* Loading spinner in reader */
+  .reader .loading,
+  .reader .error,
+  .reader .empty {
+    margin: 1rem 0;
+    padding: 2rem 1rem;
+  }
+
+  /* Prevent horizontal overflow on manga row */
+  .manga-row {
+    padding-bottom: 1rem;
+  }
+
+  /* Ensure site header doesn't overflow */
+  .site-header .container {
+    padding: 0 0.5rem;
+  }
+
+  .site-header nav {
+    gap: 0.5rem;
+  }
+
+  .logo {
+    font-size: 1.25rem;
+  }
+
+  /* Back to top button smaller on mobile */
+  .back-to-top {
+    bottom: 1rem;
+    right: 1rem;
+    width: 44px;
+    height: 44px;
+    font-size: 1.2rem;
+  }
 }
 
+/* ===== Tablet Adjustments (unchanged but kept for reference) ===== */
 @media (max-width: 968px) {
   .two-column-sections {
     grid-template-columns: 1fr;
