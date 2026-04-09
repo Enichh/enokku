@@ -5,10 +5,7 @@ import {
   findRelationship,
   getEnglishTitle,
 } from "./api.js";
-import {
-  getChaptersHybrid,
-  getWeebCentralPages,
-} from "./weebcentral-api.js";
+import { getChaptersHybrid, getWeebCentralPages } from "./weebcentral-api.js";
 import {
   getUrlParam,
   formatDate,
@@ -48,9 +45,14 @@ async function loadMangaDetails() {
 
     const title = getEnglishTitle(manga);
 
-    const altTitles =
-      manga.attributes.altTitles?.map((t) => Object.values(t)[0]).join(", ") ||
-      "";
+    const allTitles = [
+      title,
+      ...(manga.attributes.altTitles?.map((t) => Object.values(t)[0]) || []),
+      manga.attributes.title?.ja || "",
+      manga.attributes.title?.["ja-ro"] || "",
+    ].filter(Boolean);
+
+    const altTitles = allTitles.slice(1).join(", ") || "";
     const description =
       manga.attributes.description?.en ||
       Object.values(manga.attributes.description || {})[0] ||
@@ -82,14 +84,15 @@ async function loadMangaDetails() {
       img.src = getPlaceholderImage(512, 768, "No Cover");
     });
 
-    await loadChapters(title);
+    await loadChapters(allTitles);
   } catch (error) {
     showError("mangaDetails", error.message);
   }
 }
 
-async function loadChapters(mangaTitle) {
+async function loadChapters(allTitles) {
   console.log(`[Details] Loading chapters for manga: ${mangaId}`);
+  console.log(`[Details] Trying titles:`, allTitles);
   chapterListContainer.innerHTML = `
     <div class="loading">
       <div class="spinner"></div>
@@ -110,11 +113,13 @@ async function loadChapters(mangaTitle) {
       </div>
     `;
 
-    const hybrid = await getChaptersHybrid(mangaTitle, mangadexChapters);
+    const hybrid = await getChaptersHybrid(allTitles, mangadexChapters);
     allChapters = hybrid.chapters;
     weebCentralUrl = hybrid.weebCentralUrl;
 
-    console.log(`[Details] Hybrid result: ${hybrid.source}, ${allChapters.length} total chapters`);
+    console.log(
+      `[Details] Hybrid result: ${hybrid.source}, ${allChapters.length} total chapters`,
+    );
 
     if (allChapters.length === 0) {
       chapterListContainer.innerHTML = `
@@ -197,7 +202,9 @@ function renderChapterPage(page, source = "mangadex", missingCount = 0) {
   chapterListContainer.innerHTML = html;
 
   pageChapters.forEach((chapter) => {
-    const el = chapterListContainer.querySelector(`[data-chapter-id="${chapter.id}"]`);
+    const el = chapterListContainer.querySelector(
+      `[data-chapter-id="${chapter.id}"]`,
+    );
     el.addEventListener("click", () => {
       const params = new URLSearchParams({
         id: chapter.id,

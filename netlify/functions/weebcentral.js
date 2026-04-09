@@ -7,8 +7,10 @@ class WeebCentralScraper {
   constructor() {
     this.session = axios.create({
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.5",
       },
       timeout: 30000,
@@ -97,7 +99,9 @@ class WeebCentralScraper {
             chapters.push({
               chapter: parseFloat(chapterNum),
               title: chapterText,
-              url: chapterLink.startsWith("http") ? chapterLink : `${BASE_URL}${chapterLink}`,
+              url: chapterLink.startsWith("http")
+                ? chapterLink
+                : `${BASE_URL}${chapterLink}`,
               source: "weebcentral",
             });
           }
@@ -157,12 +161,16 @@ class WeebCentralScraper {
           updates.push({
             manga: {
               title: mangaName,
-              url: mangaUrl.startsWith("http") ? mangaUrl : `${BASE_URL}${mangaUrl}`,
+              url: mangaUrl.startsWith("http")
+                ? mangaUrl
+                : `${BASE_URL}${mangaUrl}`,
             },
             chapter: {
               number: chapterNum,
               title: chapterText,
-              url: chapterUrl.startsWith("http") ? chapterUrl : `${BASE_URL}${chapterUrl}`,
+              url: chapterUrl.startsWith("http")
+                ? chapterUrl
+                : `${BASE_URL}${chapterUrl}`,
             },
             source: "weebcentral",
           });
@@ -177,16 +185,48 @@ class WeebCentralScraper {
   }
 
   async findMangaByTitle(title) {
-    const searchResults = await this.searchManga(title, 5);
+    console.log(`[WeebCentral] findMangaByTitle called with: "${title}"`);
+
+    const searchResults = await this.searchManga(title, 10);
+    console.log(
+      `[WeebCentral] Search returned ${searchResults.length} results`,
+    );
+    console.log(
+      `[WeebCentral] Results:`,
+      searchResults.map((r) => r.title),
+    );
+
+    if (searchResults.length === 0) {
+      console.log(`[WeebCentral] No search results found`);
+      return null;
+    }
+
+    const normalizedTitle = title.toLowerCase().replace(/[^a-z0-9]/g, "");
+    console.log(`[WeebCentral] Normalized search title: "${normalizedTitle}"`);
 
     for (const result of searchResults) {
-      if (result.title.toLowerCase().includes(title.toLowerCase()) ||
-          title.toLowerCase().includes(result.title.toLowerCase())) {
+      const resultTitle = result.title.toLowerCase();
+      const normalizedResult = resultTitle.replace(/[^a-z0-9]/g, "");
+
+      console.log(
+        `[WeebCentral] Checking: "${result.title}" (normalized: "${normalizedResult}")`,
+      );
+
+      if (
+        resultTitle.includes(title.toLowerCase()) ||
+        title.toLowerCase().includes(resultTitle) ||
+        normalizedResult.includes(normalizedTitle) ||
+        normalizedTitle.includes(normalizedResult)
+      ) {
+        console.log(`[WeebCentral] MATCH FOUND: "${result.title}"`);
         return result;
       }
     }
 
-    return searchResults[0] || null;
+    console.log(
+      `[WeebCentral] No match found, returning first result: "${searchResults[0].title}"`,
+    );
+    return searchResults[0];
   }
 }
 

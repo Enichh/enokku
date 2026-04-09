@@ -47,16 +47,30 @@ export async function getWeebCentralLatest(limit = 20) {
   return data.updates || [];
 }
 
-export async function getChaptersHybrid(mangaTitle, mangaDexChapters = []) {
-  console.log(`[Hybrid] Starting hybrid search for: "${mangaTitle}"`);
+export async function getChaptersHybrid(mangaTitles, mangaDexChapters = []) {
+  const titles = Array.isArray(mangaTitles) ? mangaTitles : [mangaTitles];
+  console.log(
+    `[Hybrid] Starting hybrid search with ${titles.length} titles:`,
+    titles,
+  );
 
   try {
-    console.log(`[Hybrid] Searching Weeb Central for manga...`);
-    const weebCentralManga = await findWeebCentralManga(mangaTitle);
-    console.log(`[Hybrid] Weeb Central search result:`, weebCentralManga);
+    let weebCentralManga = null;
+    let matchedTitle = null;
+
+    for (const title of titles) {
+      if (!title) continue;
+      console.log(`[Hybrid] Trying title: "${title}"`);
+      weebCentralManga = await findWeebCentralManga(title);
+      if (weebCentralManga) {
+        matchedTitle = title;
+        console.log(`[Hybrid] Found match with title: "${title}"`);
+        break;
+      }
+    }
 
     if (!weebCentralManga) {
-      console.log(`[Hybrid] No Weeb Central manga found for: "${mangaTitle}"`);
+      console.log(`[Hybrid] No Weeb Central manga found for any title`);
       return { source: "mangadex", chapters: mangaDexChapters };
     }
 
@@ -89,7 +103,6 @@ export async function getChaptersHybrid(mangaTitle, mangaDexChapters = []) {
     const missingChapters = weebCentralChapters.filter(
       (wc) => !mangadexChapterNums.has(wc.chapter),
     );
-
     console.log(
       `[Hybrid] Missing chapters from Weeb Central: ${missingChapters.length}`,
     );
