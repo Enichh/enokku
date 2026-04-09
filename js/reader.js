@@ -68,7 +68,12 @@ async function loadChapter() {
     const chapterNum = chapter.attributes.chapter || "?";
     const chapterTitleText = chapter.attributes.title || "";
 
-    chapterTitle.textContent = `Chapter ${chapterNum}${chapterTitleText ? ` - ${chapterTitleText}` : ""}`;
+    // Better approach: only show title if it exists and is meaningfully different
+    let displayTitle = `Chapter ${chapterNum}`;
+    if (chapterTitleText && chapterTitleText.trim() !== "" && chapterTitleText !== `Chapter ${chapterNum}`) {
+      displayTitle += ` - ${chapterTitleText}`;
+    }
+    chapterTitle.textContent = displayTitle;
 
     console.log("[Reader] Fetching pages for chapter:", chapterId);
     const pagesData = await fetchChapterPages(chapterId);
