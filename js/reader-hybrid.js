@@ -15,20 +15,10 @@ const prevChapterBottomBtn = document.getElementById("prevChapterBottom");
 const nextChapterBottomBtn = document.getElementById("nextChapterBottom");
 const backToMangaBtn = document.getElementById("backToManga");
 
+const chapterId = getUrlParam("id");
+const mangaId = getUrlParam("manga");
 const source = getUrlParam("source") || "mangadex";
-
-// Handle different URL parameter formats for different sources
-let chapterId, mangaId, atsumaruMangaId;
-
-if (source === "atsumaru") {
-  chapterId = getUrlParam("chapterId");
-  atsumaruMangaId = getUrlParam("mangaId");
-  mangaId = atsumaruMangaId; // For compatibility
-} else {
-  chapterId = getUrlParam("id");
-  mangaId = getUrlParam("manga");
-  atsumaruMangaId = getUrlParam("mangaId"); // May be null for MangaDex
-}
+const atsumaruMangaId = getUrlParam("mangaId"); // For Atsumaru source
 
 // Floating reader bar elements
 const floatingBar = document.getElementById("floatingReaderBar");
@@ -97,11 +87,17 @@ async function loadChapterBySource() {
   updateFloatingChapterInfo("?", "", false, false);
 
   // Get chapter data from URL params based on source
+  // For Atsumaru, strip the atsu- prefix from chapterId for API calls
+  const rawChapterId =
+    source === "atsumaru" && chapterId?.startsWith("atsu-")
+      ? chapterId.replace("atsu-", "")
+      : chapterId;
+
   const chapterData = {
     source: source,
-    mangadexId: chapterId,
-    mangaId: getUrlParam("mangaId"),
-    chapterId: getUrlParam("chapterId"),
+    mangadexId: source === "mangadex" ? chapterId : null,
+    mangaId: atsumaruMangaId,
+    chapterId: rawChapterId, // Use raw ID for Atsumaru API
     mangaSlug: getUrlParam("mangaSlug"),
     chapterSlug: getUrlParam("chapterSlug"),
   };
@@ -237,9 +233,8 @@ function goToPrev() {
     const navigationMangaId = source === "atsumaru" ? atsumaruMangaId : mangaId;
 
     if (source === "atsumaru") {
-      // Extract raw Atsumaru chapter ID (remove atsu- prefix)
-      const rawChapterId = prevChapter.id.replace("atsu-", "");
-      window.location.href = `reader.html?source=atsumaru&mangaId=${atsumaruMangaId}&chapterId=${rawChapterId}`;
+      // Keep atsu- prefix in URL for consistent ID matching
+      window.location.href = `reader.html?id=${prevChapter.id}&manga=${navigationMangaId}&source=atsumaru&mangaId=${atsumaruMangaId}`;
     } else {
       window.location.href = `reader.html?id=${prevChapter.id}&manga=${navigationMangaId}&source=mangadex`;
     }
@@ -255,9 +250,8 @@ function goToNext() {
     const navigationMangaId = source === "atsumaru" ? atsumaruMangaId : mangaId;
 
     if (source === "atsumaru") {
-      // Extract raw Atsumaru chapter ID (remove atsu- prefix)
-      const rawChapterId = nextChapter.id.replace("atsu-", "");
-      window.location.href = `reader.html?source=atsumaru&mangaId=${atsumaruMangaId}&chapterId=${rawChapterId}`;
+      // Keep atsu- prefix in URL for consistent ID matching
+      window.location.href = `reader.html?id=${nextChapter.id}&manga=${navigationMangaId}&source=atsumaru&mangaId=${atsumaruMangaId}`;
     } else {
       window.location.href = `reader.html?id=${nextChapter.id}&manga=${navigationMangaId}&source=mangadex`;
     }
