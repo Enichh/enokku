@@ -221,6 +221,64 @@
     width: 26px;
     height: 26px;
   }
+
+  /* ===== Mobile Grid Layout for Two-Column Sections ===== */
+  
+  /* Convert horizontal manga rows to compact grids in two-column sections */
+  .two-column-sections .manga-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);  /* Shows 3 cards per row by default */
+    gap: 0.5rem;
+    overflow-x: visible;
+    padding-bottom: 0;
+  }
+
+  /* Reset card sizing to fill grid cells */
+  .two-column-sections .manga-row .manga-card {
+    flex: none;
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* Make cover images smaller */
+  .two-column-sections .manga-card img {
+    aspect-ratio: 2/3;  /* Slightly taller ratio for better readability */
+  }
+
+  /* Title font size adjustment */
+  .two-column-sections .manga-card .title {
+    font-size: 0.75rem;
+    -webkit-line-clamp: 2;
+  }
+
+  /* Hide meta info (e.g., chapter count) to save space */
+  .two-column-sections .manga-card .meta {
+    display: none;
+  }
+
+  /* Reduce card padding */
+  .two-column-sections .manga-card .info {
+    padding: 0.5rem;
+  }
+
+  /* For slightly larger phones, show 4 cards */
+  @media (min-width: 480px) {
+    .two-column-sections .manga-row {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  /* For very small phones, keep 3 */
+  @media (max-width: 380px) {
+    .two-column-sections .manga-row {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Optional: hide badge on very small screens to save space */
+    .two-column-sections .badge {
+      display: none;
+    }
+  }
 }
 
 /* ===== Tablet Adjustments (unchanged but kept for reference) ===== */
