@@ -218,9 +218,6 @@ function renderChapterPage(page, source = "mangadex", missingCount = 0) {
       if (chapter.source === "atsumaru") {
         if (chapter.mangaId) params.set("mangaId", chapter.mangaId);
         if (chapter.chapterId) params.set("chapterId", chapter.chapterId);
-      } else if (chapter.source === "mangakakalot") {
-        if (chapter.mangaSlug) params.set("mangaSlug", chapter.mangaSlug);
-        if (chapter.chapterSlug) params.set("chapterSlug", chapter.chapterSlug);
       } else if (chapter.source === "mangadex") {
         if (chapter.mangadexId) params.set("mangadexId", chapter.mangadexId);
       }

@@ -71,22 +71,12 @@ class AtsumaruScraper {
         return null;
       }
 
-      let chapters = data.chapters || [];
+      const chapters = data.chapters || [];
 
-      if (data.hasMoreChapters && data.totalChapterCount > chapters.length) {
+      if (data.hasMoreChapters) {
         console.log(
-          `[Atsumaru] Fetching remaining ${data.totalChapterCount - chapters.length} chapters...`,
+          `[Atsumaru] Note: ${data.totalChapterCount - chapters.length} additional chapters available but not fetched`,
         );
-        const remainingUrl = `${BASE_URL}/api/manga/chapters?id=${mangaId}&skip=${chapters.length}`;
-        console.log(`[Atsumaru] Requesting: ${remainingUrl}`);
-
-        const remainingResponse = await this.session.get(remainingUrl);
-        const remainingChapters = remainingResponse.data?.chapters || [];
-        console.log(
-          `[Atsumaru] Fetched ${remainingChapters.length} additional chapters`,
-        );
-
-        chapters = [...chapters, ...remainingChapters];
       }
 
       return {

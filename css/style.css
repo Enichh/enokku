@@ -586,14 +586,6 @@ main {
   background-color: #1f3a2f;
 }
 
-.chapter-item.source-mangakakalot {
-  border-left: 3px solid #3b82f6;
-}
-
-.chapter-item.source-mangakakalot:hover {
-  background-color: #1f2f3a;
-}
-
 /* Hybrid Source Badge */
 .chapter-list h2 .badge {
   margin-left: 0.5rem;
