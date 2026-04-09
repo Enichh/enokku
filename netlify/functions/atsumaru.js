@@ -6,10 +6,11 @@ class AtsumaruScraper {
   constructor() {
     this.session = axios.create({
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "application/json",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept: "application/json",
         "Accept-Language": "en-US,en;q=0.9",
-        "Referer": BASE_URL,
+        Referer: BASE_URL,
       },
       timeout: 30000,
     });
@@ -18,14 +19,13 @@ class AtsumaruScraper {
   async searchManga(query, limit = 10) {
     console.log(`[Atsumaru] Searching for: "${query}"`);
     try {
-      // Try search endpoint - common patterns
-      const searchUrl = `${BASE_URL}/api/search`;
+      const searchUrl = `${BASE_URL}/api/search/page`;
       const response = await this.session.get(searchUrl, {
-        params: { q: query, limit },
+        params: { query, limit },
       });
 
-      if (response.data?.items) {
-        return response.data.items.map(item => ({
+      if (response.data?.hits) {
+        return response.data.hits.map((item) => ({
           id: item.id,
           title: item.title,
           url: `${BASE_URL}/manga/${item.id}`,
@@ -66,8 +66,8 @@ class AtsumaruScraper {
         isAdult: data.isAdult,
         image: data.poster?.image ? `${BASE_URL}/${data.poster.image}` : null,
         otherNames: data.otherNames || [],
-        genres: data.genres?.map(g => g.name) || [],
-        chapters: (data.chapters || []).map(ch => ({
+        genres: data.genres?.map((g) => g.name) || [],
+        chapters: (data.chapters || []).map((ch) => ({
           id: ch.id,
           number: ch.number,
           title: ch.title,
@@ -98,7 +98,7 @@ class AtsumaruScraper {
       return {
         id: data.id,
         title: data.title,
-        pages: data.pages.map(p => ({
+        pages: data.pages.map((p) => ({
           ...p,
           image: p.image.startsWith("http") ? p.image : `${BASE_URL}${p.image}`,
         })),
@@ -111,20 +111,22 @@ class AtsumaruScraper {
 
   async findMangaByTitle(title) {
     console.log(`[Atsumaru] Finding manga by title: "${title}"`);
-    
+
     // First try direct API search
     const searchResults = await this.searchManga(title, 5);
-    
+
     if (searchResults.length > 0) {
       // Return best match
       const normalizedTitle = title.toLowerCase();
       for (const result of searchResults) {
         const resultTitle = result.title.toLowerCase();
         const englishTitle = (result.englishTitle || "").toLowerCase();
-        
-        if (resultTitle.includes(normalizedTitle) || 
-            normalizedTitle.includes(resultTitle) ||
-            englishTitle.includes(normalizedTitle)) {
+
+        if (
+          resultTitle.includes(normalizedTitle) ||
+          normalizedTitle.includes(resultTitle) ||
+          englishTitle.includes(normalizedTitle)
+        ) {
           console.log(`[Atsumaru] Found match: "${result.title}"`);
           return result;
         }
@@ -134,21 +136,29 @@ class AtsumaruScraper {
     }
 
     console.log("[Atsumaru] No search results, trying explore page");
-    
+
     // Fallback: Try to get from explore/availableFilters
     try {
-      const response = await this.session.get(`${BASE_URL}/api/explore/availableFilters`);
+      const response = await this.session.get(
+        `${BASE_URL}/api/explore/availableFilters`,
+      );
       const manga = response.data?.mangaPage;
-      
-      if (manga && manga.otherNames?.some(name => 
-        name.toLowerCase().includes(title.toLowerCase()) ||
-        title.toLowerCase().includes(name.toLowerCase())
-      )) {
+
+      if (
+        manga &&
+        manga.otherNames?.some(
+          (name) =>
+            name.toLowerCase().includes(title.toLowerCase()) ||
+            title.toLowerCase().includes(name.toLowerCase()),
+        )
+      ) {
         return {
           id: manga.id,
           title: manga.title,
           url: `${BASE_URL}/manga/${manga.id}`,
-          image: manga.poster?.image ? `${BASE_URL}/${manga.poster.image}` : null,
+          image: manga.poster?.image
+            ? `${BASE_URL}/${manga.poster.image}`
+            : null,
           type: manga.type,
           isAdult: manga.isAdult,
           source: "atsumaru",
