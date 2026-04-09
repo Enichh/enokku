@@ -211,8 +211,7 @@ function renderPages() {
 }
 
 function updatePageIndicator() {
-  const style = getSourceStyle(source);
-  pageIndicator.textContent = `${pages.length} pages (${style.name})`;
+  pageIndicator.textContent = `${pages.length} pages`;
 }
 
 backToMangaBtn.addEventListener("click", () => {
