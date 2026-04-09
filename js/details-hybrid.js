@@ -50,6 +50,8 @@ async function loadMangaDetails() {
       ...(manga.attributes.altTitles?.map((t) => Object.values(t)[0]) || []),
       manga.attributes.title?.ja || "",
       manga.attributes.title?.["ja-ro"] || "",
+      manga.attributes.title?.ko || "",
+      manga.attributes.title?.["ko-ro"] || "",
     ].filter(Boolean);
 
     const altTitles = allTitles.slice(1).join(", ") || "";
