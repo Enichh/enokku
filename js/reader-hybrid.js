@@ -15,10 +15,20 @@ const prevChapterBottomBtn = document.getElementById("prevChapterBottom");
 const nextChapterBottomBtn = document.getElementById("nextChapterBottom");
 const backToMangaBtn = document.getElementById("backToManga");
 
-const chapterId = getUrlParam("id");
-const mangaId = getUrlParam("manga");
 const source = getUrlParam("source") || "mangadex";
-const atsumaruMangaId = getUrlParam("mangaId"); // For Atsumaru source
+
+// Handle different URL parameter formats for different sources
+let chapterId, mangaId, atsumaruMangaId;
+
+if (source === "atsumaru") {
+  chapterId = getUrlParam("chapterId");
+  atsumaruMangaId = getUrlParam("mangaId");
+  mangaId = atsumaruMangaId; // For compatibility
+} else {
+  chapterId = getUrlParam("id");
+  mangaId = getUrlParam("manga");
+  atsumaruMangaId = getUrlParam("mangaId"); // May be null for MangaDex
+}
 
 // Floating reader bar elements
 const floatingBar = document.getElementById("floatingReaderBar");
@@ -116,11 +126,11 @@ async function loadChapterNavigation() {
   console.log("[Reader] chapterId:", chapterId);
   console.log("[Reader] source:", source);
   console.log("[Reader] atsumaruMangaId:", atsumaruMangaId);
-  
+
   // Use correct manga ID based on source
   const navigationMangaId = source === "atsumaru" ? atsumaruMangaId : mangaId;
   console.log("[Reader] navigationMangaId:", navigationMangaId);
-  
+
   if (!navigationMangaId) {
     console.log("[Reader] No navigationMangaId, skipping navigation");
     return;
@@ -135,24 +145,29 @@ async function loadChapterNavigation() {
       const data = await response.json();
       const chapters = data?.chapters || [];
       console.log("[Reader] Fetched Atsumaru chapters count:", chapters.length);
-      
-      allChapters = chapters.map((ch) => ({
-        id: `atsu-${ch.id}`,
-        attributes: {
-          chapter: ch.number,
-          title: ch.title,
-          publishAt: ch.createdAt
-        }
-      })).sort((a, b) => {
-        const aNum = parseFloat(a.attributes?.chapter) || 0;
-        const bNum = parseFloat(b.attributes?.chapter) || 0;
-        return aNum - bNum;
-      });
+
+      allChapters = chapters
+        .map((ch) => ({
+          id: `atsu-${ch.id}`,
+          attributes: {
+            chapter: ch.number,
+            title: ch.title,
+            publishAt: ch.createdAt,
+          },
+        }))
+        .sort((a, b) => {
+          const aNum = parseFloat(a.attributes?.chapter) || 0;
+          const bNum = parseFloat(b.attributes?.chapter) || 0;
+          return aNum - bNum;
+        });
     } else {
       // For MangaDex, use existing logic
       console.log("[Reader] Fetching MangaDex feed for navigation");
       const { data: chapters } = await fetchMangaFeed(navigationMangaId);
-      console.log("[Reader] Fetched MangaDex chapters count:", chapters?.length || 0);
+      console.log(
+        "[Reader] Fetched MangaDex chapters count:",
+        chapters?.length || 0,
+      );
 
       allChapters = chapters.sort((a, b) => {
         const aNum = parseFloat(a.attributes?.chapter) || 0;
@@ -165,11 +180,12 @@ async function loadChapterNavigation() {
       });
     }
 
-    console.log("[Reader] Sample chapter IDs:", allChapters.slice(0, 3).map(c => c.id));
-    
-    currentChapterIndex = allChapters.findIndex(
-      (c) => c.id === chapterId,
+    console.log(
+      "[Reader] Sample chapter IDs:",
+      allChapters.slice(0, 3).map((c) => c.id),
     );
+
+    currentChapterIndex = allChapters.findIndex((c) => c.id === chapterId);
     console.log("[Reader] Current chapter index:", currentChapterIndex);
     console.log("[Reader] Total chapters:", allChapters.length);
 
@@ -180,7 +196,12 @@ async function loadChapterNavigation() {
       const chapterTitle = chapter.attributes?.title || "";
       const hasPrev = currentChapterIndex > 0;
       const hasNext = currentChapterIndex < allChapters.length - 1;
-      console.log("[Reader] Navigation state - hasPrev:", hasPrev, "hasNext:", hasNext);
+      console.log(
+        "[Reader] Navigation state - hasPrev:",
+        hasPrev,
+        "hasNext:",
+        hasNext,
+      );
       updateFloatingChapterInfo(chapterNum, chapterTitle, hasPrev, hasNext);
     } else {
       console.log("[Reader] Chapter not found in chapters array!");
@@ -214,15 +235,32 @@ function goToPrev() {
   if (currentChapterIndex > 0) {
     const prevChapter = allChapters[currentChapterIndex - 1];
     const navigationMangaId = source === "atsumaru" ? atsumaruMangaId : mangaId;
-    window.location.href = `reader.html?id=${prevChapter.id}&manga=${navigationMangaId}&source=${source}${source === "atsumaru" ? `&mangaId=${atsumaruMangaId}` : ""}`;
+
+    if (source === "atsumaru") {
+      // Extract raw Atsumaru chapter ID (remove atsu- prefix)
+      const rawChapterId = prevChapter.id.replace("atsu-", "");
+      window.location.href = `reader.html?source=atsumaru&mangaId=${atsumaruMangaId}&chapterId=${rawChapterId}`;
+    } else {
+      window.location.href = `reader.html?id=${prevChapter.id}&manga=${navigationMangaId}&source=mangadex`;
+    }
   }
 }
 
 function goToNext() {
-  if (currentChapterIndex >= 0 && currentChapterIndex < allChapters.length - 1) {
+  if (
+    currentChapterIndex >= 0 &&
+    currentChapterIndex < allChapters.length - 1
+  ) {
     const nextChapter = allChapters[currentChapterIndex + 1];
     const navigationMangaId = source === "atsumaru" ? atsumaruMangaId : mangaId;
-    window.location.href = `reader.html?id=${nextChapter.id}&manga=${navigationMangaId}&source=${source}${source === "atsumaru" ? `&mangaId=${atsumaruMangaId}` : ""}`;
+
+    if (source === "atsumaru") {
+      // Extract raw Atsumaru chapter ID (remove atsu- prefix)
+      const rawChapterId = nextChapter.id.replace("atsu-", "");
+      window.location.href = `reader.html?source=atsumaru&mangaId=${atsumaruMangaId}&chapterId=${rawChapterId}`;
+    } else {
+      window.location.href = `reader.html?id=${nextChapter.id}&manga=${navigationMangaId}&source=mangadex`;
+    }
   }
 }
 
@@ -291,10 +329,18 @@ function updateFloatingProgress(percent, currentPageNum, totalPages) {
   currentProgress = { percent, current: currentPageNum, total: totalPages };
 }
 
-function updateFloatingChapterInfo(chapterNumber, chapterTitle, hasPrev, hasNext) {
-  const displayTitle = chapterTitle && chapterTitle.trim() && chapterTitle !== `Chapter ${chapterNumber}`
-    ? `Chapter ${chapterNumber} - ${chapterTitle}`
-    : `Chapter ${chapterNumber}`;
+function updateFloatingChapterInfo(
+  chapterNumber,
+  chapterTitle,
+  hasPrev,
+  hasNext,
+) {
+  const displayTitle =
+    chapterTitle &&
+    chapterTitle.trim() &&
+    chapterTitle !== `Chapter ${chapterNumber}`
+      ? `Chapter ${chapterNumber} - ${chapterTitle}`
+      : `Chapter ${chapterNumber}`;
 
   if (floatChapterDisplay) floatChapterDisplay.textContent = displayTitle;
   if (floatPrevBtn) floatPrevBtn.disabled = !hasPrev;
