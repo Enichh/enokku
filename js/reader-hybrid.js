@@ -111,6 +111,9 @@ async function loadChapterBySource() {
 
 async function loadChapterNavigation() {
   console.log("[Reader] === loadChapterNavigation START ===");
+  console.log("[Reader] mangaId:", mangaId);
+  console.log("[Reader] chapterId:", chapterId);
+  
   if (!mangaId) {
     console.log("[Reader] No mangaId, skipping navigation");
     return;
@@ -119,6 +122,7 @@ async function loadChapterNavigation() {
   try {
     console.log("[Reader] Fetching manga feed for navigation");
     const { data: chapters } = await fetchMangaFeed(mangaId);
+    console.log("[Reader] Fetched chapters count:", chapters?.length || 0);
 
     allChapters = chapters.sort((a, b) => {
       const aNum = parseFloat(a.attributes?.chapter) || 0;
@@ -130,10 +134,13 @@ async function loadChapterNavigation() {
       );
     });
 
+    console.log("[Reader] Sample chapter IDs:", allChapters.slice(0, 3).map(c => c.id));
+    
     currentChapterIndex = allChapters.findIndex(
       (c) => c.id === chapterId,
     );
     console.log("[Reader] Current chapter index:", currentChapterIndex);
+    console.log("[Reader] Total chapters:", allChapters.length);
 
     // Update floating bar chapter info
     if (currentChapterIndex >= 0) {
@@ -142,7 +149,10 @@ async function loadChapterNavigation() {
       const chapterTitle = chapter.attributes?.title || "";
       const hasPrev = currentChapterIndex > 0;
       const hasNext = currentChapterIndex < allChapters.length - 1;
+      console.log("[Reader] Navigation state - hasPrev:", hasPrev, "hasNext:", hasNext);
       updateFloatingChapterInfo(chapterNum, chapterTitle, hasPrev, hasNext);
+    } else {
+      console.log("[Reader] Chapter not found in chapters array!");
     }
 
     console.log("[Reader] === loadChapterNavigation SUCCESS ===");
@@ -155,6 +165,11 @@ function updateChapterButtons() {
   const hasPrev = currentChapterIndex > 0;
   const hasNext =
     currentChapterIndex >= 0 && currentChapterIndex < allChapters.length - 1;
+
+  console.log("[Reader] updateChapterButtons:");
+  console.log("  currentChapterIndex:", currentChapterIndex);
+  console.log("  allChapters.length:", allChapters.length);
+  console.log("  hasPrev:", hasPrev, "hasNext:", hasNext);
 
   prevChapterBtn.disabled = !hasPrev;
   nextChapterBtn.disabled = !hasNext;
