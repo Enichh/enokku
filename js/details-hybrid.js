@@ -5,7 +5,7 @@ import {
   findRelationship,
   getEnglishTitle,
 } from "./api.js";
-import { getChaptersHybrid, getSourceStyle } from "./hybrid-api.js";
+import { getChaptersHybrid } from "./hybrid-api.js";
 import {
   getUrlParam,
   formatDate,
@@ -151,16 +151,8 @@ function renderChapterPage(page, source = "mangadex", missingCount = 0) {
   const endIndex = Math.min(startIndex + chaptersPerPage, allChapters.length);
   const pageChapters = allChapters.slice(startIndex, endIndex);
 
-  let sourceBadge = "";
-  if (source === "hybrid" && hybridInfo) {
-    const sourcesText = hybridInfo.sources
-      .map((s) => getSourceStyle(s).name)
-      .join(" + ");
-    sourceBadge = `<span class="badge" title="Sources: ${sourcesText}">${sourcesText}</span>`;
-  }
-
   let html = `
-    <h2>Chapters (${allChapters.length} total) ${sourceBadge}</h2>
+    <h2>Chapters (${allChapters.length} total)</h2>
     <div class="chapter-pagination">
       <button onclick="goToChapterPage(${page - 1})" ${page === 0 ? "disabled" : ""}>Previous</button>
       <span class="page-info">Page ${page + 1} of ${totalPages}</span>
@@ -170,20 +162,17 @@ function renderChapterPage(page, source = "mangadex", missingCount = 0) {
   `;
 
   pageChapters.forEach((chapter) => {
-    const style = getSourceStyle(chapter.source);
     const chapterNum = chapter.chapter || "?";
     const chapterTitle = chapter.title || "";
-    const sourceIcon = ` ${style.icon}`;
 
     html += `
-      <div class="chapter-item source-${chapter.source}" 
+      <div class="chapter-item" 
            data-chapter-id="${chapter.id}" 
            data-source="${chapter.source}">
         <div>
           <div class="chapter-title">
-            Chapter ${chapterNum}${chapterTitle ? ` - ${chapterTitle}` : ""}${sourceIcon}
+            Chapter ${chapterNum}${chapterTitle ? ` - ${chapterTitle}` : ""}
           </div>
-          <div class="chapter-meta" style="color: ${style.color}">Source: ${style.name}</div>
         </div>
       </div>
     `;
