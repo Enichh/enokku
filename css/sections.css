@@ -1,0 +1,68 @@
+/* Section Header with Badge */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.badge {
+  background: var(--success);
+  color: var(--bg-primary);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge.hot {
+  background: var(--accent);
+  color: white;
+}
+
+/* Two Column Sections */
+.two-column-sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.two-column-sections:last-of-type {
+  margin-bottom: 0;
+}
+
+.two-column-sections .manga-section {
+  margin-bottom: 0;
+  min-width: 0;
+}
+
+/* Homepage Sections */
+.search-results-section {
+  margin-bottom: 2rem;
+}
+
+.search-results-section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  padding-left: 0.5rem;
+  border-left: 4px solid var(--accent);
+}
+
+.search-results-section.hidden,
+#homeSections.hidden {
+  display: none;
+}
+
+.manga-section {
+  margin-bottom: 2.5rem;
+}
+
+.manga-section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  padding-left: 0.75rem;
+  border-left: 4px solid var(--accent);
+  color: var(--text-primary);
+}

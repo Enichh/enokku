@@ -1,0 +1,139 @@
+.manga-details {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2rem;
+}
+
+.manga-cover {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: var(--bg-secondary);
+}
+
+.manga-cover img {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+}
+
+.manga-info h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.manga-info .alt-titles {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.manga-info .status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: var(--bg-tertiary);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.manga-info .description {
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}
+
+.chapter-list {
+  margin-top: 2rem;
+}
+
+.chapter-list h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.chapter-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.chapter-item:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.chapter-item .chapter-title {
+  font-weight: 500;
+}
+
+.chapter-item .chapter-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Hybrid Source Badge */
+.chapter-list h2 .badge {
+  margin-left: 0.5rem;
+  font-size: 0.7rem;
+  vertical-align: middle;
+}
+
+.chapter-list h2 .badge[title]:hover {
+  cursor: help;
+}
+
+.chapter-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 0;
+  flex-wrap: wrap;
+}
+
+.chapter-pagination.bottom {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  margin-top: 1rem;
+}
+
+.chapter-pagination button {
+  padding: 0.5rem 1rem;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.9rem;
+}
+
+.chapter-pagination button:hover {
+  background-color: var(--accent);
+}
+
+.chapter-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--bg-tertiary);
+}
+
+.chapter-pagination .page-info {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  padding: 0 0.5rem;
+}
+
+.chapter-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}

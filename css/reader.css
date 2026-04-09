@@ -1,0 +1,79 @@
+.reader {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.reader-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.reader-header h1 {
+  font-size: 1.1rem;
+}
+
+.reader-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.reader-controls button {
+  padding: 0.5rem 1rem;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.reader-controls button:hover {
+  background-color: var(--accent);
+}
+
+.reader-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.reader-images {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.reader-images img {
+  width: 100%;
+  display: block;
+  background-color: var(--bg-secondary);
+}
+
+.page-indicator {
+  text-align: center;
+  padding: 1rem;
+  color: var(--text-muted);
+}
+
+.reader-footer {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  margin-top: 1rem;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.reader-footer .reader-controls {
+  display: flex;
+  gap: 1rem;
+}
+
+.reader-footer .reader-controls button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+}
