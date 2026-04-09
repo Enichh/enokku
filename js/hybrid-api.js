@@ -175,4 +175,4 @@ export function getSourceStyle(source) {
   return styles[source] || { color: "#888", icon: "❓", name: source };
 }
 
-export { SOURCES, SOURCE_PRIORITY };
+export { SOURCES, SOURCE_PRIORITY, findAtsumaruManga, getAtsumaruChapters };
