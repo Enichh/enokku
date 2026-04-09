@@ -116,11 +116,14 @@
 
   /* Reader images area */
   .reader-images {
-    padding: 0.5rem 0;
+    padding: 0;
   }
 
   .reader-images img {
     border-radius: 0;
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
   }
 
   /* Reader footer */
