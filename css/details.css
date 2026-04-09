@@ -223,31 +223,24 @@
 /* Mobile: fixed FAB */
 @media (max-width: 768px) {
   .start-reading-btn {
-    position: fixed;
-    bottom: 80px;  /* Above floating reader bar if present */
-    right: 20px;
-    width: auto;
-    min-width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    padding: 0;
-    margin-top: 0;
-    z-index: 150;
-    box-shadow: 0 4px 16px rgba(255,0,0,0.4);
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    width: auto !important;
+    min-width: 56px !important;
+    height: 56px !important;
+    border-radius: 30px !important;
+    padding: 0 1.2rem !important;
+    margin-top: 0 !important;
+    z-index: 150 !important;
+    box-shadow: 0 4px 16px rgba(255,0,0,0.4) !important;
   }
 
   .btn-text {
-    display: none;
+    display: none !important;
   }
 
   .btn-text-mobile {
-    display: inline;
-  }
-
-  /* If you want the button to be a floating circle with just "Read" */
-  .start-reading-btn {
-    border-radius: 30px;  /* Pill shape on mobile, but can be circular */
-    padding: 0 1.2rem;
-    height: 48px;
+    display: inline !important;
   }
 }
