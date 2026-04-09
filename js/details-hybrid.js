@@ -5,7 +5,7 @@ import {
   findRelationship,
   getEnglishTitle,
 } from "./api.js";
-import { getChaptersHybrid, getWeebCentralPages } from "./weebcentral-api.js";
+import { getChaptersHybridAtsumaru } from "./atsumaru-api.js";
 import {
   getUrlParam,
   formatDate,
@@ -24,7 +24,7 @@ const mangaId = getUrlParam("id");
 let allChapters = [];
 let currentPage = 0;
 const chaptersPerPage = 50;
-let weebCentralUrl = null;
+let atsumaruId = null;
 
 if (!mangaId) {
   showError("mangaDetails", "No manga ID provided");
@@ -111,13 +111,13 @@ async function loadChapters(allTitles) {
     chapterListContainer.innerHTML = `
       <div class="loading">
         <div class="spinner"></div>
-        <p>Checking Weeb Central for additional chapters...</p>
+        <p>Checking Atsumaru for additional chapters...</p>
       </div>
     `;
 
-    const hybrid = await getChaptersHybrid(allTitles, mangadexChapters);
+    const hybrid = await getChaptersHybridAtsumaru(allTitles, mangadexChapters);
     allChapters = hybrid.chapters;
-    weebCentralUrl = hybrid.weebCentralUrl;
+    atsumaruId = hybrid.atsumaruId;
 
     console.log(
       `[Details] Hybrid result: ${hybrid.source}, ${allChapters.length} total chapters`,
@@ -153,8 +153,8 @@ function renderChapterPage(page, source = "mangadex", missingCount = 0) {
 
   let sourceBadge = "";
   if (source === "hybrid") {
-    sourceBadge = `<span class="badge" title="${missingCount} chapters from Weeb Central">Hybrid Source</span>`;
-  } else if (weebCentralUrl) {
+    sourceBadge = `<span class="badge" title="${missingCount} chapters from Atsumaru">Hybrid Source</span>`;
+  } else if (atsumaruId) {
     sourceBadge = `<span class="badge">MangaDex</span>`;
   }
 
@@ -169,21 +169,22 @@ function renderChapterPage(page, source = "mangadex", missingCount = 0) {
   `;
 
   pageChapters.forEach((chapter) => {
-    const isWeebCentral = chapter.source === "weebcentral";
+    const isAtsumaru = chapter.source === "atsumaru";
     const chapterNum = chapter.chapter || "?";
     const chapterTitle = chapter.title || "";
-    const sourceIcon = isWeebCentral ? " 🌐" : "";
+    const sourceIcon = isAtsumaru ? " 📚" : "";
 
     html += `
-      <div class="chapter-item ${isWeebCentral ? "weebcentral" : ""}" 
+      <div class="chapter-item ${isAtsumaru ? "atsumaru" : ""}" 
            data-chapter-id="${chapter.id}" 
            data-source="${chapter.source}"
-           ${chapter.url ? `data-url="${chapter.url}"` : ""}>
+           ${chapter.mangaId ? `data-manga-id="${chapter.mangaId}"` : ""}
+           ${chapter.chapterId ? `data-chapter-id-atsu="${chapter.chapterId}"` : ""}>
         <div>
           <div class="chapter-title">
             Chapter ${chapterNum}${chapterTitle ? ` - ${chapterTitle}` : ""}${sourceIcon}
           </div>
-          <div class="chapter-meta">${isWeebCentral ? "Source: Weeb Central" : "Source: MangaDex"}</div>
+          <div class="chapter-meta">${isAtsumaru ? "Source: Atsumaru" : "Source: MangaDex"}</div>
         </div>
       </div>
     `;
@@ -214,8 +215,11 @@ function renderChapterPage(page, source = "mangadex", missingCount = 0) {
         source: chapter.source,
       });
 
-      if (chapter.url) {
-        params.set("chapterUrl", chapter.url);
+      if (chapter.mangaId) {
+        params.set("mangaId", chapter.mangaId);
+      }
+      if (chapter.chapterId) {
+        params.set("chapterId", chapter.chapterId);
       }
 
       if (chapter.mangadexId) {

@@ -3,7 +3,7 @@ import {
   fetchChapterPages,
   fetchMangaFeed,
 } from "./api.js";
-import { getWeebCentralPages } from "./weebcentral-api.js";
+import { getChapterPagesHybridAtsumaru } from "./atsumaru-api.js";
 import { getUrlParam, getPlaceholderImage } from "./utils.js";
 
 const chapterTitle = document.getElementById("chapterTitle");
@@ -18,7 +18,8 @@ const backToMangaBtn = document.getElementById("backToManga");
 const chapterId = getUrlParam("id");
 const mangaId = getUrlParam("manga");
 const source = getUrlParam("source") || "mangadex";
-const chapterUrl = getUrlParam("chapterUrl");
+const atsumaruMangaId = getUrlParam("mangaId");
+const atsumaruChapterId = getUrlParam("chapterId");
 const mangadexId = getUrlParam("mangadexId");
 
 let pages = [];
@@ -33,7 +34,14 @@ if (!chapterId) {
 
 async function loadChapter() {
   console.log("[Reader] === loadChapter START ===");
-  console.log("[Reader] chapterId:", chapterId, "mangaId:", mangaId, "source:", source);
+  console.log(
+    "[Reader] chapterId:",
+    chapterId,
+    "mangaId:",
+    mangaId,
+    "source:",
+    source,
+  );
 
   readerImages.innerHTML = `
     <div class="loading">
@@ -43,8 +51,8 @@ async function loadChapter() {
   `;
 
   try {
-    if (source === "weebcentral" && chapterUrl) {
-      await loadWeebCentralChapter();
+    if (source === "atsumaru" && atsumaruMangaId && atsumaruChapterId) {
+      await loadAtsumaruChapter();
     } else {
       await loadMangaDexChapter();
     }
@@ -93,26 +101,27 @@ async function loadMangaDexChapter() {
   }));
 }
 
-async function loadWeebCentralChapter() {
-  console.log("[Reader] Fetching Weeb Central chapter:", chapterUrl);
+async function loadAtsumaruChapter() {
+  console.log("[Reader] Fetching Atsumaru chapter:", atsumaruChapterId);
 
-  chapterTitle.textContent = `Chapter (Weeb Central)`;
+  chapterTitle.textContent = `Chapter (Atsumaru)`;
 
-  const pageUrls = await getWeebCentralPages(chapterUrl);
+  const chapterData = await getChapterPagesHybridAtsumaru({
+    source: "atsumaru",
+    mangaId: atsumaruMangaId,
+    chapterId: atsumaruChapterId,
+  });
 
-  if (!pageUrls || pageUrls.length === 0) {
-    throw new Error("No pages found on Weeb Central");
+  if (!chapterData || chapterData.length === 0) {
+    throw new Error("No pages found on Atsumaru");
   }
 
-  pages = pageUrls.map((url, index) => ({
+  pages = chapterData.map((url, index) => ({
     url: `/api/proxy?imageUrl=${encodeURIComponent(url)}`,
     alt: `Page ${index + 1}`,
   }));
 
-  const chapterMatch = chapterUrl.match(/chapter-(\d+)/i);
-  if (chapterMatch) {
-    chapterTitle.textContent = `Chapter ${chapterMatch[1]} (Weeb Central)`;
-  }
+  chapterTitle.textContent = `Chapter (Atsumaru)`;
 }
 
 async function loadChapterNavigation() {
@@ -130,10 +139,15 @@ async function loadChapterNavigation() {
       const aNum = parseFloat(a.attributes?.chapter) || 0;
       const bNum = parseFloat(b.attributes?.chapter) || 0;
       if (aNum !== bNum) return aNum - bNum;
-      return new Date(a.attributes?.publishAt || 0) - new Date(b.attributes?.publishAt || 0);
+      return (
+        new Date(a.attributes?.publishAt || 0) -
+        new Date(b.attributes?.publishAt || 0)
+      );
     });
 
-    currentChapterIndex = allChapters.findIndex((c) => c.id === (mangadexId || chapterId));
+    currentChapterIndex = allChapters.findIndex(
+      (c) => c.id === (mangadexId || chapterId),
+    );
     console.log("[Reader] Current chapter index:", currentChapterIndex);
     console.log("[Reader] === loadChapterNavigation SUCCESS ===");
   } catch (error) {
@@ -143,7 +157,8 @@ async function loadChapterNavigation() {
 
 function updateChapterButtons() {
   const hasPrev = currentChapterIndex > 0;
-  const hasNext = currentChapterIndex >= 0 && currentChapterIndex < allChapters.length - 1;
+  const hasNext =
+    currentChapterIndex >= 0 && currentChapterIndex < allChapters.length - 1;
 
   prevChapterBtn.disabled = !hasPrev;
   nextChapterBtn.disabled = !hasNext;
@@ -198,7 +213,7 @@ function renderPages() {
 }
 
 function updatePageIndicator() {
-  pageIndicator.textContent = `${pages.length} pages${source === "weebcentral" ? " (Weeb Central)" : ""}`;
+  pageIndicator.textContent = `${pages.length} pages${source === "atsumaru" ? " (Atsumaru)" : ""}`;
 }
 
 backToMangaBtn.addEventListener("click", () => {
