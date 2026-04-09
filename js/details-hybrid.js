@@ -305,6 +305,24 @@ function sortChapters() {
   
   console.log(`[Details] Chapters after sort:`, allChapters.map(c => ({ id: c.id, chapter: c.chapter })));
   
+  // Update button active states before re-rendering
+  const sortAscBtn = document.getElementById('sortAscBtn');
+  const sortDescBtn = document.getElementById('sortDescBtn');
+  
+  if (sortAscBtn && sortDescBtn) {
+    if (currentSortOrder === 'asc') {
+      sortAscBtn.classList.add('active');
+      sortDescBtn.classList.remove('active');
+    } else {
+      sortAscBtn.classList.remove('active');
+      sortDescBtn.classList.add('active');
+    }
+    console.log(`[Details] Button states updated:`, { 
+      ascActive: sortAscBtn.classList.contains('active'),
+      descActive: sortDescBtn.classList.contains('active')
+    });
+  }
+  
   // Re-render from first page
   renderChapterPage(0);
 }
