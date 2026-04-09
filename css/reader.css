@@ -342,38 +342,3 @@
   color: white;
   box-shadow: 0 0 10px var(--accent-glow);
 }
-
-/* Mobile adjustments */
-@media (max-width: 768px) {
-  .floating-reader-bar {
-    padding: 0.5rem 1rem;
-    bottom: 15px;
-  }
-
-  .floating-reader-bar.collapsed {
-    padding: 0.4rem 1rem;
-  }
-
-  .float-progress-only {
-    font-size: 1rem;
-  }
-
-  .float-expanded-controls {
-    gap: 0.5rem;
-  }
-
-  .float-nav-btn {
-    width: 36px;
-    height: 36px;
-  }
-
-  .float-expanded-center {
-    gap: 0.5rem;
-    font-size: 0.9rem;
-  }
-
-  .float-back-to-top-btn {
-    width: 28px;
-    height: 28px;
-  }
-}
