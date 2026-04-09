@@ -84,6 +84,9 @@ export async function getMangaDexPages(chapterId) {
 
 export async function getChaptersHybrid(mangaTitles, mangaDexChapters = []) {
   const titles = Array.isArray(mangaTitles) ? mangaTitles : [mangaTitles];
+  console.log(
+    `[Hybrid] Starting multi-source search with ${titles.length} titles`,
+  );
 
   // Start with MangaDex chapters
   const combinedChapters = mangaDexChapters.map((c) => ({
@@ -101,11 +104,13 @@ export async function getChaptersHybrid(mangaTitles, mangaDexChapters = []) {
   const missingCounts = { [SOURCES.MANGADEX]: 0 };
 
   // Try Atsumaru
+  console.log(`[Hybrid] Trying Atsumaru...`);
   let atsumaruManga = null;
   for (const title of titles) {
     if (!title) continue;
     atsumaruManga = await findAtsumaruManga(title);
     if (atsumaruManga) {
+      console.log(`[Hybrid] Atsumaru match: "${atsumaruManga.title}"`);
       break;
     }
   }
@@ -117,6 +122,9 @@ export async function getChaptersHybrid(mangaTitles, mangaDexChapters = []) {
     );
 
     if (missingAtsumaru.length > 0) {
+      console.log(
+        `[Hybrid] Atsumaru added ${missingAtsumaru.length} new chapters`,
+      );
       combinedChapters.push(...missingAtsumaru);
       sourcesUsed.push(SOURCES.ATSUMARU);
       missingCounts[SOURCES.ATSUMARU] = missingAtsumaru.length;
@@ -132,6 +140,10 @@ export async function getChaptersHybrid(mangaTitles, mangaDexChapters = []) {
   const totalMissing =
     Object.values(missingCounts).reduce((a, b) => a + b, 0) -
     missingCounts[SOURCES.MANGADEX];
+
+  console.log(
+    `[Hybrid] Final: ${combinedChapters.length} chapters from ${sourcesUsed.join(" + ")}`,
+  );
 
   return {
     source: isHybrid ? "hybrid" : SOURCES.MANGADEX,
