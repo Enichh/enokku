@@ -569,22 +569,29 @@ main {
   color: var(--text-muted);
 }
 
-/* Atsumaru Chapter Styling */
-.chapter-item.atsumaru {
-  border-left: 3px solid #10b981;
-  background-color: var(--bg-tertiary);
+/* Source-based Chapter Styling */
+.chapter-item.source-mangadex {
+  border-left: 3px solid #ff6740;
 }
 
-.chapter-item.atsumaru:hover {
+.chapter-item.source-mangadex:hover {
+  background-color: #3a1f1f;
+}
+
+.chapter-item.source-atsumaru {
+  border-left: 3px solid #10b981;
+}
+
+.chapter-item.source-atsumaru:hover {
   background-color: #1f3a2f;
 }
 
-.chapter-item.atsumaru .chapter-title::before {
-  content: "📚 ";
+.chapter-item.source-mangakakalot {
+  border-left: 3px solid #3b82f6;
 }
 
-.chapter-item.atsumaru .chapter-meta {
-  color: #34d399;
+.chapter-item.source-mangakakalot:hover {
+  background-color: #1f2f3a;
 }
 
 /* Hybrid Source Badge */

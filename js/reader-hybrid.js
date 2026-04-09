@@ -3,7 +3,7 @@ import {
   fetchChapterPages,
   fetchMangaFeed,
 } from "./api.js";
-import { getChapterPagesHybridAtsumaru } from "./atsumaru-api.js";
+import { getChapterPagesHybrid, getSourceStyle } from "./hybrid-api.js";
 import { getUrlParam, getPlaceholderImage } from "./utils.js";
 
 const chapterTitle = document.getElementById("chapterTitle");
@@ -18,9 +18,6 @@ const backToMangaBtn = document.getElementById("backToManga");
 const chapterId = getUrlParam("id");
 const mangaId = getUrlParam("manga");
 const source = getUrlParam("source") || "mangadex";
-const atsumaruMangaId = getUrlParam("mangaId");
-const atsumaruChapterId = getUrlParam("chapterId");
-const mangadexId = getUrlParam("mangadexId");
 
 let pages = [];
 let currentPage = 0;
@@ -51,11 +48,7 @@ async function loadChapter() {
   `;
 
   try {
-    if (source === "atsumaru" && atsumaruMangaId && atsumaruChapterId) {
-      await loadAtsumaruChapter();
-    } else {
-      await loadMangaDexChapter();
-    }
+    await loadChapterBySource();
 
     await loadChapterNavigation();
     renderPages();
@@ -69,59 +62,34 @@ async function loadChapter() {
   }
 }
 
-async function loadMangaDexChapter() {
-  console.log("[Reader] Fetching MangaDex chapter:", chapterId);
+async function loadChapterBySource() {
+  console.log(`[Reader] Loading chapter from source: ${source}`);
 
-  const chapter = mangadexId
-    ? await fetchChapterDetails(mangadexId)
-    : await fetchChapterDetails(chapterId);
+  const style = getSourceStyle(source);
+  chapterTitle.textContent = `Chapter (${style.name})`;
 
-  if (chapter.data?.attributes?.isUnavailable) {
-    const externalUrl = chapter.data.attributes.externalUrl;
-    if (externalUrl) {
-      throw new Error(`Chapter hosted externally: ${externalUrl}`);
-    }
-    throw new Error("Chapter pages are unavailable");
+  // Get chapter data from URL params based on source
+  const chapterData = {
+    source: source,
+    mangadexId: chapterId,
+    mangaId: getUrlParam("mangaId"),
+    chapterId: getUrlParam("chapterId"),
+    mangaSlug: getUrlParam("mangaSlug"),
+    chapterSlug: getUrlParam("chapterSlug"),
+  };
+
+  const pageUrls = await getChapterPagesHybrid(chapterData);
+
+  if (!pageUrls || pageUrls.length === 0) {
+    throw new Error(`No pages found from ${style.name}`);
   }
 
-  const attrs = chapter.data?.attributes || chapter.attributes || {};
-  const chapterNum = attrs.chapter || "?";
-  const chapterTitleText = attrs.title || "";
-
-  chapterTitle.textContent = `Chapter ${chapterNum}${chapterTitleText ? ` - ${chapterTitleText}` : ""}`;
-
-  const pagesData = await fetchChapterPages(mangadexId || chapterId);
-  const baseUrl = pagesData.baseUrl;
-  const hash = pagesData.chapter.hash;
-  const pageFiles = pagesData.chapter.data;
-
-  pages = pageFiles.map((page) => ({
-    url: `/api/proxy?imageUrl=${encodeURIComponent(`${baseUrl}/data/${hash}/${page}`)}`,
-    alt: page,
-  }));
-}
-
-async function loadAtsumaruChapter() {
-  console.log("[Reader] Fetching Atsumaru chapter:", atsumaruChapterId);
-
-  chapterTitle.textContent = `Chapter (Atsumaru)`;
-
-  const chapterData = await getChapterPagesHybridAtsumaru({
-    source: "atsumaru",
-    mangaId: atsumaruMangaId,
-    chapterId: atsumaruChapterId,
-  });
-
-  if (!chapterData || chapterData.length === 0) {
-    throw new Error("No pages found on Atsumaru");
-  }
-
-  pages = chapterData.map((url, index) => ({
+  pages = pageUrls.map((url, index) => ({
     url: `/api/proxy?imageUrl=${encodeURIComponent(url)}`,
     alt: `Page ${index + 1}`,
   }));
 
-  chapterTitle.textContent = `Chapter (Atsumaru)`;
+  chapterTitle.textContent = `Chapter (${style.name})`;
 }
 
 async function loadChapterNavigation() {
@@ -213,7 +181,8 @@ function renderPages() {
 }
 
 function updatePageIndicator() {
-  pageIndicator.textContent = `${pages.length} pages${source === "atsumaru" ? " (Atsumaru)" : ""}`;
+  const style = getSourceStyle(source);
+  pageIndicator.textContent = `${pages.length} pages (${style.name})`;
 }
 
 backToMangaBtn.addEventListener("click", () => {

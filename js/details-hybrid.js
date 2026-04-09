@@ -5,7 +5,7 @@ import {
   findRelationship,
   getEnglishTitle,
 } from "./api.js";
-import { getChaptersHybridAtsumaru } from "./atsumaru-api.js";
+import { getChaptersHybrid, getSourceStyle } from "./hybrid-api.js";
 import {
   getUrlParam,
   formatDate,
@@ -24,7 +24,7 @@ const mangaId = getUrlParam("id");
 let allChapters = [];
 let currentPage = 0;
 const chaptersPerPage = 50;
-let atsumaruId = null;
+let hybridInfo = null;
 
 if (!mangaId) {
   showError("mangaDetails", "No manga ID provided");
@@ -111,13 +111,13 @@ async function loadChapters(allTitles) {
     chapterListContainer.innerHTML = `
       <div class="loading">
         <div class="spinner"></div>
-        <p>Checking Atsumaru for additional chapters...</p>
+        <p>Checking alternative sources for chapters...</p>
       </div>
     `;
 
-    const hybrid = await getChaptersHybridAtsumaru(allTitles, mangadexChapters);
+    const hybrid = await getChaptersHybrid(allTitles, mangadexChapters);
     allChapters = hybrid.chapters;
-    atsumaruId = hybrid.atsumaruId;
+    hybridInfo = hybrid;
 
     console.log(
       `[Details] Hybrid result: ${hybrid.source}, ${allChapters.length} total chapters`,
@@ -152,10 +152,11 @@ function renderChapterPage(page, source = "mangadex", missingCount = 0) {
   const pageChapters = allChapters.slice(startIndex, endIndex);
 
   let sourceBadge = "";
-  if (source === "hybrid") {
-    sourceBadge = `<span class="badge" title="${missingCount} chapters from Atsumaru">Hybrid Source</span>`;
-  } else if (atsumaruId) {
-    sourceBadge = `<span class="badge">MangaDex</span>`;
+  if (source === "hybrid" && hybridInfo) {
+    const sourcesText = hybridInfo.sources
+      .map((s) => getSourceStyle(s).name)
+      .join(" + ");
+    sourceBadge = `<span class="badge" title="Sources: ${sourcesText}">${sourcesText}</span>`;
   }
 
   let html = `
@@ -169,22 +170,20 @@ function renderChapterPage(page, source = "mangadex", missingCount = 0) {
   `;
 
   pageChapters.forEach((chapter) => {
-    const isAtsumaru = chapter.source === "atsumaru";
+    const style = getSourceStyle(chapter.source);
     const chapterNum = chapter.chapter || "?";
     const chapterTitle = chapter.title || "";
-    const sourceIcon = isAtsumaru ? " 📚" : "";
+    const sourceIcon = ` ${style.icon}`;
 
     html += `
-      <div class="chapter-item ${isAtsumaru ? "atsumaru" : ""}" 
+      <div class="chapter-item source-${chapter.source}" 
            data-chapter-id="${chapter.id}" 
-           data-source="${chapter.source}"
-           ${chapter.mangaId ? `data-manga-id="${chapter.mangaId}"` : ""}
-           ${chapter.chapterId ? `data-chapter-id-atsu="${chapter.chapterId}"` : ""}>
+           data-source="${chapter.source}">
         <div>
           <div class="chapter-title">
             Chapter ${chapterNum}${chapterTitle ? ` - ${chapterTitle}` : ""}${sourceIcon}
           </div>
-          <div class="chapter-meta">${isAtsumaru ? "Source: Atsumaru" : "Source: MangaDex"}</div>
+          <div class="chapter-meta" style="color: ${style.color}">Source: ${style.name}</div>
         </div>
       </div>
     `;
@@ -215,15 +214,15 @@ function renderChapterPage(page, source = "mangadex", missingCount = 0) {
         source: chapter.source,
       });
 
-      if (chapter.mangaId) {
-        params.set("mangaId", chapter.mangaId);
-      }
-      if (chapter.chapterId) {
-        params.set("chapterId", chapter.chapterId);
-      }
-
-      if (chapter.mangadexId) {
-        params.set("mangadexId", chapter.mangadexId);
+      // Add source-specific parameters
+      if (chapter.source === "atsumaru") {
+        if (chapter.mangaId) params.set("mangaId", chapter.mangaId);
+        if (chapter.chapterId) params.set("chapterId", chapter.chapterId);
+      } else if (chapter.source === "mangakakalot") {
+        if (chapter.mangaSlug) params.set("mangaSlug", chapter.mangaSlug);
+        if (chapter.chapterSlug) params.set("chapterSlug", chapter.chapterSlug);
+      } else if (chapter.source === "mangadex") {
+        if (chapter.mangadexId) params.set("mangadexId", chapter.mangadexId);
       }
 
       window.location.href = `reader.html?${params.toString()}`;
