@@ -569,6 +569,35 @@ main {
   color: var(--text-muted);
 }
 
+/* Weeb Central Chapter Styling */
+.chapter-item.weebcentral {
+  border-left: 3px solid #4f46e5;
+  background-color: var(--bg-tertiary);
+}
+
+.chapter-item.weebcentral:hover {
+  background-color: #1f1f3a;
+}
+
+.chapter-item.weebcentral .chapter-title::before {
+  content: "🌐 ";
+}
+
+.chapter-item.weebcentral .chapter-meta {
+  color: #818cf8;
+}
+
+/* Hybrid Source Badge */
+.chapter-list h2 .badge {
+  margin-left: 0.5rem;
+  font-size: 0.7rem;
+  vertical-align: middle;
+}
+
+.chapter-list h2 .badge[title]:hover {
+  cursor: help;
+}
+
 .chapter-pagination {
   display: flex;
   align-items: center;

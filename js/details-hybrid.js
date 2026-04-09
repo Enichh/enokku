@@ -1,0 +1,238 @@
+import {
+  fetchMangaDetails,
+  fetchMangaFeed,
+  getCoverUrl,
+  findRelationship,
+  getEnglishTitle,
+} from "./api.js";
+import {
+  getChaptersHybrid,
+  getWeebCentralPages,
+} from "./weebcentral-api.js";
+import {
+  getUrlParam,
+  formatDate,
+  truncateText,
+  showLoading,
+  showError,
+  getPlaceholderImage,
+} from "./utils.js";
+import { debounce } from "./utils.js";
+
+const mangaDetailsContainer = document.getElementById("mangaDetails");
+const chapterListContainer = document.getElementById("chapterList");
+const searchInput = document.getElementById("searchInput");
+
+const mangaId = getUrlParam("id");
+let allChapters = [];
+let currentPage = 0;
+const chaptersPerPage = 50;
+let weebCentralUrl = null;
+
+if (!mangaId) {
+  showError("mangaDetails", "No manga ID provided");
+}
+
+async function loadMangaDetails() {
+  showLoading("mangaDetails");
+
+  try {
+    const { data: manga } = await fetchMangaDetails(mangaId);
+
+    const coverArt = findRelationship(manga, "cover_art");
+    const author = findRelationship(manga, "author");
+
+    const coverUrl = coverArt
+      ? getCoverUrl(mangaId, coverArt, "512")
+      : getPlaceholderImage(512, 768, "No Cover");
+
+    const title = getEnglishTitle(manga);
+
+    const altTitles =
+      manga.attributes.altTitles?.map((t) => Object.values(t)[0]).join(", ") ||
+      "";
+    const description =
+      manga.attributes.description?.en ||
+      Object.values(manga.attributes.description || {})[0] ||
+      "No description available";
+
+    const tags =
+      manga.attributes.tags
+        ?.map((tag) => {
+          const tagName = tag.attributes?.name?.en || "";
+          return tagName ? `<span class="status">${tagName}</span>` : "";
+        })
+        .join(" ") || "";
+
+    mangaDetailsContainer.innerHTML = `
+      <div class="manga-cover">
+        <img id="mangaCoverImg" src="${coverUrl}" alt="${title}" referrerpolicy="no-referrer">
+      </div>
+      <div class="manga-info">
+        <h1>${title}</h1>
+        ${altTitles ? `<div class="alt-titles">${truncateText(altTitles, 100)}</div>` : ""}
+        <div class="status">${manga.attributes.status || "Unknown"} · ${author?.attributes?.name || "Unknown Author"}</div>
+        <div style="margin: 0.5rem 0;">${tags}</div>
+        <div class="description">${truncateText(description, 500)}</div>
+      </div>
+    `;
+
+    const img = mangaDetailsContainer.querySelector("#mangaCoverImg");
+    img.addEventListener("error", () => {
+      img.src = getPlaceholderImage(512, 768, "No Cover");
+    });
+
+    await loadChapters(title);
+  } catch (error) {
+    showError("mangaDetails", error.message);
+  }
+}
+
+async function loadChapters(mangaTitle) {
+  console.log(`[Details] Loading chapters for manga: ${mangaId}`);
+  chapterListContainer.innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Loading chapters from MangaDex...</p>
+    </div>
+  `;
+
+  try {
+    const response = await fetchMangaFeed(mangaId);
+    const mangadexChapters = response.data || [];
+
+    console.log(`[Details] Found ${mangadexChapters.length} MangaDex chapters`);
+
+    chapterListContainer.innerHTML = `
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Checking Weeb Central for additional chapters...</p>
+      </div>
+    `;
+
+    const hybrid = await getChaptersHybrid(mangaTitle, mangadexChapters);
+    allChapters = hybrid.chapters;
+    weebCentralUrl = hybrid.weebCentralUrl;
+
+    console.log(`[Details] Hybrid result: ${hybrid.source}, ${allChapters.length} total chapters`);
+
+    if (allChapters.length === 0) {
+      chapterListContainer.innerHTML = `
+        <div class="empty">
+          <p>No chapters available</p>
+        </div>
+      `;
+      return;
+    }
+
+    renderChapterPage(0, hybrid.source, hybrid.missingCount || 0);
+  } catch (error) {
+    console.error(`[Details] Error loading chapters:`, error);
+    chapterListContainer.innerHTML = `
+      <div class="error">
+        <p>Error loading chapters: ${error.message}</p>
+      </div>
+    `;
+  }
+}
+
+function renderChapterPage(page, source = "mangadex", missingCount = 0) {
+  console.log(`[Details] Rendering chapter page ${page}`);
+  currentPage = page;
+  const totalPages = Math.ceil(allChapters.length / chaptersPerPage);
+  const startIndex = page * chaptersPerPage;
+  const endIndex = Math.min(startIndex + chaptersPerPage, allChapters.length);
+  const pageChapters = allChapters.slice(startIndex, endIndex);
+
+  let sourceBadge = "";
+  if (source === "hybrid") {
+    sourceBadge = `<span class="badge" title="${missingCount} chapters from Weeb Central">Hybrid Source</span>`;
+  } else if (weebCentralUrl) {
+    sourceBadge = `<span class="badge">MangaDex</span>`;
+  }
+
+  let html = `
+    <h2>Chapters (${allChapters.length} total) ${sourceBadge}</h2>
+    <div class="chapter-pagination">
+      <button onclick="goToChapterPage(${page - 1})" ${page === 0 ? "disabled" : ""}>Previous</button>
+      <span class="page-info">Page ${page + 1} of ${totalPages}</span>
+      <button onclick="goToChapterPage(${page + 1})" ${page >= totalPages - 1 ? "disabled" : ""}>Next</button>
+    </div>
+    <div class="chapter-items">
+  `;
+
+  pageChapters.forEach((chapter) => {
+    const isWeebCentral = chapter.source === "weebcentral";
+    const chapterNum = chapter.chapter || "?";
+    const chapterTitle = chapter.title || "";
+    const sourceIcon = isWeebCentral ? " 🌐" : "";
+
+    html += `
+      <div class="chapter-item ${isWeebCentral ? "weebcentral" : ""}" 
+           data-chapter-id="${chapter.id}" 
+           data-source="${chapter.source}"
+           ${chapter.url ? `data-url="${chapter.url}"` : ""}>
+        <div>
+          <div class="chapter-title">
+            Chapter ${chapterNum}${chapterTitle ? ` - ${chapterTitle}` : ""}${sourceIcon}
+          </div>
+          <div class="chapter-meta">${isWeebCentral ? "Source: Weeb Central" : "Source: MangaDex"}</div>
+        </div>
+      </div>
+    `;
+  });
+
+  html += "</div>";
+
+  if (totalPages > 1) {
+    html += `
+      <div class="chapter-pagination bottom">
+        <button onclick="goToChapterPage(${page - 1})" ${page === 0 ? "disabled" : ""}>Previous</button>
+        <span class="page-info">Page ${page + 1} of ${totalPages}</span>
+        <button onclick="goToChapterPage(${page + 1})" ${page >= totalPages - 1 ? "disabled" : ""}>Next</button>
+      </div>
+    `;
+  }
+
+  chapterListContainer.innerHTML = html;
+
+  pageChapters.forEach((chapter) => {
+    const el = chapterListContainer.querySelector(`[data-chapter-id="${chapter.id}"]`);
+    el.addEventListener("click", () => {
+      const params = new URLSearchParams({
+        id: chapter.id,
+        manga: mangaId,
+        source: chapter.source,
+      });
+
+      if (chapter.url) {
+        params.set("chapterUrl", chapter.url);
+      }
+
+      if (chapter.mangadexId) {
+        params.set("mangadexId", chapter.mangadexId);
+      }
+
+      window.location.href = `reader.html?${params.toString()}`;
+    });
+  });
+}
+
+window.goToChapterPage = function (page) {
+  const totalPages = Math.ceil(allChapters.length / chaptersPerPage);
+  if (page < 0 || page >= totalPages) return;
+  renderChapterPage(page);
+  chapterListContainer.scrollIntoView({ behavior: "smooth" });
+};
+
+const debouncedSearch = debounce((query) => {
+  if (query) {
+    window.location.href = `index.html?search=${encodeURIComponent(query)}`;
+  }
+}, 500);
+
+searchInput?.addEventListener("input", (e) => {
+  debouncedSearch(e.target.value.trim());
+});
+
+loadMangaDetails();

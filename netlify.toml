@@ -11,6 +11,12 @@
   status = 200
   force = true
 
+[[redirects]]
+  from = "/weebcentral/*"
+  to = "/.netlify/functions/weebcentral-handler/:splat"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]
