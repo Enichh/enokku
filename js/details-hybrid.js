@@ -25,6 +25,7 @@ let allChapters = [];
 let currentPage = 0;
 const chaptersPerPage = 50;
 let hybridInfo = null;
+let currentSortOrder = 'asc'; // 'asc' or 'desc'
 
 if (!mangaId) {
   showError("mangaDetails", "No manga ID provided");
@@ -71,6 +72,10 @@ async function loadMangaDetails() {
     mangaDetailsContainer.innerHTML = `
       <div class="manga-cover">
         <img id="mangaCoverImg" src="${coverUrl}" alt="${title}" referrerpolicy="no-referrer">
+        <button id="startReadingBtn" class="start-reading-btn">
+          <span class="btn-text">▶ Start Reading</span>
+          <span class="btn-text-mobile">▶ Read</span>
+        </button>
       </div>
       <div class="manga-info">
         <h1>${title}</h1>
@@ -152,7 +157,24 @@ function renderChapterPage(page, source = "mangadex", missingCount = 0) {
   const pageChapters = allChapters.slice(startIndex, endIndex);
 
   let html = `
-    <h2>Chapters (${allChapters.length} total)</h2>
+    <div class="chapter-header">
+      <div class="sort-controls">
+        <button id="sortAscBtn" class="sort-btn ${currentSortOrder === 'asc' ? 'active' : ''}" title="Sort ascending (oldest first)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/>
+          </svg>
+          Ascending
+        </button>
+        <button id="sortDescBtn" class="sort-btn ${currentSortOrder === 'desc' ? 'active' : ''}" title="Sort descending (newest first)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/>
+          </svg>
+          Descending
+        </button>
+      </div>
+      <span id="chapterCount" class="chapter-count">${allChapters.length} chapters</span>
+    </div>
+    <h2>Chapters</h2>
     <div class="chapter-pagination">
       <button onclick="goToChapterPage(${page - 1})" ${page === 0 ? "disabled" : ""}>Previous</button>
       <span class="page-info">Page ${page + 1} of ${totalPages}</span>
@@ -192,6 +214,34 @@ function renderChapterPage(page, source = "mangadex", missingCount = 0) {
 
   chapterListContainer.innerHTML = html;
 
+  // Add event listeners for sort buttons
+  const sortAscBtn = document.getElementById('sortAscBtn');
+  const sortDescBtn = document.getElementById('sortDescBtn');
+  
+  if (sortAscBtn) {
+    sortAscBtn.addEventListener('click', () => {
+      if (currentSortOrder !== 'asc') {
+        currentSortOrder = 'asc';
+        sortChapters();
+      }
+    });
+  }
+  
+  if (sortDescBtn) {
+    sortDescBtn.addEventListener('click', () => {
+      if (currentSortOrder !== 'desc') {
+        currentSortOrder = 'desc';
+        sortChapters();
+      }
+    });
+  }
+
+  // Add event listener for Start Reading button
+  const startReadingBtn = document.getElementById('startReadingBtn');
+  if (startReadingBtn) {
+    startReadingBtn.addEventListener('click', startReading);
+  }
+
   pageChapters.forEach((chapter) => {
     const el = chapterListContainer.querySelector(
       `[data-chapter-id="${chapter.id}"]`,
@@ -222,6 +272,81 @@ window.goToChapterPage = function (page) {
   renderChapterPage(page);
   chapterListContainer.scrollIntoView({ behavior: "smooth" });
 };
+
+function sortChapters() {
+  console.log(`[Details] Sorting chapters: ${currentSortOrder}`);
+  
+  // Sort chapters based on current sort order
+  allChapters.sort((a, b) => {
+    const aChapter = parseFloat(a.chapter) || 0;
+    const bChapter = parseFloat(b.chapter) || 0;
+    
+    if (currentSortOrder === 'asc') {
+      return aChapter - bChapter;
+    } else {
+      return bChapter - aChapter;
+    }
+  });
+  
+  // Re-render from first page
+  renderChapterPage(0, hybridInfo?.source, hybridInfo?.missingCount || 0);
+}
+
+function startReading() {
+  console.log(`[Details] Start Reading clicked`);
+  
+  // Check for reading progress in localStorage
+  const progressKey = `reading_progress_${mangaId}`;
+  const savedProgress = localStorage.getItem(progressKey);
+  
+  let targetChapter = null;
+  
+  if (savedProgress) {
+    try {
+      const progress = JSON.parse(savedProgress);
+      // Find the saved chapter in the current list
+      targetChapter = allChapters.find(ch => 
+        ch.id === progress.chapterId || 
+        (ch.source === 'atsumaru' && ch.chapterId === progress.chapterId) ||
+        (ch.source === 'mangadex' && ch.mangadexId === progress.mangadexId)
+      );
+      
+      if (targetChapter) {
+        console.log(`[Details] Found saved progress: Chapter ${targetChapter.chapter}`);
+      }
+    } catch (error) {
+      console.error('[Details] Error parsing saved progress:', error);
+    }
+  }
+  
+  // If no saved progress, use the first chapter from the sorted list
+  if (!targetChapter && allChapters.length > 0) {
+    targetChapter = allChapters[0];
+    console.log(`[Details] No saved progress, using first chapter: Chapter ${targetChapter.chapter}`);
+  }
+  
+  if (!targetChapter) {
+    console.error('[Details] No chapters available for reading');
+    return;
+  }
+  
+  // Navigate to the reader
+  const params = new URLSearchParams({
+    id: targetChapter.id,
+    manga: mangaId,
+    source: targetChapter.source,
+  });
+
+  // Add source-specific parameters
+  if (targetChapter.source === "atsumaru") {
+    if (targetChapter.mangaId) params.set("mangaId", targetChapter.mangaId);
+    if (targetChapter.chapterId) params.set("chapterId", targetChapter.chapterId);
+  } else if (targetChapter.source === "mangadex") {
+    if (targetChapter.mangadexId) params.set("mangadexId", targetChapter.mangadexId);
+  }
+
+  window.location.href = `reader.html?${params.toString()}`;
+}
 
 const debouncedSearch = debounce((query) => {
   if (query) {

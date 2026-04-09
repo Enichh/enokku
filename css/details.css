@@ -137,3 +137,117 @@
   flex-direction: column;
   gap: 0.5rem;
 }
+
+/* Chapter Header with Sort Controls */
+.chapter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.sort-controls {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--bg-tertiary);
+  padding: 0.25rem;
+  border-radius: 30px;
+}
+
+.sort-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.2rem;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.sort-btn svg {
+  transition: transform 0.2s;
+}
+
+.sort-btn.active {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.sort-btn:hover:not(.active) {
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+.chapter-count {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* Start Reading Button - Desktop: below cover */
+.start-reading-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+.start-reading-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px var(--accent-glow);
+}
+
+.btn-text-mobile {
+  display: none;
+}
+
+/* Mobile: fixed FAB */
+@media (max-width: 768px) {
+  .start-reading-btn {
+    position: fixed;
+    bottom: 80px;  /* Above floating reader bar if present */
+    right: 20px;
+    width: auto;
+    min-width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    padding: 0;
+    margin-top: 0;
+    z-index: 150;
+    box-shadow: 0 4px 16px rgba(255,0,0,0.4);
+  }
+
+  .btn-text {
+    display: none;
+  }
+
+  .btn-text-mobile {
+    display: inline;
+  }
+
+  /* If you want the button to be a floating circle with just "Read" */
+  .start-reading-btn {
+    border-radius: 30px;  /* Pill shape on mobile, but can be circular */
+    padding: 0 1.2rem;
+    height: 48px;
+  }
+}
