@@ -98,8 +98,6 @@ async function loadMangaDetails() {
 }
 
 async function loadChapters(allTitles) {
-  console.log(`[Details] Loading chapters from Atsumaru for manga: ${mangaId}`);
-  console.log(`[Details] Trying titles:`, allTitles);
   chapterListContainer.innerHTML = `
     <div class="loading">
       <div class="spinner"></div>
@@ -114,13 +112,11 @@ async function loadChapters(allTitles) {
       if (!title) continue;
       atsumaruManga = await findAtsumaruManga(title);
       if (atsumaruManga) {
-        console.log(`[Details] Atsumaru match: "${atsumaruManga.title}"`);
         break;
       }
     }
 
     if (!atsumaruManga) {
-      console.log(`[Details] No Atsumaru match found for any title`);
       chapterListContainer.innerHTML = `
         <div class="empty">
           <p>No chapters available on Atsumaru</p>
@@ -133,10 +129,6 @@ async function loadChapters(allTitles) {
     const chapters = await getAtsumaruChapters(atsumaruManga.id);
     allChapters = chapters;
     hybridInfo = { source: 'atsumaru', atsumaruId: atsumaruManga.id };
-
-    console.log(
-      `[Details] Atsumaru result: ${allChapters.length} chapters found`,
-    );
 
     if (allChapters.length === 0) {
       chapterListContainer.innerHTML = `
@@ -159,7 +151,6 @@ async function loadChapters(allTitles) {
 }
 
 function renderChapterPage(page) {
-  console.log(`[Details] Rendering chapter page ${page}`);
   currentPage = page;
   const totalPages = Math.ceil(allChapters.length / chaptersPerPage);
   const startIndex = page * chaptersPerPage;
@@ -228,11 +219,8 @@ function renderChapterPage(page) {
   const sortAscBtn = document.getElementById('sortAscBtn');
   const sortDescBtn = document.getElementById('sortDescBtn');
   
-  console.log(`[Details] Sort buttons found:`, { sortAscBtn: !!sortAscBtn, sortDescBtn: !!sortDescBtn });
-  
   if (sortAscBtn) {
     sortAscBtn.addEventListener('click', () => {
-      console.log(`[Details] Asc button clicked, current order: ${currentSortOrder}`);
       if (currentSortOrder !== 'asc') {
         currentSortOrder = 'asc';
         sortChapters();
@@ -242,7 +230,6 @@ function renderChapterPage(page) {
   
   if (sortDescBtn) {
     sortDescBtn.addEventListener('click', () => {
-      console.log(`[Details] Desc button clicked, current order: ${currentSortOrder}`);
       if (currentSortOrder !== 'desc') {
         currentSortOrder = 'desc';
         sortChapters();
@@ -288,9 +275,6 @@ window.goToChapterPage = function (page) {
 };
 
 function sortChapters() {
-  console.log(`[Details] Sorting chapters: ${currentSortOrder}`);
-  console.log(`[Details] Chapters before sort:`, allChapters.map(c => ({ id: c.id, chapter: c.chapter })));
-  
   // Sort chapters based on current sort order
   allChapters.sort((a, b) => {
     const aChapter = parseFloat(a.chapter) || 0;
@@ -302,8 +286,6 @@ function sortChapters() {
       return bChapter - aChapter;
     }
   });
-  
-  console.log(`[Details] Chapters after sort:`, allChapters.map(c => ({ id: c.id, chapter: c.chapter })));
   
   // Update button active states before re-rendering
   const sortAscBtn = document.getElementById('sortAscBtn');
@@ -317,10 +299,6 @@ function sortChapters() {
       sortAscBtn.classList.remove('active');
       sortDescBtn.classList.add('active');
     }
-    console.log(`[Details] Button states updated:`, { 
-      ascActive: sortAscBtn.classList.contains('active'),
-      descActive: sortDescBtn.classList.contains('active')
-    });
   }
   
   // Re-render from first page
@@ -328,8 +306,6 @@ function sortChapters() {
 }
 
 function startReading() {
-  console.log(`[Details] Start Reading clicked`);
-  
   // Check for reading progress in localStorage
   const progressKey = `reading_progress_${mangaId}`;
   const savedProgress = localStorage.getItem(progressKey);
@@ -345,10 +321,6 @@ function startReading() {
         (ch.source === 'atsumaru' && ch.chapterId === progress.chapterId) ||
         (ch.source === 'mangadex' && ch.mangadexId === progress.mangadexId)
       );
-      
-      if (targetChapter) {
-        console.log(`[Details] Found saved progress: Chapter ${targetChapter.chapter}`);
-      }
     } catch (error) {
       console.error('[Details] Error parsing saved progress:', error);
     }
@@ -357,11 +329,9 @@ function startReading() {
   // If no saved progress, use the first chapter from the sorted list
   if (!targetChapter && allChapters.length > 0) {
     targetChapter = allChapters[0];
-    console.log(`[Details] No saved progress, using first chapter: Chapter ${targetChapter.chapter}`);
   }
   
   if (!targetChapter) {
-    console.error('[Details] No chapters available for reading');
     return;
   }
   

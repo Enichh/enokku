@@ -43,16 +43,6 @@ if (!chapterId) {
 }
 
 async function loadChapter() {
-  console.log("[Reader] === loadChapter START ===");
-  console.log(
-    "[Reader] chapterId:",
-    chapterId,
-    "mangaId:",
-    mangaId,
-    "source:",
-    source,
-  );
-
   readerImages.innerHTML = `
     <div class="loading">
       <div class="spinner"></div>
@@ -69,8 +59,6 @@ async function loadChapter() {
     updateChapterButtons();
     initPageObserver();
     updateFloatingProgress(0, 1, pages.length);
-
-    console.log("[Reader] === loadChapter SUCCESS ===");
   } catch (error) {
     console.error("[Reader] === loadChapter FAILED ===", error);
     readerImages.innerHTML = `<div class="error"><p>Error loading chapter: ${error.message}</p></div>`;
@@ -78,8 +66,6 @@ async function loadChapter() {
 }
 
 async function loadChapterBySource() {
-  console.log(`[Reader] Loading chapter from source: ${source}`);
-
   const style = getSourceStyle(source);
   chapterTitle.textContent = `Chapter (${style.name})`;
 
@@ -111,30 +97,20 @@ async function loadChapterBySource() {
 }
 
 async function loadChapterNavigation() {
-  console.log("[Reader] === loadChapterNavigation START ===");
-  console.log("[Reader] mangaId:", mangaId);
-  console.log("[Reader] chapterId:", chapterId);
-  console.log("[Reader] source:", source);
-  console.log("[Reader] atsumaruMangaId:", atsumaruMangaId);
-  
   // Use correct manga ID based on source
   const navigationMangaId = source === "atsumaru" ? atsumaruMangaId : mangaId;
-  console.log("[Reader] navigationMangaId:", navigationMangaId);
   
   if (!navigationMangaId) {
-    console.log("[Reader] No navigationMangaId, skipping navigation");
     return;
   }
 
   try {
     if (source === "atsumaru") {
       // For Atsumaru, we need to fetch chapters differently
-      console.log("[Reader] Fetching Atsumaru chapters for navigation");
       // Use the Atsumaru API to get chapters
       const response = await fetch(`/atsumaru/manga?id=${navigationMangaId}`);
       const data = await response.json();
       const chapters = data?.chapters || [];
-      console.log("[Reader] Fetched Atsumaru chapters count:", chapters.length);
       
       allChapters = chapters.map((ch) => ({
         id: `atsu-${ch.id}`,
@@ -150,9 +126,7 @@ async function loadChapterNavigation() {
       });
     } else {
       // For MangaDex, use existing logic
-      console.log("[Reader] Fetching MangaDex feed for navigation");
       const { data: chapters } = await fetchMangaFeed(navigationMangaId);
-      console.log("[Reader] Fetched MangaDex chapters count:", chapters?.length || 0);
 
       allChapters = chapters.sort((a, b) => {
         const aNum = parseFloat(a.attributes?.chapter) || 0;
@@ -164,14 +138,10 @@ async function loadChapterNavigation() {
         );
       });
     }
-
-    console.log("[Reader] Sample chapter IDs:", allChapters.slice(0, 3).map(c => c.id));
     
     currentChapterIndex = allChapters.findIndex(
       (c) => c.id === chapterId,
     );
-    console.log("[Reader] Current chapter index:", currentChapterIndex);
-    console.log("[Reader] Total chapters:", allChapters.length);
 
     // Update floating bar chapter info
     if (currentChapterIndex >= 0) {
@@ -180,13 +150,8 @@ async function loadChapterNavigation() {
       const chapterTitle = chapter.attributes?.title || "";
       const hasPrev = currentChapterIndex > 0;
       const hasNext = currentChapterIndex < allChapters.length - 1;
-      console.log("[Reader] Navigation state - hasPrev:", hasPrev, "hasNext:", hasNext);
       updateFloatingChapterInfo(chapterNum, chapterTitle, hasPrev, hasNext);
-    } else {
-      console.log("[Reader] Chapter not found in chapters array!");
     }
-
-    console.log("[Reader] === loadChapterNavigation SUCCESS ===");
   } catch (error) {
     console.error("[Reader] === loadChapterNavigation FAILED ===", error);
   }
@@ -196,11 +161,6 @@ function updateChapterButtons() {
   const hasPrev = currentChapterIndex > 0;
   const hasNext =
     currentChapterIndex >= 0 && currentChapterIndex < allChapters.length - 1;
-
-  console.log("[Reader] updateChapterButtons:");
-  console.log("  currentChapterIndex:", currentChapterIndex);
-  console.log("  allChapters.length:", allChapters.length);
-  console.log("  hasPrev:", hasPrev, "hasNext:", hasNext);
 
   prevChapterBtn.disabled = !hasPrev;
   nextChapterBtn.disabled = !hasNext;
@@ -232,7 +192,6 @@ prevChapterBottomBtn.onclick = goToPrev;
 nextChapterBottomBtn.onclick = goToNext;
 
 function renderPages() {
-  console.log("[Reader] === renderPages START, count:", pages.length);
   readerImages.innerHTML = "";
 
   pages.forEach((page, index) => {
@@ -244,7 +203,7 @@ function renderPages() {
     img.referrerPolicy = "no-referrer";
 
     img.onload = () => {
-      console.log(`[Reader] Page ${index + 1} loaded`);
+      // Page loaded successfully
     };
 
     img.onerror = () => {
@@ -254,8 +213,6 @@ function renderPages() {
 
     readerImages.appendChild(img);
   });
-
-  console.log("[Reader] === renderPages COMPLETE ===");
 }
 
 function updatePageIndicator() {
