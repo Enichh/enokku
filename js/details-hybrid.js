@@ -228,8 +228,11 @@ function renderChapterPage(page) {
   const sortAscBtn = document.getElementById('sortAscBtn');
   const sortDescBtn = document.getElementById('sortDescBtn');
   
+  console.log(`[Details] Sort buttons found:`, { sortAscBtn: !!sortAscBtn, sortDescBtn: !!sortDescBtn });
+  
   if (sortAscBtn) {
     sortAscBtn.addEventListener('click', () => {
+      console.log(`[Details] Asc button clicked, current order: ${currentSortOrder}`);
       if (currentSortOrder !== 'asc') {
         currentSortOrder = 'asc';
         sortChapters();
@@ -239,6 +242,7 @@ function renderChapterPage(page) {
   
   if (sortDescBtn) {
     sortDescBtn.addEventListener('click', () => {
+      console.log(`[Details] Desc button clicked, current order: ${currentSortOrder}`);
       if (currentSortOrder !== 'desc') {
         currentSortOrder = 'desc';
         sortChapters();
@@ -285,6 +289,7 @@ window.goToChapterPage = function (page) {
 
 function sortChapters() {
   console.log(`[Details] Sorting chapters: ${currentSortOrder}`);
+  console.log(`[Details] Chapters before sort:`, allChapters.map(c => ({ id: c.id, chapter: c.chapter })));
   
   // Sort chapters based on current sort order
   allChapters.sort((a, b) => {
@@ -297,6 +302,8 @@ function sortChapters() {
       return bChapter - aChapter;
     }
   });
+  
+  console.log(`[Details] Chapters after sort:`, allChapters.map(c => ({ id: c.id, chapter: c.chapter })));
   
   // Re-render from first page
   renderChapterPage(0);
