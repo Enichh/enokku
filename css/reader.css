@@ -1,79 +1,217 @@
+/* Reader Container */
 .reader {
   max-width: 900px;
   margin: 0 auto;
 }
 
+/* Reader Header – now with gradient and better spacing */
 .reader-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding: 1rem;
-  background-color: var(--bg-secondary);
-  border-radius: 8px;
+  background: linear-gradient(145deg, var(--bg-secondary) 0%, #1a1a1a 100%);
+  border-bottom: 2px solid var(--accent);
+  border-radius: 12px 12px 0 0;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.reader-header h1 {
-  font-size: 1.1rem;
-}
-
-.reader-controls {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.reader-controls button {
-  padding: 0.5rem 1rem;
-  background-color: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.reader-controls button:hover {
-  background-color: var(--accent);
-}
-
-.reader-controls button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.reader-images {
+.reader-header .container {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
+}
+
+.reader-header nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.reader-header .chapter-title-header {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-shadow: 0 0 8px var(--accent-glow);
+  margin: 0;
+  text-align: center;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reader-header .page-indicator {
+  font-size: 0.9rem;
+  background: var(--bg-tertiary);
+  padding: 0.3rem 1rem;
+  border-radius: 20px;
+  color: var(--accent);
+  border: 1px solid var(--border);
+  font-weight: 500;
+}
+
+.chapter-nav-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.25rem;
+}
+
+/* Button Styles – unified look */
+.btn-secondary {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  padding: 0.6rem 1.5rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+}
+
+.btn-secondary:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  box-shadow: 0 0 12px var(--accent-glow);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  background: var(--bg-tertiary);
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+/* Reader Images Area – card-like container */
+.reader-images {
+  background: var(--bg-primary);
+  padding: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
 }
 
 .reader-images img {
   width: 100%;
   display: block;
   background-color: var(--bg-secondary);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: box-shadow 0.2s;
 }
 
-.page-indicator {
-  text-align: center;
-  padding: 1rem;
-  color: var(--text-muted);
+.reader-images img:hover {
+  box-shadow: 0 8px 20px rgba(255,0,0,0.15);
 }
 
+/* Reader Footer – matches header gradient */
 .reader-footer {
+  background: linear-gradient(145deg, #1a1a1a 0%, var(--bg-secondary) 100%);
+  border-top: 2px solid var(--accent);
+  border-radius: 0 0 12px 12px;
+  padding: 1.5rem;
+  margin-top: 0;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.reader-footer .container {
   display: flex;
   justify-content: center;
-  padding: 1rem;
-  margin-top: 1rem;
-  background-color: var(--bg-secondary);
-  border-radius: 8px;
 }
 
-.reader-footer .reader-controls {
+.chapter-nav-bottom {
   display: flex;
-  gap: 1rem;
+  gap: 2rem;
+  align-items: center;
 }
 
-.reader-footer .reader-controls button {
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
+.chapter-nav-bottom .btn-secondary {
+  min-width: 160px;
+}
+
+/* Loading/Error States – enhanced */
+.reader .loading,
+.reader .error,
+.reader .empty {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 4rem 2rem;
+  margin: 2rem 0;
+  border: 1px solid var(--border);
+}
+
+.reader .spinner {
+  width: 56px;
+  height: 56px;
+  border-width: 5px;
+}
+
+/* Page indicator in header now handled separately */
+.page-indicator {
+  text-align: center;
+  padding: 0.5rem 1rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .reader-header {
+    padding: 1rem;
+  }
+
+  .reader-header nav {
+    flex-wrap: wrap;
+  }
+
+  .reader-header .chapter-title-header {
+    font-size: 1rem;
+    order: 2;
+    width: 100%;
+    margin-top: 0.5rem;
+    text-align: left;
+  }
+
+  .chapter-nav-top {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .btn-secondary {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .chapter-nav-bottom {
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .chapter-nav-bottom .btn-secondary {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .reader-images {
+    padding: 0.5rem 0;
+  }
+
+  .reader-footer {
+    padding: 1rem;
+  }
 }
