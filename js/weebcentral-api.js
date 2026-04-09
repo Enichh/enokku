@@ -17,8 +17,15 @@ export async function searchWeebCentral(query, limit = 10) {
 }
 
 export async function findWeebCentralManga(title) {
-  const data = await fetchWeebCentral("/find", { title });
-  return data.result;
+  console.log(`[findWeebCentralManga] Searching for title: "${title}"`);
+  try {
+    const data = await fetchWeebCentral("/find", { title });
+    console.log(`[findWeebCentralManga] API response:`, data);
+    return data.result;
+  } catch (error) {
+    console.error(`[findWeebCentralManga] Error:`, error);
+    return null;
+  }
 }
 
 export async function getWeebCentralManga(url) {
@@ -41,33 +48,61 @@ export async function getWeebCentralLatest(limit = 20) {
 }
 
 export async function getChaptersHybrid(mangaTitle, mangaDexChapters = []) {
+  console.log(`[Hybrid] Starting hybrid search for: "${mangaTitle}"`);
+
   try {
+    console.log(`[Hybrid] Searching Weeb Central for manga...`);
     const weebCentralManga = await findWeebCentralManga(mangaTitle);
+    console.log(`[Hybrid] Weeb Central search result:`, weebCentralManga);
 
     if (!weebCentralManga) {
+      console.log(`[Hybrid] No Weeb Central manga found for: "${mangaTitle}"`);
       return { source: "mangadex", chapters: mangaDexChapters };
     }
 
-    const weebCentralChapters = await getWeebCentralChapters(weebCentralManga.url);
+    console.log(
+      `[Hybrid] Found Weeb Central manga: ${weebCentralManga.title} at ${weebCentralManga.url}`,
+    );
+    console.log(`[Hybrid] Fetching chapters from Weeb Central...`);
+
+    const weebCentralChapters = await getWeebCentralChapters(
+      weebCentralManga.url,
+    );
+    console.log(
+      `[Hybrid] Weeb Central returned ${weebCentralChapters.length} chapters`,
+    );
 
     if (weebCentralChapters.length === 0) {
+      console.log(`[Hybrid] No chapters found on Weeb Central`);
       return { source: "mangadex", chapters: mangaDexChapters };
     }
 
-    const mangadexChapterNums = new Set(mangaDexChapters.map(c => parseFloat(c.attributes?.chapter)));
+    const mangadexChapterNums = new Set(
+      mangaDexChapters.map((c) => parseFloat(c.attributes?.chapter)),
+    );
+    console.log(`[Hybrid] MangaDex chapter numbers:`, [...mangadexChapterNums]);
+    console.log(
+      `[Hybrid] Weeb Central chapter numbers:`,
+      weebCentralChapters.map((c) => c.chapter),
+    );
+
     const missingChapters = weebCentralChapters.filter(
-      wc => !mangadexChapterNums.has(wc.chapter)
+      (wc) => !mangadexChapterNums.has(wc.chapter),
+    );
+
+    console.log(
+      `[Hybrid] Missing chapters from Weeb Central: ${missingChapters.length}`,
     );
 
     const combinedChapters = [
-      ...mangaDexChapters.map(c => ({
+      ...mangaDexChapters.map((c) => ({
         id: c.id,
         chapter: c.attributes?.chapter,
         title: c.attributes?.title || `Chapter ${c.attributes?.chapter}`,
         source: "mangadex",
         mangadexId: c.id,
       })),
-      ...missingChapters.map(c => ({
+      ...missingChapters.map((c) => ({
         id: `wc-${c.chapter}`,
         chapter: c.chapter.toString(),
         title: c.title,
@@ -75,6 +110,10 @@ export async function getChaptersHybrid(mangaTitle, mangaDexChapters = []) {
         url: c.url,
       })),
     ].sort((a, b) => parseFloat(b.chapter) - parseFloat(a.chapter));
+
+    console.log(
+      `[Hybrid] Final result: ${combinedChapters.length} total chapters (${mangaDexChapters.length} MD + ${missingChapters.length} WC)`,
+    );
 
     return {
       source: "hybrid",
@@ -84,7 +123,12 @@ export async function getChaptersHybrid(mangaTitle, mangaDexChapters = []) {
     };
   } catch (error) {
     console.error("[Hybrid] Error fetching WeebCentral chapters:", error);
-    return { source: "mangadex", chapters: mangaDexChapters };
+    console.error("[Hybrid] Stack trace:", error.stack);
+    return {
+      source: "mangadex",
+      chapters: mangaDexChapters,
+      error: error.message,
+    };
   }
 }
 
@@ -100,7 +144,7 @@ export async function getChapterPagesHybrid(chapter) {
     if (data.baseUrl && data.chapter) {
       const { baseUrl, chapter: chapterData } = data;
       return chapterData.data.map(
-        page => `${baseUrl}/data/${chapterData.hash}/${page}`
+        (page) => `${baseUrl}/data/${chapterData.hash}/${page}`,
       );
     }
   }
