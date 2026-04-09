@@ -72,5 +72,38 @@
     </noscript>
 
     <script type="module" src="js/reader-hybrid.js"></script>
+    <!-- Floating Reader Bar (Collapsible) -->
+    <div id="floatingReaderBar" class="floating-reader-bar collapsed">
+      <!-- Collapsed State Content -->
+      <div class="float-progress-only" id="floatProgressOnly">
+        <span id="floatProgressText">0% 0/0</span>
+      </div>
+
+      <!-- Expanded State Content -->
+      <div class="float-expanded-controls">
+        <button id="floatPrevChapter" class="float-nav-btn" aria-label="Previous Chapter" disabled>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+          </svg>
+        </button>
+        
+        <div class="float-expanded-center">
+          <span id="floatChapterDisplay">Chapter 0</span>
+          <span class="float-progress-separator">•</span>
+          <span id="floatProgressExpanded">0% 0/0</span>
+          <button id="floatBackToTop" class="float-back-to-top-btn" aria-label="Back to top">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/>
+            </svg>
+          </button>
+        </div>
+        
+        <button id="floatNextChapter" class="float-nav-btn" aria-label="Next Chapter" disabled>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
   </body>
 </html>

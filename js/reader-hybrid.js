@@ -19,10 +19,22 @@ const chapterId = getUrlParam("id");
 const mangaId = getUrlParam("manga");
 const source = getUrlParam("source") || "mangadex";
 
+// Floating reader bar elements
+const floatingBar = document.getElementById("floatingReaderBar");
+const floatProgressOnly = document.getElementById("floatProgressText");
+const floatProgressExpanded = document.getElementById("floatProgressExpanded");
+const floatChapterDisplay = document.getElementById("floatChapterDisplay");
+const floatPrevBtn = document.getElementById("floatPrevChapter");
+const floatNextBtn = document.getElementById("floatNextChapter");
+const floatBackToTopBtn = document.getElementById("floatBackToTop");
+
 let pages = [];
 let currentPage = 0;
 let allChapters = [];
 let currentChapterIndex = -1;
+let collapseTimer = null;
+let currentProgress = { percent: 0, current: 0, total: 0 };
+let currentChapterInfo = { number: "?", title: "" };
 
 if (!chapterId) {
   readerImages.innerHTML =
@@ -54,6 +66,8 @@ async function loadChapter() {
     renderPages();
     updatePageIndicator();
     updateChapterButtons();
+    initPageObserver();
+    updateFloatingProgress(0, 1, pages.length);
 
     console.log("[Reader] === loadChapter SUCCESS ===");
   } catch (error) {
@@ -67,6 +81,9 @@ async function loadChapterBySource() {
 
   const style = getSourceStyle(source);
   chapterTitle.textContent = `Chapter (${style.name})`;
+
+  // Set fallback floating bar chapter info
+  updateFloatingChapterInfo("?", "", false, false);
 
   // Get chapter data from URL params based on source
   const chapterData = {
@@ -114,9 +131,20 @@ async function loadChapterNavigation() {
     });
 
     currentChapterIndex = allChapters.findIndex(
-      (c) => c.id === (mangadexId || chapterId),
+      (c) => c.id === chapterId,
     );
     console.log("[Reader] Current chapter index:", currentChapterIndex);
+
+    // Update floating bar chapter info
+    if (currentChapterIndex >= 0) {
+      const chapter = allChapters[currentChapterIndex];
+      const chapterNum = chapter.attributes?.chapter || "?";
+      const chapterTitle = chapter.attributes?.title || "";
+      const hasPrev = currentChapterIndex > 0;
+      const hasNext = currentChapterIndex < allChapters.length - 1;
+      updateFloatingChapterInfo(chapterNum, chapterTitle, hasPrev, hasNext);
+    }
+
     console.log("[Reader] === loadChapterNavigation SUCCESS ===");
   } catch (error) {
     console.error("[Reader] === loadChapterNavigation FAILED ===", error);
@@ -132,26 +160,28 @@ function updateChapterButtons() {
   nextChapterBtn.disabled = !hasNext;
   prevChapterBottomBtn.disabled = !hasPrev;
   nextChapterBottomBtn.disabled = !hasNext;
-
-  const goToPrev = () => {
-    if (hasPrev) {
-      const prevChapter = allChapters[currentChapterIndex - 1];
-      window.location.href = `reader.html?id=${prevChapter.id}&manga=${mangaId}`;
-    }
-  };
-
-  const goToNext = () => {
-    if (hasNext) {
-      const nextChapter = allChapters[currentChapterIndex + 1];
-      window.location.href = `reader.html?id=${nextChapter.id}&manga=${mangaId}`;
-    }
-  };
-
-  prevChapterBtn.onclick = goToPrev;
-  nextChapterBtn.onclick = goToNext;
-  prevChapterBottomBtn.onclick = goToPrev;
-  nextChapterBottomBtn.onclick = goToNext;
+  if (floatPrevBtn) floatPrevBtn.disabled = !hasPrev;
+  if (floatNextBtn) floatNextBtn.disabled = !hasNext;
 }
+
+function goToPrev() {
+  if (currentChapterIndex > 0) {
+    const prevChapter = allChapters[currentChapterIndex - 1];
+    window.location.href = `reader.html?id=${prevChapter.id}&manga=${mangaId}`;
+  }
+}
+
+function goToNext() {
+  if (currentChapterIndex >= 0 && currentChapterIndex < allChapters.length - 1) {
+    const nextChapter = allChapters[currentChapterIndex + 1];
+    window.location.href = `reader.html?id=${nextChapter.id}&manga=${mangaId}`;
+  }
+}
+
+prevChapterBtn.onclick = goToPrev;
+nextChapterBtn.onclick = goToNext;
+prevChapterBottomBtn.onclick = goToPrev;
+nextChapterBottomBtn.onclick = goToNext;
 
 function renderPages() {
   console.log("[Reader] === renderPages START, count:", pages.length);
@@ -200,6 +230,153 @@ window.addEventListener("keydown", (e) => {
     nextChapterBtn.click();
   }
 });
+
+// ===== Floating Reader Bar Functions =====
+
+function updateFloatingProgress(percent, currentPageNum, totalPages) {
+  const percentText = `${Math.round(percent)}%`;
+  const pageText = `${currentPageNum}/${totalPages}`;
+  const fullText = `${percentText} ${pageText}`;
+
+  if (floatProgressOnly) floatProgressOnly.textContent = fullText;
+  if (floatProgressExpanded) floatProgressExpanded.textContent = fullText;
+
+  currentProgress = { percent, current: currentPageNum, total: totalPages };
+}
+
+function updateFloatingChapterInfo(chapterNumber, chapterTitle, hasPrev, hasNext) {
+  const displayTitle = chapterTitle && chapterTitle.trim() && chapterTitle !== `Chapter ${chapterNumber}`
+    ? `Chapter ${chapterNumber} - ${chapterTitle}`
+    : `Chapter ${chapterNumber}`;
+
+  if (floatChapterDisplay) floatChapterDisplay.textContent = displayTitle;
+  if (floatPrevBtn) floatPrevBtn.disabled = !hasPrev;
+  if (floatNextBtn) floatNextBtn.disabled = !hasNext;
+
+  currentChapterInfo = { number: chapterNumber, title: chapterTitle };
+}
+
+function expandFloatingBar() {
+  if (!floatingBar) return;
+  floatingBar.classList.remove("collapsed");
+  resetCollapseTimer();
+}
+
+function collapseFloatingBar() {
+  if (!floatingBar) return;
+  floatingBar.classList.add("collapsed");
+  if (collapseTimer) {
+    clearTimeout(collapseTimer);
+    collapseTimer = null;
+  }
+}
+
+function resetCollapseTimer() {
+  if (collapseTimer) clearTimeout(collapseTimer);
+  collapseTimer = setTimeout(() => {
+    collapseFloatingBar();
+  }, 3000);
+}
+
+function handleFloatingBarTap(e) {
+  if (e.target.closest("button")) return;
+
+  if (floatingBar.classList.contains("collapsed")) {
+    expandFloatingBar();
+  } else {
+    collapseFloatingBar();
+  }
+}
+
+// ===== Floating Bar Event Listeners =====
+
+if (floatingBar) {
+  floatingBar.addEventListener("click", handleFloatingBarTap);
+}
+
+window.addEventListener(
+  "scroll",
+  () => {
+    if (floatingBar && !floatingBar.classList.contains("collapsed")) {
+      collapseFloatingBar();
+    }
+  },
+  { passive: true },
+);
+
+document.addEventListener("click", (e) => {
+  if (
+    floatingBar &&
+    !floatingBar.contains(e.target) &&
+    !floatingBar.classList.contains("collapsed")
+  ) {
+    collapseFloatingBar();
+  }
+});
+
+if (floatBackToTopBtn) {
+  floatBackToTopBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+}
+
+if (floatPrevBtn) {
+  floatPrevBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (!floatPrevBtn.disabled) {
+      goToPrev();
+    }
+  });
+}
+
+if (floatNextBtn) {
+  floatNextBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (!floatNextBtn.disabled) {
+      goToNext();
+    }
+  });
+}
+
+// ===== Page Tracking with IntersectionObserver =====
+
+let pageObserver = null;
+
+function initPageObserver() {
+  if (pageObserver) {
+    pageObserver.disconnect();
+  }
+
+  const images = readerImages.querySelectorAll("img");
+  if (images.length === 0) return;
+
+  let maxVisibleIndex = 0;
+
+  pageObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const index = parseInt(entry.target.dataset.page, 10);
+          if (index > maxVisibleIndex) {
+            maxVisibleIndex = index;
+          }
+          const percent = ((index + 1) / pages.length) * 100;
+          updateFloatingProgress(percent, index + 1, pages.length);
+        }
+      });
+    },
+    {
+      root: null,
+      rootMargin: "0px",
+      threshold: 0.5,
+    },
+  );
+
+  images.forEach((img) => pageObserver.observe(img));
+}
+
+// ===== End of Floating Reader Bar =====
 
 const backToTopBtn = document.getElementById("backToTop");
 
