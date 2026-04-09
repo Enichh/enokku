@@ -20,9 +20,18 @@ class AtsumaruScraper {
     console.log(`[Atsumaru] Searching for: "${query}"`);
     try {
       const searchUrl = `${BASE_URL}/api/search/page`;
+      console.log(
+        `[Atsumaru] Requesting: ${searchUrl}?query=${encodeURIComponent(query)}`,
+      );
       const response = await this.session.get(searchUrl, {
         params: { query, limit },
       });
+
+      console.log(`[Atsumaru] Response status: ${response.status}`);
+      console.log(
+        `[Atsumaru] Response data:`,
+        JSON.stringify(response.data, null, 2)?.substring(0, 2000),
+      );
 
       if (response.data?.hits) {
         return response.data.hits.map((item) => ({
@@ -46,9 +55,15 @@ class AtsumaruScraper {
   async getMangaDetails(mangaId) {
     console.log(`[Atsumaru] Getting manga details: ${mangaId}`);
     try {
-      const response = await this.session.get(`${BASE_URL}/api/manga/page`, {
-        params: { id: mangaId },
-      });
+      const url = `${BASE_URL}/api/manga/page?id=${mangaId}`;
+      console.log(`[Atsumaru] Requesting: ${url}`);
+      const response = await this.session.get(url);
+
+      console.log(`[Atsumaru] Response status: ${response.status}`);
+      console.log(
+        `[Atsumaru] Response data:`,
+        JSON.stringify(response.data, null, 2)?.substring(0, 2000),
+      );
 
       const data = response.data?.mangaPage;
       if (!data) {
@@ -85,9 +100,15 @@ class AtsumaruScraper {
   async getChapterPages(mangaId, chapterId) {
     console.log(`[Atsumaru] Getting chapter pages: ${chapterId}`);
     try {
-      const response = await this.session.get(`${BASE_URL}/api/read/chapter`, {
-        params: { mangaId, chapterId },
-      });
+      const url = `${BASE_URL}/api/read/chapter?mangaId=${mangaId}&chapterId=${chapterId}`;
+      console.log(`[Atsumaru] Requesting: ${url}`);
+      const response = await this.session.get(url);
+
+      console.log(`[Atsumaru] Response status: ${response.status}`);
+      console.log(
+        `[Atsumaru] Response data:`,
+        JSON.stringify(response.data, null, 2)?.substring(0, 2000),
+      );
 
       const data = response.data?.readChapter;
       if (!data) {
