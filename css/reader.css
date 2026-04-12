@@ -244,6 +244,11 @@
 /* ===== Floating Reader Bar (Collapsible) ===== */
 /* Floating reader bar glassmorphism */
 #floatingReaderBar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
@@ -258,7 +263,7 @@
 }
 
 #floatingReaderBar.expanded {
-  transform: translateY(-10px);
+  transform: translateX(-50%) translateY(-10px);
   box-shadow: var(--shadow-lg), var(--shadow-glow-md);
 }
 
