@@ -100,23 +100,24 @@
 
 /* Reader Images Area – full width on mobile */
 .reader-images {
-  background: transparent;
+  background: var(--bg-primary);
   padding: 0;
   display: flex;
   flex-direction: column;
   gap: 0;
   border: none;
   box-shadow: none;
+  line-height: 0;
 }
 
 .reader-images img {
   width: 100%;
   display: block;
-  background-color: var(--bg-secondary);
-  border-radius: 4px;
-  box-shadow: var(--shadow-lg);
+  vertical-align: top;
+  border-radius: 0;
   opacity: 0;
   transition: opacity var(--transition-slow) ease;
+  margin-bottom: -1px;
 }
 
 .reader-images img.loaded {
@@ -124,7 +125,7 @@
 }
 
 .reader-images img:hover {
-  box-shadow: var(--shadow-lg), var(--shadow-glow-sm);
+  filter: brightness(1.05);
 }
 
 /* Page load animation (reader-specific) */
