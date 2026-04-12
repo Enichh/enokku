@@ -253,11 +253,11 @@ async function loadChapters(allTitles) {
 
     // Get chapters from Atsumaru
     const chapters = await getAtsumaruChapters(atsumaruMangaId);
-    allChapters = chapters;
+    allChapters = deduplicateChapters(chapters);
     hybridInfo = { source: "atsumaru", atsumaruId: atsumaruMangaId };
 
     console.log(
-      `[Details] Atsumaru result: ${allChapters.length} chapters found`,
+      `[Details] Atsumaru result: ${chapters.length} chapters found, ${allChapters.length} unique`,
     );
 
     if (allChapters.length === 0) {
@@ -304,7 +304,7 @@ async function renderAtsumaruOnlyDetails() {
   // Try to find Atsumaru manga by ID directly
   try {
     const chapters = await getAtsumaruChapters(mangaId);
-    allChapters = chapters;
+    allChapters = deduplicateChapters(chapters);
     hybridInfo = { source: "atsumaru", atsumaruId: mangaId };
 
     if (allChapters.length === 0) {
@@ -466,6 +466,16 @@ window.goToChapterPage = function (page) {
   renderChapterPage(page);
   chapterListContainer.scrollIntoView({ behavior: "smooth" });
 };
+
+function deduplicateChapters(chapters) {
+  const seen = new Set();
+  return chapters.filter((ch) => {
+    const chapterNum = ch.chapter?.toString() || "0";
+    if (seen.has(chapterNum)) return false;
+    seen.add(chapterNum);
+    return true;
+  });
+}
 
 function sortChapters() {
   console.log(`[Details] Sorting chapters: ${currentSortOrder}`);
