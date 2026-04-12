@@ -249,6 +249,31 @@
   box-shadow: 0 0 8px var(--success);
 }
 
+/* PWA Install Section */
+.settings-pwa-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.settings-pwa-buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.settings-pwa-buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.settings-pwa-buttons button:disabled:hover {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+
 /* App Update Section */
 .settings-update-section {
   margin-top: 1.5rem;
@@ -368,6 +393,79 @@
 
 .settings-about p {
   margin-bottom: 0.5rem;
+}
+
+/* Install Banner */
+.install-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--surface-elevated);
+  border-bottom: 2px solid var(--accent);
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  z-index: 1002;
+  transform: translateY(-100%);
+  transition: transform 0.3s ease-out;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.install-banner.visible {
+  transform: translateY(0);
+}
+
+.install-banner.hidden {
+  transform: translateY(-100%);
+}
+
+.install-banner-text {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.install-banner-btn {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-family: "Space Mono", monospace;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.install-banner-btn:hover {
+  background: var(--accent-hover);
+  transform: scale(1.05);
+}
+
+.install-banner-close {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all var(--transition-fast);
+}
+
+.install-banner-close:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 /* Connection Status Indicator */

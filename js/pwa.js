@@ -8,6 +8,9 @@ const PWA_CONFIG = {
 
 let deferredInstallPrompt = null;
 let pageViewCount = parseInt(localStorage.getItem("enokku_page_views") || "0");
+
+// Expose deferredInstallPrompt globally for settings page access
+window.deferredInstallPrompt = deferredInstallPrompt;
 let installPromptDismissed = localStorage.getItem("enokku_install_dismissed");
 let lastUserActivity = Date.now();
 let updateCheckInterval = null;
@@ -106,6 +109,7 @@ function setupInstallPrompt() {
   window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
     deferredInstallPrompt = event;
+    window.deferredInstallPrompt = deferredInstallPrompt; // Update global reference
 
     if (shouldShowInstallPrompt()) {
       setTimeout(showCustomInstallPrompt, PWA_CONFIG.INSTALL_PROMPT_DELAY);
@@ -115,10 +119,39 @@ function setupInstallPrompt() {
   window.addEventListener("appinstalled", () => {
     // console.log('[PWA] App installed');
     deferredInstallPrompt = null;
+    window.deferredInstallPrompt = deferredInstallPrompt; // Update global reference
     hideInstallBanner();
     localStorage.setItem("enokku_installed", "true");
   });
 }
+
+// Make install functions globally available even when banner isn't shown
+window.triggerInstall = async () => {
+  if (!deferredInstallPrompt) {
+    console.log("[PWA] No install prompt available");
+    return;
+  }
+
+  try {
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+
+    if (outcome === "accepted") {
+      console.log("[PWA] User accepted install");
+    } else {
+      console.log("[PWA] User dismissed install");
+    }
+
+    deferredInstallPrompt = null;
+  } catch (error) {
+    console.error("[PWA] Install prompt failed:", error);
+  }
+};
+
+window.dismissInstall = () => {
+  localStorage.setItem("enokku_install_dismissed", Date.now().toString());
+  hideInstallBanner();
+};
 
 function shouldShowInstallPrompt() {
   if (installPromptDismissed) {
@@ -151,27 +184,6 @@ function showCustomInstallPrompt() {
   `;
 
   document.body.appendChild(banner);
-
-  window.triggerInstall = async () => {
-    if (!deferredInstallPrompt) return;
-
-    deferredInstallPrompt.prompt();
-    const { outcome } = await deferredInstallPrompt.userChoice;
-
-    if (outcome === "accepted") {
-      console.log("[PWA] User accepted install");
-    } else {
-      console.log("[PWA] User dismissed install");
-      dismissInstall();
-    }
-
-    deferredInstallPrompt = null;
-  };
-
-  window.dismissInstall = () => {
-    localStorage.setItem("enokku_install_dismissed", Date.now().toString());
-    hideInstallBanner();
-  };
 }
 
 function hideInstallBanner() {

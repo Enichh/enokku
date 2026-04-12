@@ -148,6 +148,37 @@ function loadSettingsUI() {
       swStatus.innerHTML = '<span class="status-dot"></span> Not Supported';
     }
   }
+
+  // Setup install button state
+  updateInstallButtonState();
+}
+
+function updateInstallButtonState() {
+  const installBtn = document.getElementById("installBtn");
+  if (!installBtn) return;
+
+  // Check if app is already installed
+  const isStandalone =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true;
+  const isInstalled = localStorage.getItem("enokku_installed") === "true";
+
+  if (isStandalone || isInstalled) {
+    installBtn.textContent = "✓ Already Installed";
+    installBtn.disabled = true;
+    installBtn.innerHTML = "<span>✓</span> Already Installed";
+  } else {
+    // Check if install prompt is available
+    setTimeout(() => {
+      if (window.deferredInstallPrompt) {
+        installBtn.disabled = false;
+      } else {
+        installBtn.textContent = "⏳ Install Unavailable";
+        installBtn.disabled = true;
+        installBtn.innerHTML = "<span>⏳</span> Install Unavailable";
+      }
+    }, 2000); // Wait a bit for install prompt to be captured
+  }
 }
 
 async function updateCacheStats() {
