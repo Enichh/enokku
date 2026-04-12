@@ -428,7 +428,7 @@
 .mobile-filter-toggle {
   display: none;
   position: fixed;
-  bottom: 2rem;
+  bottom: calc(2rem + 64px + env(safe-area-inset-bottom, 0px));
   right: 2rem;
   width: 56px;
   height: 56px;
@@ -439,7 +439,7 @@
   font-size: 1.5rem;
   cursor: pointer;
   box-shadow: 0 4px 20px var(--accent-glow);
-  z-index: 998;
+  z-index: 1001;
   transition: all 0.2s ease;
 }
 
@@ -713,6 +713,7 @@
   line-height: 1.2;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1025,7 +1026,7 @@
   }
 
   .mobile-filter-toggle {
-    bottom: 1rem;
+    bottom: calc(1rem + 64px + env(safe-area-inset-bottom, 0px));
     right: 1rem;
     width: 48px;
     height: 48px;
@@ -1095,6 +1096,7 @@
   .manga-card-title {
     font-size: 0.8rem;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
   }
 
   .manga-card-meta {
