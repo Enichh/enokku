@@ -287,6 +287,7 @@
         getAllOfflineChapters,
         isChapterCached,
         formatBytes,
+        getCachedMangaMetadata,
       } from "./js/offline-manager.js";
 
       async function loadCachedContent() {
@@ -457,7 +458,9 @@
       });
 
       document.addEventListener("DOMContentLoaded", () => {
-        console.log("[Offline] DOM Content Loaded - initializing offline page...");
+        console.log(
+          "[Offline] DOM Content Loaded - initializing offline page...",
+        );
         loadCachedContent();
       });
     </script>
