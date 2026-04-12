@@ -120,40 +120,37 @@
             <div id="continueReadingRow" class="manga-row" role="list"></div>
           </section>
 
-          <nav class="category-tabs" aria-label="Category filters">
-            <button class="tab-btn active" data-target="all">All</button>
-            <button class="tab-btn" data-target="manga">Manga</button>
-            <button class="tab-btn" data-target="manhwa">Manhwa</button>
+          <nav
+            class="category-tabs trending-tabs"
+            aria-label="Category filters"
+          >
+            <button class="tab-btn active" data-target="trending-all">
+              All
+            </button>
+            <button class="tab-btn" data-target="trending-manga">Manga</button>
+            <button class="tab-btn" data-target="trending-manhwa">
+              Manhwa
+            </button>
           </nav>
 
-          <section
-            class="manga-section"
-            aria-labelledby="recently-updated-heading"
-          >
-            <div class="section-header">
-              <h2 id="recently-updated-heading">Recently Updated</h2>
-              <span class="badge">New</span>
-            </div>
-            <div id="recentlyUpdatedRow" class="manga-row" role="list">
-              <div class="loading-small">
-                <div class="spinner-small"></div>
-              </div>
-            </div>
-          </section>
-
-          <section class="manga-section" aria-labelledby="trending-heading">
+          <section class="trending-section" aria-labelledby="trending-heading">
             <div class="section-header">
               <h2 id="trending-heading">Top Trending</h2>
               <span class="badge hot">Hot</span>
             </div>
-            <div id="trendingRow" class="manga-row" role="list">
+            <div
+              id="trendingRow"
+              class="horizontal-scroll-container"
+              role="list"
+            >
               <div class="loading-small">
                 <div class="spinner-small"></div>
               </div>
             </div>
           </section>
 
-          <div class="two-column-sections">
+          <!-- Desktop two-column sections (hidden on mobile) -->
+          <div class="two-column-sections desktop-only">
             <section
               class="manga-section"
               aria-labelledby="most-followed-manga-heading"
@@ -179,7 +176,7 @@
             </section>
           </div>
 
-          <div class="two-column-sections">
+          <div class="two-column-sections desktop-only">
             <section class="manga-section" aria-labelledby="top-manga-heading">
               <h2 id="top-manga-heading">Top Rated Manga</h2>
               <div id="topMangaRow" class="manga-row" role="list">

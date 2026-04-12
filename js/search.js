@@ -244,7 +244,7 @@ async function fetchResults(append = false) {
 
   try {
     const params = buildApiParams();
-    console.log("[Search] Fetching with params:", params.toString());
+    // console.log("[Search] Fetching with params:", params.toString());
 
     const response = await fetch(`/api/manga?${params.toString()}`);
     if (!response.ok) throw new Error(`API error: ${response.status}`);
