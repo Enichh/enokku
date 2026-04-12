@@ -518,7 +518,9 @@ async function handleNavigation(request) {
 
   // Fall back to cache immediately when network fails
   console.log("[SW] Checking cache for:", request.url);
-  const cached = await cache.match(request);
+  // Normalize URL: strip query params for cache lookup since we cache clean URLs
+  const cached =
+    (await cache.match(request)) || (await cache.match(url.pathname));
   if (cached) {
     console.log("[SW] Serving from cache:", request.url);
     return cached;
