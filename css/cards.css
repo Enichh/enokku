@@ -9,15 +9,15 @@
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+  transition: transform var(--transition-base) var(--ease-out-back),
+              box-shadow var(--transition-base) ease;
   border: 1px solid var(--border);
+  will-change: transform;
 }
 
 .manga-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px var(--accent-glow);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-lg), var(--shadow-glow-sm);
   border-color: var(--accent);
 }
 
@@ -26,6 +26,25 @@
   aspect-ratio: 3/4;
   object-fit: cover;
   background-color: var(--bg-tertiary);
+  transition: transform var(--transition-slow) ease;
+}
+
+.manga-card:hover img {
+  transform: scale(1.1);
+}
+
+/* Skeleton loading state (card-specific) */
+.manga-card.skeleton {
+  background: linear-gradient(90deg, var(--bg-tertiary) 25%, 
+                                     var(--surface-hover) 50%, 
+                                     var(--bg-tertiary) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .manga-card .info {

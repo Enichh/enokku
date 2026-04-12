@@ -4,14 +4,16 @@
   margin: 0 auto;
 }
 
-/* Reader Header – now with gradient and better spacing */
+/* Reader Header – Glassmorphism effect */
 .reader-header {
-  background: linear-gradient(145deg, var(--bg-secondary) 0%, #1a1a1a 100%);
-  border-bottom: 2px solid var(--accent);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--glass-border);
   border-radius: 12px 12px 0 0;
   padding: 1.25rem 1.5rem;
   margin-bottom: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .reader-header .container {
@@ -28,16 +30,18 @@
 }
 
 .reader-header .chapter-title-header {
+  font-family: "Bebas Neue", "Impact", "Arial Black", sans-serif;
   font-size: 1.2rem;
   font-weight: 600;
   color: var(--text-primary);
-  text-shadow: 0 0 8px var(--accent-glow);
+  text-shadow: 0 0 20px var(--accent-glow);
   margin: 0;
   text-align: center;
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 900;
 }
 
 .reader-header .page-indicator {
@@ -58,16 +62,17 @@
 }
 
 /* Button Styles – unified look */
-.btn-secondary {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
+.reader-header .btn-secondary {
+  font-family: "Space Mono", "Courier New", Courier, monospace;
+  background: rgba(255, 0, 0, 0.1);
+  border: 1px solid var(--accent);
   border-radius: 30px;
   padding: 0.6rem 1.5rem;
   color: var(--text-primary);
   font-weight: 500;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-base) ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   display: inline-flex;
   align-items: center;
@@ -75,12 +80,12 @@
   gap: 0.5rem;
 }
 
-.btn-secondary:hover {
+.reader-header .btn-secondary:hover {
   background: var(--accent);
   border-color: var(--accent);
   color: white;
-  box-shadow: 0 0 12px var(--accent-glow);
-  transform: translateY(-1px);
+  box-shadow: 0 0 20px var(--accent-glow);
+  transform: translateY(-2px);
 }
 
 .btn-secondary:disabled {
@@ -109,12 +114,33 @@
   display: block;
   background-color: var(--bg-secondary);
   border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  transition: box-shadow 0.2s;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transition: opacity var(--transition-slow) ease;
+}
+
+.reader-images img.loaded {
+  opacity: 1;
 }
 
 .reader-images img:hover {
-  box-shadow: 0 8px 20px rgba(255,0,0,0.15);
+  box-shadow: var(--shadow-lg), var(--shadow-glow-sm);
+}
+
+/* Page load animation (reader-specific) */
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.reader-images img {
+  animation: pageFadeIn var(--transition-slow) var(--ease-out-expo) forwards;
 }
 
 /* Reader Footer – matches header gradient */
@@ -216,18 +242,14 @@
 }
 
 /* ===== Floating Reader Bar (Collapsible) ===== */
-.floating-reader-bar {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(20, 20, 20, 0.95);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--border);
+/* Floating reader bar glassmorphism */
+#floatingReaderBar {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-lg), var(--shadow-glow-sm);
   border-radius: 50px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--accent-glow) inset;
-  z-index: 200;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--transition-base) var(--ease-out-expo);
   max-width: 90vw;
   padding: 0.75rem 1.5rem;
   color: var(--text-primary);
@@ -235,25 +257,30 @@
   user-select: none;
 }
 
+#floatingReaderBar.expanded {
+  transform: translateY(-10px);
+  box-shadow: var(--shadow-lg), var(--shadow-glow-md);
+}
+
 /* Collapsed state - only progress visible */
-.floating-reader-bar.collapsed {
+#floatingReaderBar.collapsed {
   padding: 0.5rem 1.2rem;
 }
 
-.floating-reader-bar.collapsed .float-expanded-controls {
+#floatingReaderBar.collapsed .float-expanded-controls {
   display: none;
 }
 
-.floating-reader-bar.collapsed .float-progress-only {
+#floatingReaderBar.collapsed .float-progress-only {
   display: block;
 }
 
 /* Expanded state */
-.floating-reader-bar:not(.collapsed) .float-progress-only {
+#floatingReaderBar:not(.collapsed) .float-progress-only {
   display: none;
 }
 
-.floating-reader-bar:not(.collapsed) .float-expanded-controls {
+#floatingReaderBar:not(.collapsed) .float-expanded-controls {
   display: flex;
 }
 

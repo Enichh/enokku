@@ -17,6 +17,7 @@ import {
   showError,
   getPlaceholderImage,
 } from "./utils.js";
+import { getReadingHistory, clearHistory } from "./reading-history.js";
 
 const trendingRow = document.getElementById("trendingRow");
 const topMangaRow = document.getElementById("topMangaRow");
@@ -31,6 +32,11 @@ const searchInput = document.getElementById("searchInput");
 const homeSections = document.getElementById("homeSections");
 const mobileMenuToggle = document.getElementById("mobileMenuToggle");
 const navLinks = document.getElementById("navLinks");
+const continueReadingSection = document.getElementById(
+  "continueReadingSection",
+);
+const continueReadingRow = document.getElementById("continueReadingRow");
+const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
 const mangaSections = [
   {
@@ -82,6 +88,66 @@ function renderMangaCard(manga) {
   });
 
   return card;
+}
+
+function renderHistoryCard(entry) {
+  const card = document.createElement("div");
+  card.className = "manga-card history-card";
+  card.innerHTML = `
+    <img src="${entry.coverUrl}" alt="${entry.mangaTitle}" loading="lazy" referrerpolicy="no-referrer">
+    <div class="info">
+      <div class="title">${entry.mangaTitle}</div>
+      <div class="meta">${entry.scrollPercent}% • Ch. ${entry.chapterNumber}</div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: ${entry.scrollPercent}%"></div>
+      </div>
+    </div>
+  `;
+
+  const img = card.querySelector("img");
+  img.addEventListener("error", () => {
+    img.src = getPlaceholderImage(256, 384, "No Cover");
+  });
+
+  card.addEventListener("click", () => {
+    const source = entry.source || "mangadex";
+    const mangaId = entry.mangaId;
+    const chapterId = entry.chapterId;
+
+    if (source === "atsumaru" && entry.atsumaruMangaId) {
+      window.location.href = `reader.html?id=${chapterId}&manga=${mangaId}&source=atsumaru&mangaId=${entry.atsumaruMangaId}`;
+    } else {
+      window.location.href = `reader.html?id=${chapterId}&manga=${mangaId}&source=mangadex`;
+    }
+  });
+
+  return card;
+}
+
+function loadContinueReading() {
+  if (!continueReadingRow) return;
+
+  const history = getReadingHistory();
+
+  if (history.length === 0) {
+    continueReadingSection?.classList.add("hidden");
+    return;
+  }
+
+  continueReadingRow.innerHTML = "";
+  history.forEach((entry) => {
+    continueReadingRow.appendChild(renderHistoryCard(entry));
+  });
+
+  continueReadingSection?.classList.remove("hidden");
+}
+
+function handleClearHistory() {
+  if (confirm("Clear all reading history? This cannot be undone.")) {
+    clearHistory();
+    continueReadingSection?.classList.add("hidden");
+    if (continueReadingRow) continueReadingRow.innerHTML = "";
+  }
 }
 
 function showRowLoading(rowElement) {
@@ -218,5 +284,9 @@ mobileMenuToggle?.addEventListener("click", () => {
   navLinks?.classList.toggle("active");
   mobileMenuToggle?.classList.toggle("active");
 });
+
+// Continue reading
+clearHistoryBtn?.addEventListener("click", handleClearHistory);
+loadContinueReading();
 
 loadAllSections();

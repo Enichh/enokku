@@ -2,27 +2,57 @@
 .hero-section {
   background: linear-gradient(
     135deg,
-    var(--bg-secondary) 0%,
-    var(--bg-tertiary) 100%
+    var(--bg-immersive) 0%,
+    var(--surface-elevated) 50%,
+    var(--bg-immersive) 100%
   );
   border-radius: 16px;
   padding: 3rem 2rem;
   margin-bottom: 2rem;
   text-align: center;
   border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative overlay (hero-specific) */
+.hero-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at top right,
+    rgba(255, 0, 0, 0.1) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
 }
 
 .hero-content h1 {
-  font-size: 2.5rem;
+  font-family: "Bebas Neue", "Impact", "Arial Black", sans-serif;
+  font-size: clamp(2rem, 5vw, 4rem);
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, var(--accent) 0%, #ff4444 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 30px var(--accent-glow);
+  color: var(--text-primary);
+  text-shadow:
+    0 0 40px var(--accent-glow),
+    0 0 80px var(--accent-glow-subtle);
+  animation: float 6s ease-in-out infinite;
+  font-weight: 900;
+}
+
+/* Floating animation (hero-specific) */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .hero-content p {
+  font-family: "Space Mono", "Courier New", Courier, monospace;
   font-size: 1.1rem;
   color: var(--text-secondary);
   max-width: 600px;

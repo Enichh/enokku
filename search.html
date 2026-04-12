@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Search and discover manga, manhwa, and manhua on Enokku"
+    />
+    <meta name="theme-color" content="#ff0000" />
+
+    <meta property="og:title" content="Search Manga - Enokku" />
+    <meta property="og:type" content="website" />
+
+    <title>Search Manga - Enokku</title>
+
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/utilities.css" />
+    <link rel="stylesheet" href="css/cards.css" />
+    <link rel="stylesheet" href="css/search.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+  </head>
+  <body class="search-page">
+    <!-- Header -->
+    <header class="site-header search-header-compact">
+      <div class="container">
+        <nav aria-label="Main navigation">
+          <a href="index.html" class="logo" aria-label="Enokku Home">Enokku</a>
+          <div class="nav-links">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="search.html" class="nav-link active">Search</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="search-container">
+      <!-- Filter Sidebar -->
+      <aside class="filter-sidebar" id="filterSidebar">
+        <!-- Mobile Close Button -->
+        <button
+          class="filter-close-btn"
+          id="filterCloseBtn"
+          aria-label="Close filters"
+        >
+          &#10005;
+        </button>
+        <!-- Content Type -->
+        <div class="filter-section">
+          <h3 class="filter-title">Content Type</h3>
+          <div class="content-type-tabs" id="contentTypeTabs">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- Genres -->
+        <div class="filter-section">
+          <h3 class="filter-title">Genres</h3>
+          <div id="excludeModeToggle">
+            <!-- Injected by JS -->
+          </div>
+          <div class="genre-chips" id="genreChips">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- Year -->
+        <div class="filter-section">
+          <h3 class="filter-title">Year</h3>
+          <div class="year-options" id="yearOptions">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="filter-section">
+          <h3 class="filter-title">Status</h3>
+          <div class="status-options" id="statusOptions">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- Content Rating -->
+        <div class="filter-section">
+          <h3 class="filter-title">Content Rating</h3>
+          <div class="rating-options" id="contentRatingOptions">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- Clear Filters -->
+        <button class="clear-filters-btn" onclick="clearAllFilters()">
+          Clear All Filters
+        </button>
+      </aside>
+
+      <!-- Main Results Area -->
+      <section class="results-main">
+        <!-- Search Header -->
+        <div class="search-header">
+          <div class="search-bar-container">
+            <div class="search-input-wrapper">
+              <span class="search-icon">&#128269;</span>
+              <input
+                type="search"
+                id="searchInput"
+                class="search-input"
+                placeholder="Search manga by title..."
+                autocomplete="off"
+                aria-label="Search manga"
+              />
+            </div>
+
+            <div class="sort-dropdown">
+              <select
+                id="sortSelect"
+                class="sort-select"
+                aria-label="Sort results"
+              >
+                <option value="relevance">Relevance</option>
+                <option value="latest">Latest Updated</option>
+                <option value="trending">Trending</option>
+                <option value="rating">Top Rated</option>
+                <option value="newest">Newest Added</option>
+                <option value="alphabetical">Alphabetical</option>
+              </select>
+              <span class="sort-arrow">&#9662;</span>
+            </div>
+          </div>
+
+          <!-- Active Filters -->
+          <div class="active-filters" id="activeFilters">
+            <!-- Injected by JS -->
+          </div>
+
+          <!-- Results Count -->
+          <div class="results-count" id="resultsCount"></div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section">
+          <div class="results-grid" id="resultsGrid">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- Load More -->
+        <div class="load-more-container">
+          <button class="load-more-btn" id="loadMoreBtn">
+            <span>Load More</span>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Mobile Filter Toggle -->
+    <button
+      class="mobile-filter-toggle"
+      id="mobileFilterToggle"
+      aria-label="Open filters"
+    >
+      &#9881;
+    </button>
+
+    <!-- NoScript Warning -->
+    <noscript>
+      <div class="noscript-warning">
+        <p>
+          JavaScript is required to use the search feature. Please enable
+          JavaScript in your browser settings.
+        </p>
+      </div>
+    </noscript>
+
+    <!-- Scripts -->
+    <script type="module" src="js/search.js"></script>
+  </body>
+</html>

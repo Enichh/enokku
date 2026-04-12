@@ -1,3 +1,6 @@
 node_modules
 AI.md
 .gitignore
+
+# Local Netlify folder
+.netlify

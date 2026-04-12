@@ -15,6 +15,15 @@
     <title>Reader - Enokku</title>
 
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
     <link rel="stylesheet" href="css/reset.css" />
     <link rel="stylesheet" href="css/variables.css" />
     <link rel="stylesheet" href="css/base.css" />
@@ -28,22 +37,35 @@
     <header class="reader-header">
       <div class="container">
         <nav aria-label="Reader navigation">
-          <button id="backToManga" class="btn-secondary" aria-label="Back to manga details">
+          <button
+            id="backToManga"
+            class="btn-secondary"
+            aria-label="Back to manga details"
+          >
             ← Back
           </button>
           <h1 id="chapterTitle" class="chapter-title-header">Loading...</h1>
           <span id="pageIndicator" class="page-indicator"></span>
         </nav>
         <div class="chapter-nav-top">
-          <button id="prevChapter" class="btn-secondary" disabled>← Previous Chapter</button>
-          <button id="nextChapter" class="btn-secondary" disabled>Next Chapter →</button>
+          <button id="prevChapter" class="btn-secondary" disabled>
+            ← Previous Chapter
+          </button>
+          <button id="nextChapter" class="btn-secondary" disabled>
+            Next Chapter →
+          </button>
         </div>
       </div>
     </header>
 
     <main id="main-content">
       <div class="container">
-        <div id="readerImages" class="reader-images" role="img" aria-label="Manga pages">
+        <div
+          id="readerImages"
+          class="reader-images"
+          role="img"
+          aria-label="Manga pages"
+        >
           <div class="loading">
             <div class="spinner"></div>
             <p>Loading chapter...</p>
@@ -55,9 +77,15 @@
     <footer class="reader-footer">
       <div class="container">
         <div class="chapter-nav-bottom">
-          <button id="prevChapterBottom" class="btn-secondary" disabled>← Previous Chapter</button>
-          <button id="backToTop" class="btn-secondary" aria-label="Back to top">↑ Top</button>
-          <button id="nextChapterBottom" class="btn-secondary" disabled>Next Chapter →</button>
+          <button id="prevChapterBottom" class="btn-secondary" disabled>
+            ← Previous Chapter
+          </button>
+          <button id="backToTop" class="btn-secondary" aria-label="Back to top">
+            ↑ Top
+          </button>
+          <button id="nextChapterBottom" class="btn-secondary" disabled>
+            Next Chapter →
+          </button>
         </div>
       </div>
     </footer>
@@ -81,26 +109,42 @@
 
       <!-- Expanded State Content -->
       <div class="float-expanded-controls">
-        <button id="floatPrevChapter" class="float-nav-btn" aria-label="Previous Chapter" disabled>
+        <button
+          id="floatPrevChapter"
+          class="float-nav-btn"
+          aria-label="Previous Chapter"
+          disabled
+        >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
           </svg>
         </button>
-        
+
         <div class="float-expanded-center">
           <span id="floatChapterDisplay">Chapter 0</span>
           <span class="float-progress-separator">•</span>
           <span id="floatProgressExpanded">0% 0/0</span>
-          <button id="floatBackToTop" class="float-back-to-top-btn" aria-label="Back to top">
+          <button
+            id="floatBackToTop"
+            class="float-back-to-top-btn"
+            aria-label="Back to top"
+          >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/>
+              <path
+                d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"
+              />
             </svg>
           </button>
         </div>
-        
-        <button id="floatNextChapter" class="float-nav-btn" aria-label="Next Chapter" disabled>
+
+        <button
+          id="floatNextChapter"
+          class="float-nav-btn"
+          aria-label="Next Chapter"
+          disabled
+        >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
           </svg>
         </button>
       </div>

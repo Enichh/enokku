@@ -2,9 +2,14 @@ import {
   fetchChapterDetails,
   fetchChapterPages,
   fetchMangaFeed,
+  fetchMangaDetails,
+  getCoverUrl,
+  findRelationship,
+  getEnglishTitle,
 } from "./api.js";
 import { getChapterPagesHybrid, getSourceStyle } from "./hybrid-api.js";
-import { getUrlParam, getPlaceholderImage } from "./utils.js";
+import { getUrlParam, getPlaceholderImage, debounce } from "./utils.js";
+import { saveReadingProgress } from "./reading-history.js";
 
 const chapterTitle = document.getElementById("chapterTitle");
 const readerImages = document.getElementById("readerImages");
@@ -37,6 +42,11 @@ let collapseTimer = null;
 let currentProgress = { percent: 0, current: 0, total: 0 };
 let currentChapterInfo = { number: "?", title: "" };
 
+// Reading history tracking
+let mangaTitleForHistory = "";
+let coverUrlForHistory = "";
+let debouncedSaveProgress = null;
+
 if (!chapterId) {
   readerImages.innerHTML =
     '<div class="error"><p>No chapter ID provided</p></div>';
@@ -62,18 +72,38 @@ async function loadChapter() {
 
   try {
     await loadChapterBySource();
-
+    await loadMangaDetailsForHistory();
     await loadChapterNavigation();
     renderPages();
     updatePageIndicator();
     updateChapterButtons();
     initPageObserver();
-    updateFloatingProgress(0, 1, pages.length);
+    initDebouncedSave();
+    updateFloatingProgress(0);
+    saveProgressToHistory(0);
 
     console.log("[Reader] === loadChapter SUCCESS ===");
   } catch (error) {
     console.error("[Reader] === loadChapter FAILED ===", error);
     readerImages.innerHTML = `<div class="error"><p>Error loading chapter: ${error.message}</p></div>`;
+  }
+}
+
+async function loadMangaDetailsForHistory() {
+  const navigationMangaId = source === "atsumaru" ? atsumaruMangaId : mangaId;
+  if (!navigationMangaId || source !== "mangadex") return;
+
+  try {
+    const mangaData = await fetchMangaDetails(navigationMangaId);
+    if (mangaData?.data) {
+      mangaTitleForHistory = getEnglishTitle(mangaData.data);
+      const coverArt = findRelationship(mangaData.data, "cover_art");
+      coverUrlForHistory = coverArt
+        ? getCoverUrl(mangaData.data.id, coverArt, "256")
+        : getPlaceholderImage(256, 384, "No Cover");
+    }
+  } catch (error) {
+    console.error("[Reader] Failed to load manga details for history:", error);
   }
 }
 
@@ -312,15 +342,22 @@ window.addEventListener("keydown", (e) => {
 
 // ===== Floating Reader Bar Functions =====
 
-function updateFloatingProgress(percent, currentPageNum, totalPages) {
+function updateFloatingProgress(percent) {
   const percentText = `${Math.round(percent)}%`;
-  const pageText = `${currentPageNum}/${totalPages}`;
-  const fullText = `${percentText} ${pageText}`;
+  const chapterText =
+    currentChapterIndex >= 0 && allChapters.length > 0
+      ? `${currentChapterIndex + 1}/${allChapters.length}`
+      : "?/?";
+  const fullText = `${percentText} ${chapterText}`;
 
   if (floatProgressOnly) floatProgressOnly.textContent = fullText;
   if (floatProgressExpanded) floatProgressExpanded.textContent = fullText;
 
-  currentProgress = { percent, current: currentPageNum, total: totalPages };
+  currentProgress = {
+    percent,
+    current: currentChapterIndex + 1,
+    total: allChapters.length,
+  };
 }
 
 function updateFloatingChapterInfo(
@@ -449,7 +486,10 @@ function initPageObserver() {
             maxVisibleIndex = index;
           }
           const percent = ((index + 1) / pages.length) * 100;
-          updateFloatingProgress(percent, index + 1, pages.length);
+          updateFloatingProgress(percent);
+          if (debouncedSaveProgress) {
+            debouncedSaveProgress(percent);
+          }
         }
       });
     },
@@ -464,6 +504,40 @@ function initPageObserver() {
 }
 
 // ===== End of Floating Reader Bar =====
+
+// ===== Reading History Functions =====
+
+function initDebouncedSave() {
+  debouncedSaveProgress = debounce((percent) => {
+    saveProgressToHistory(percent);
+  }, 500);
+}
+
+function saveProgressToHistory(percent) {
+  const navigationMangaId = source === "atsumaru" ? atsumaruMangaId : mangaId;
+  if (!navigationMangaId || !chapterId) return;
+
+  const currentChapter = allChapters[currentChapterIndex];
+  const chapterNumber =
+    currentChapter?.attributes?.chapter || currentChapterInfo.number || "?";
+  const chapterTitleText =
+    currentChapter?.attributes?.title || currentChapterInfo.title || "";
+
+  saveReadingProgress({
+    mangaId: navigationMangaId,
+    mangaTitle:
+      mangaTitleForHistory || `Manga ${navigationMangaId.slice(0, 8)}`,
+    coverUrl: coverUrlForHistory || getPlaceholderImage(256, 384, "No Cover"),
+    chapterId: chapterId,
+    chapterNumber: chapterNumber,
+    chapterTitle: chapterTitleText,
+    scrollPercent: Math.round(percent),
+    source: source,
+    atsumaruMangaId: atsumaruMangaId,
+  });
+}
+
+// =====
 
 const backToTopBtn = document.getElementById("backToTop");
 

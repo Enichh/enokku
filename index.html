@@ -36,6 +36,14 @@
 
     <link rel="preconnect" href="https://api.mangadex.org" />
     <link rel="preconnect" href="https://uploads.mangadex.org" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -44,6 +52,10 @@
       <div class="container">
         <nav aria-label="Main navigation">
           <a href="index.html" class="logo" aria-label="Enokku Home">Enokku</a>
+          <div class="nav-links" id="navLinks">
+            <a href="index.html" class="nav-link active">Home</a>
+            <a href="search.html" class="nav-link">Catalog</a>
+          </div>
           <div class="search-container">
             <input
               type="search"
@@ -54,6 +66,15 @@
               autocomplete="off"
             />
           </div>
+          <button
+            class="mobile-menu-toggle"
+            id="mobileMenuToggle"
+            aria-label="Toggle menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
         </nav>
       </div>
     </header>
@@ -78,6 +99,20 @@
                 daily.
               </p>
             </div>
+          </section>
+
+          <section
+            id="continueReadingSection"
+            class="manga-section continue-reading-section hidden"
+            aria-labelledby="continue-reading-heading"
+          >
+            <div class="section-header">
+              <h2 id="continue-reading-heading">Continue Reading</h2>
+              <button id="clearHistoryBtn" class="btn-text" type="button">
+                Clear All
+              </button>
+            </div>
+            <div id="continueReadingRow" class="manga-row" role="list"></div>
           </section>
 
           <nav class="category-tabs" aria-label="Category filters">

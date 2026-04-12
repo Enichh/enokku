@@ -7,6 +7,7 @@
 }
 
 .badge {
+  font-family: "Space Mono", "Courier New", Courier, monospace;
   background: var(--success);
   color: var(--bg-primary);
   padding: 0.25rem 0.75rem;
@@ -14,11 +15,23 @@
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
+  box-shadow: 0 0 15px var(--accent-glow);
+  animation: pulse-glow 2s ease-in-out infinite;
 }
 
 .badge.hot {
-  background: var(--accent);
+  background: linear-gradient(135deg, #ff0000, #ff4500);
   color: white;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 15px var(--accent-glow);
+  }
+  50% {
+    box-shadow: 0 0 25px var(--accent-glow);
+  }
 }
 
 /* Two Column Sections */
@@ -56,13 +69,79 @@
 }
 
 .manga-section {
-  margin-bottom: 2.5rem;
+  margin-bottom: var(--space-12);
 }
 
 .manga-section h2 {
+  font-family: "Bebas Neue", "Impact", "Arial Black", sans-serif;
   font-size: 1.25rem;
   margin-bottom: 1rem;
   padding-left: 0.75rem;
   border-left: 4px solid var(--accent);
   color: var(--text-primary);
+  position: relative;
+  display: inline-block;
+  font-weight: 900;
+}
+
+.manga-section h2::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+/* Continue Reading Section */
+.continue-reading-section .section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.continue-reading-section.hidden {
+  display: none;
+}
+
+.btn-text {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-text:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+  border-color: var(--accent);
+}
+
+/* History Card Meta */
+.history-card .meta {
+  font-size: 0.75rem;
+  color: var(--accent);
+  margin-top: 0.25rem;
+}
+
+.history-card .progress-bar {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.history-card .progress-fill {
+  height: 100%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+  transition: width 0.3s ease;
 }

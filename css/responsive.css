@@ -315,31 +315,37 @@
 
 /* Mobile Navigation */
 @media (max-width: 768px) {
-  .nav-links {
-    display: flex;
-    gap: 1rem;
-    order: 2;
-  }
-
   .nav-link {
     font-size: 0.85rem;
     padding: 0.5rem;
   }
 
   .site-header nav {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 0.5rem;
-  }
-
-  .search-container {
-    order: 3;
-    width: 100%;
-    max-width: none;
-    margin-top: 0.5rem;
   }
 
   .logo {
     font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .search-container {
+    order: 2;
+    flex: 1;
+    margin: 0 0.5rem;
+    width: auto;
+    max-width: none;
+  }
+
+  .mobile-menu-toggle {
+    order: 3;
+    flex-shrink: 0;
+  }
+
+  .nav-links {
+    order: 4;
+    width: 100%;
   }
 }
 

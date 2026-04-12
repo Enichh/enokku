@@ -1,8 +1,7 @@
-/* Fallback fonts (no Google Fonts due to CSP) */
-/* Using system fonts that match the aesthetic */
+/* Google Fonts: Bebas Neue + Space Mono */
 
 body {
-  font-family: "Courier New", Courier, monospace;
+  font-family: "Space Mono", "Courier New", Courier, monospace;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
@@ -31,9 +30,9 @@ h1,
 h2,
 h3,
 .logo {
-  font-family: "Impact", "Arial Black", sans-serif;
+  font-family: "Bebas Neue", "Impact", "Arial Black", sans-serif;
   letter-spacing: 0.05em;
-  font-weight: 900;
+  font-weight: 400;
 }
 
 /* Selection Styling */
@@ -167,6 +166,7 @@ nav {
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  position: relative;
 }
 
 .nav-links {
@@ -230,6 +230,7 @@ nav {
   }
 
   .nav-links.active {
+    display: flex;
     transform: translateY(0);
   }
 
