@@ -417,4 +417,5 @@ export {
   registerSyncViaServiceWorker,
   MAX_CACHED_CHAPTERS,
   IMAGE_CACHE_NAME,
+  getOfflineChapter,
 };
