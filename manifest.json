@@ -9,6 +9,7 @@
   "theme_color": "#e63946",
   "background_color": "#1a1a2e",
   "categories": ["entertainment", "books"],
+  "version": "1.2.0",
   "icons": [
     {
       "src": "assets/favicon.svg",
