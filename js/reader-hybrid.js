@@ -214,11 +214,11 @@ async function loadChapterNavigation() {
     console.log("[Reader] Current chapter index:", currentChapterIndex);
     console.log("[Reader] Total chapters:", allChapters.length);
 
-    // Update floating bar chapter info
+    // Update chapter title and floating bar chapter info
     if (currentChapterIndex >= 0) {
       const chapter = allChapters[currentChapterIndex];
       const chapterNum = chapter.attributes?.chapter || "?";
-      const chapterTitle = chapter.attributes?.title || "";
+      const chapterTitleText = chapter.attributes?.title || "";
       const hasPrev = currentChapterIndex > 0;
       const hasNext = currentChapterIndex < allChapters.length - 1;
       console.log(
@@ -227,7 +227,9 @@ async function loadChapterNavigation() {
         "hasNext:",
         hasNext,
       );
-      updateFloatingChapterInfo(chapterNum, chapterTitle, hasPrev, hasNext);
+      // Update header title with chapter number
+      chapterTitle.textContent = `Chapter ${chapterNum}`;
+      updateFloatingChapterInfo(chapterNum, chapterTitleText, hasPrev, hasNext);
     } else {
       console.log("[Reader] Chapter not found in chapters array!");
     }
