@@ -272,26 +272,3 @@
 #chapterList::-webkit-scrollbar-track {
   background: var(--bg-secondary);
 }
-@media (max-width: 768px) {
-  .start-reading-btn {
-    position: fixed !important;
-    bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
-    right: 20px !important;
-    width: auto !important;
-    min-width: 56px !important;
-    height: 56px !important;
-    border-radius: 30px !important;
-    padding: 0 1.2rem !important;
-    margin-top: 0 !important;
-    z-index: 150 !important;
-    box-shadow: 0 4px 16px rgba(255, 0, 0, 0.4) !important;
-  }
-
-  .btn-text {
-    display: none !important;
-  }
-
-  .btn-text-mobile {
-    display: inline !important;
-  }
-}
