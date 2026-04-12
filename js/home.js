@@ -29,6 +29,8 @@ const searchResultsSection = document.getElementById("searchResultsSection");
 const searchResultsRow = document.getElementById("searchResultsRow");
 const searchInput = document.getElementById("searchInput");
 const homeSections = document.getElementById("homeSections");
+const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+const navLinks = document.getElementById("navLinks");
 
 const mangaSections = [
   {
@@ -209,6 +211,12 @@ tabButtons.forEach((btn) => {
     const target = btn.dataset.target;
     filterSections(target);
   });
+});
+
+// Mobile menu toggle
+mobileMenuToggle?.addEventListener("click", () => {
+  navLinks?.classList.toggle("active");
+  mobileMenuToggle?.classList.toggle("active");
 });
 
 loadAllSections();
