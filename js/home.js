@@ -245,69 +245,9 @@ async function loadSection(fetchFn, rowElement, sectionName) {
   }
 }
 
-// New function to load combined trending content
-async function loadTrendingSection(filter = "all") {
-  if (!trendingRow) return;
-
-  showRowLoading(trendingRow);
-
-  try {
-    const [trendingData, topMangaData, topManwhaData] = await Promise.all([
-      fetchTopTrending(8),
-      fetchTopManga(8),
-      fetchTopManwha(8),
-    ]);
-
-    let combinedData = [];
-
-    if (filter === "all") {
-      // Combine all three sources
-      combinedData = [
-        ...(trendingData.data || []),
-        ...(topMangaData.data || []),
-        ...(topManwhaData.data || []),
-      ];
-    } else if (filter === "manga") {
-      // Combine trending and top manga
-      combinedData = [
-        ...(trendingData.data || []),
-        ...(topMangaData.data || []),
-      ];
-    } else if (filter === "manhwa") {
-      // Combine trending and top manhwa
-      combinedData = [
-        ...(trendingData.data || []),
-        ...(topManwhaData.data || []),
-      ];
-    }
-
-    // Remove duplicates by manga ID
-    const uniqueData = combinedData.filter(
-      (manga, index, self) =>
-        index === self.findIndex((m) => m.id === manga.id),
-    );
-
-    trendingRow.innerHTML = "";
-
-    if (uniqueData.length === 0) {
-      trendingRow.innerHTML = `<div class="empty-small">No ${filter} found</div>`;
-      return;
-    }
-
-    uniqueData.forEach((manga) => {
-      trendingRow.appendChild(renderMangaCard(manga));
-    });
-  } catch (error) {
-    showRowError(trendingRow, `Error: ${error.message}`);
-  }
-}
-
 async function loadAllSections() {
-  // Load trending section with 'all' filter by default
-  await loadTrendingSection("all");
-
-  // Load other sections
   await Promise.all([
+    loadSection(fetchTopTrending, trendingRow, "trending manga"),
     loadSection(fetchTopManga, topMangaRow, "top manga"),
     loadSection(fetchTopManwha, topManwhaRow, "top manwha"),
     loadSection(fetchRecentlyUpdated, recentlyUpdatedRow, "recently updated"),
@@ -389,12 +329,6 @@ function filterSections(filter) {
       container.style.gridTemplateColumns = "1fr";
     }
   });
-
-  // Handle trending tabs - reload trending section with filter
-  if (filter.startsWith("trending-")) {
-    const trendingFilter = filter.replace("trending-", "");
-    loadTrendingSection(trendingFilter);
-  }
 }
 
 const tabButtons = document.querySelectorAll(".tab-btn");
@@ -403,16 +337,7 @@ tabButtons.forEach((btn) => {
     tabButtons.forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
     const target = btn.dataset.target;
-
-    // Handle trending tabs differently
-    if (target.startsWith("trending-")) {
-      // Only update trending section
-      const trendingFilter = target.replace("trending-", "");
-      loadTrendingSection(trendingFilter);
-    } else {
-      // Handle legacy tabs
-      filterSections(target);
-    }
+    filterSections(target);
   });
 });
 
