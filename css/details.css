@@ -275,7 +275,7 @@
 @media (max-width: 768px) {
   .start-reading-btn {
     position: fixed !important;
-    bottom: 20px !important;
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
     right: 20px !important;
     width: auto !important;
     min-width: 56px !important;
