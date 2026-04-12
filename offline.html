@@ -282,7 +282,7 @@
     </nav>
 
     <script type="module">
-      import { getContinueReadingList } from "./js/reading-history.js";
+      import { getReadingHistory } from "./js/reading-history.js";
       import {
         getAllOfflineChapters,
         isChapterCached,
@@ -291,7 +291,7 @@
 
       async function loadCachedContent() {
         try {
-          const readingList = await getContinueReadingList();
+          const readingList = getReadingHistory();
           const cachedList = document.getElementById("cachedList");
 
           if (readingList.length === 0) {
