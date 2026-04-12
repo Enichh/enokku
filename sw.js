@@ -173,7 +173,7 @@ function addCacheTimestamp(response) {
   const headers = new Headers(response.headers);
   headers.set("x-sw-cached-at", Date.now().toString());
 
-  return new Response(response.body, {
+  return new Response(response.clone().body, {
     status: response.status,
     statusText: response.statusText,
     headers: headers,
