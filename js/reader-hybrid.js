@@ -110,8 +110,7 @@ async function loadMangaDetailsForHistory() {
 async function loadChapterBySource() {
   console.log(`[Reader] Loading chapter from source: ${source}`);
 
-  const style = getSourceStyle(source);
-  chapterTitle.textContent = `Chapter (${style.name})`;
+  chapterTitle.textContent = "Chapter";
 
   // Set fallback floating bar chapter info
   updateFloatingChapterInfo("?", "", false, false);
@@ -143,7 +142,7 @@ async function loadChapterBySource() {
     alt: `Page ${index + 1}`,
   }));
 
-  chapterTitle.textContent = `Chapter (${style.name})`;
+  chapterTitle.textContent = "Chapter";
 }
 
 async function loadChapterNavigation() {
