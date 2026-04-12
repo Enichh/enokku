@@ -7,6 +7,9 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   position: relative;
+  /* Extend background into iOS unsafe area */
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
 }
 
 /* Global Grain Texture Overlay */
