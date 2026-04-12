@@ -1,7 +1,4 @@
-import {
-  getContinueReadingList,
-  clearReadingHistory,
-} from "./reading-history.js";
+import { getReadingHistory, clearHistory } from "./reading-history.js";
 
 const LIBRARY_STATE = {
   activeTab: "continue",
@@ -70,7 +67,7 @@ async function loadContinueReading() {
   if (!container) return;
 
   try {
-    const readingList = await getContinueReadingList();
+    const readingList = getReadingHistory();
 
     if (readingList.length === 0) {
       container.innerHTML = `
@@ -140,7 +137,7 @@ async function loadRecentHistory() {
   if (!container) return;
 
   try {
-    const readingList = await getContinueReadingList();
+    const readingList = getReadingHistory();
 
     if (readingList.length === 0) {
       container.innerHTML = `
@@ -265,7 +262,7 @@ async function handleClearHistory() {
   if (!confirm("Clear all reading history? This cannot be undone.")) return;
 
   try {
-    await clearReadingHistory();
+    clearHistory();
     loadContinueReading();
     loadRecentHistory();
   } catch (error) {
