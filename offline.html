@@ -184,6 +184,168 @@
         opacity: 1;
       }
 
+      /* Downloaded Chapters Redesign */
+      .downloaded-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .downloaded-search {
+        flex: 1;
+        max-width: 300px;
+      }
+
+      .downloaded-search input {
+        width: 100%;
+        padding: 0.6rem 1rem;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text-primary);
+        font-family: "Space Mono", monospace;
+        font-size: 0.9rem;
+      }
+
+      .downloaded-stats {
+        margin-bottom: 1rem;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+
+      .downloaded-groups {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .manga-group {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .manga-group-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        cursor: pointer;
+        transition: background var(--transition-base);
+      }
+
+      .manga-group-header:hover {
+        background: var(--bg-tertiary);
+      }
+
+      .manga-group-cover {
+        width: 50px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 6px;
+        flex-shrink: 0;
+      }
+
+      .manga-group-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .manga-group-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .manga-group-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+
+      .manga-group-chapters {
+        padding: 0 1rem 1rem 1rem;
+        border-top: 1px solid var(--border);
+        display: none;
+      }
+
+      .manga-group.expanded .manga-group-chapters {
+        display: block;
+      }
+
+      .chapter-list {
+        display: grid;
+        gap: 0.5rem;
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+      }
+
+      .chapter-item-compact {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.6rem 0.8rem;
+        background: var(--bg-tertiary);
+        border-radius: 6px;
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: all var(--transition-base);
+        font-size: 0.9rem;
+      }
+
+      .chapter-item-compact:hover {
+        background: var(--bg-elevated);
+        border-color: var(--accent);
+      }
+
+      .chapter-item-compact .chapter-info {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .chapter-number {
+        font-weight: 600;
+        color: var(--accent);
+      }
+
+      .chapter-title {
+        color: var(--text-secondary);
+      }
+
+      .chapter-meta {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+      }
+
+      .expand-icon {
+        margin-left: auto;
+        transition: transform var(--transition-base);
+        font-size: 1.2rem;
+      }
+
+      .manga-group.expanded .expand-icon {
+        transform: rotate(90deg);
+      }
+
+      @media (min-width: 768px) {
+        .chapter-list {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        }
+      }
+
       @media (max-width: 768px) {
         .offline-title {
           font-size: 2rem;
@@ -241,8 +403,18 @@
       </section>
 
       <section class="cached-content" id="downloadedChaptersSection">
-        <h2>Downloaded Chapters</h2>
-        <div class="cached-list" id="downloadedChaptersList">
+        <div class="downloaded-header">
+          <h2>Downloaded Chapters</h2>
+          <div class="downloaded-search">
+            <input
+              type="search"
+              id="downloadedSearch"
+              placeholder="Filter by manga or chapter..."
+            />
+          </div>
+        </div>
+        <div class="downloaded-stats" id="downloadedStats"></div>
+        <div class="downloaded-groups" id="downloadedGroups">
           <div class="empty-cached">No downloaded chapters available</div>
         </div>
       </section>
@@ -340,105 +512,137 @@
         try {
           console.log("[Offline] Loading downloaded chapters...");
           const chapters = await getAllOfflineChapters();
-          console.log("[Offline] Found chapters:", chapters.length, chapters);
-          const downloadedList = document.getElementById(
-            "downloadedChaptersList",
-          );
+          const groupsContainer = document.getElementById("downloadedGroups");
+          const statsEl = document.getElementById("downloadedStats");
 
           if (chapters.length === 0) {
-            console.log("[Offline] No chapters found, checking database...");
-            downloadedList.innerHTML =
-              '<div class="empty-cached">No downloaded chapters available. Chapters you read will be automatically cached for offline reading. (Debug: ' +
-              chapters.length +
-              " chapters found in database)</div>";
+            statsEl.textContent = "";
+            groupsContainer.innerHTML =
+              '<div class="empty-cached">No downloaded chapters available</div>';
             return;
           }
 
-          // Group chapters by manga
-          console.log("[Offline] Grouping chapters by manga...");
-          const chaptersByManga = {};
-          chapters.forEach((chapter) => {
-            console.log("[Offline] Processing chapter for grouping:", chapter);
-            if (!chaptersByManga[chapter.mangaId]) {
-              chaptersByManga[chapter.mangaId] = [];
+          // Group by mangaId
+          const groups = {};
+          for (const ch of chapters) {
+            if (!groups[ch.mangaId]) {
+              groups[ch.mangaId] = [];
             }
-            chaptersByManga[chapter.mangaId].push(chapter);
-          });
-          console.log(
-            "[Offline] Chapters grouped by manga:",
-            Object.keys(chaptersByManga),
+            groups[ch.mangaId].push(ch);
+          }
+
+          // Sort groups by manga title (we'll fetch metadata)
+          const groupEntries = await Promise.all(
+            Object.entries(groups).map(async ([mangaId, mangaChapters]) => {
+              const metadata = await getCachedMangaMetadata(mangaId);
+              const title = metadata?.title || `Manga ${mangaId.slice(0, 8)}`;
+              const coverUrl = metadata?.coverUrl || "assets/favicon.svg";
+              // Sort chapters by number descending (newest first)
+              mangaChapters.sort((a, b) => {
+                const aNum = parseFloat(a.chapterNumber) || 0;
+                const bNum = parseFloat(b.chapterNumber) || 0;
+                return bNum - aNum;
+              });
+              return { mangaId, title, coverUrl, chapters: mangaChapters };
+            }),
           );
 
+          // Sort groups alphabetically by title
+          groupEntries.sort((a, b) => a.title.localeCompare(b.title));
+
+          // Render stats
+          const totalManga = groupEntries.length;
+          const totalChapters = chapters.length;
+          statsEl.textContent = `${totalManga} manga · ${totalChapters} chapters`;
+
+          // Render groups
           let html = "";
-          for (const [mangaId, mangaChapters] of Object.entries(
-            chaptersByManga,
-          )) {
-            console.log(
-              `[Offline] Processing manga group: ${mangaId} with ${mangaChapters.length} chapters`,
-            );
-
-            // Get manga title from cached metadata
-            const mangaMetadata = await getCachedMangaMetadata(mangaId);
-            console.log(
-              `[Offline] Manga metadata for ${mangaId}:`,
-              mangaMetadata,
-            );
-            const mangaTitle =
-              mangaMetadata?.title ||
-              mangaMetadata?.attributes?.title ||
-              `Manga ${mangaId.slice(0, 8)}...`;
-            console.log(`[Offline] Using manga title: ${mangaTitle}`);
-
+          for (const group of groupEntries) {
+            const groupId = `group-${group.mangaId.replace(/[^a-zA-Z0-9]/g, "")}`;
             html += `
-              <div class="offline-manga-group">
-                <h3 class="offline-manga-title">${mangaTitle}</h3>
-                <div class="offline-chapter-items">
-            `;
-
-            mangaChapters.forEach((chapter) => {
-              console.log("[Offline] Rendering chapter:", chapter);
-              const cachedAt = new Date(chapter.cachedAt).toLocaleDateString();
-              const size = formatBytes(chapter.pageCount * 500 * 1024); // Estimate 500KB per page
-
-              // Detect Atsumaru chapters by checking if chapterId starts with 'atsu-' or source is 'atsumaru'
-              const isAtsumaru =
-                chapter.chapterId?.startsWith("atsu-") ||
-                chapter.source === "atsumaru";
-              const readerParams = isAtsumaru
-                ? `id=${chapter.chapterId}&manga=${chapter.mangaId}&source=atsumaru`
-                : `id=${chapter.chapterId}&manga=${chapter.mangaId}`;
-
-              console.log(
-                `[Offline] Chapter ${chapter.chapterId} - Atsumaru: ${isAtsumaru}, Params: ${readerParams}`,
-              );
-
-              html += `
-                <a href="reader.html?${readerParams}" class="cached-item">
-                  <div class="cached-item-info">
-                    <div class="cached-item-title">
-                      Chapter ${chapter.chapterNumber || "?"}
-                      ${chapter.chapterTitle ? ` - ${chapter.chapterTitle}` : ""}
-                    </div>
-                    <div class="cached-item-chapter">
-                      ${chapter.pageCount} pages | Cached: ${cachedAt} | Est. ${size}
+              <div class="manga-group" id="${groupId}">
+                <div class="manga-group-header" data-group="${groupId}">
+                  <img class="manga-group-cover" src="${group.coverUrl}" alt="" onerror="this.src='assets/favicon.svg'">
+                  <div class="manga-group-info">
+                    <div class="manga-group-title">${group.title}</div>
+                    <div class="manga-group-meta">
+                      <span>${group.chapters.length} chapter${group.chapters.length !== 1 ? "s" : ""}</span>
+                      <span>Latest: Ch. ${group.chapters[0]?.chapterNumber || "?"}</span>
                     </div>
                   </div>
-                </a>
-              `;
-            });
-
-            html += `
+                  <span class="expand-icon">></span>
+                </div>
+                <div class="manga-group-chapters">
+                  <div class="chapter-list">
+                    ${group.chapters
+                      .map((ch) => {
+                        const isAtsumaru =
+                          ch.source === "atsumaru" ||
+                          ch.chapterId?.startsWith("atsu-");
+                        const readerParams = isAtsumaru
+                          ? `id=${ch.chapterId}&manga=${ch.mangaId}&source=atsumaru`
+                          : `id=${ch.chapterId}&manga=${ch.mangaId}`;
+                        const cachedDate = new Date(
+                          ch.cachedAt,
+                        ).toLocaleDateString();
+                        return `
+                        <a href="reader.html?${readerParams}" class="chapter-item-compact">
+                          <div class="chapter-info">
+                            <span class="chapter-number">Ch. ${ch.chapterNumber || "?"}</span>
+                            ${ch.chapterTitle ? `<span class="chapter-title">${ch.chapterTitle}</span>` : ""}
+                          </div>
+                          <div class="chapter-meta">${cachedDate}</div>
+                        </a>
+                      `;
+                      })
+                      .join("")}
+                  </div>
                 </div>
               </div>
             `;
           }
 
-          console.log("[Offline] Setting downloaded chapters HTML...");
-          downloadedList.innerHTML = html;
+          groupsContainer.innerHTML = html;
+
+          // Add click handlers for collapsible groups
+          document.querySelectorAll(".manga-group-header").forEach((header) => {
+            header.addEventListener("click", (e) => {
+              const group = header.closest(".manga-group");
+              group.classList.toggle("expanded");
+            });
+          });
+
+          // Search functionality
+          const searchInput = document.getElementById("downloadedSearch");
+          if (searchInput) {
+            searchInput.addEventListener("input", (e) => {
+              const query = e.target.value.toLowerCase();
+              document.querySelectorAll(".manga-group").forEach((group) => {
+                const title =
+                  group
+                    .querySelector(".manga-group-title")
+                    ?.textContent.toLowerCase() || "";
+                const chapters = group.querySelectorAll(
+                  ".chapter-item-compact",
+                );
+                let groupVisible = title.includes(query);
+
+                chapters.forEach((ch) => {
+                  const chapterText = ch.textContent.toLowerCase();
+                  const matches = chapterText.includes(query);
+                  ch.style.display = matches ? "flex" : "none";
+                  if (matches) groupVisible = true;
+                });
+
+                group.style.display = groupVisible ? "block" : "none";
+              });
+            });
+          }
+
           console.log("[Offline] Downloaded chapters rendered successfully");
         } catch (error) {
           console.error("Failed to load downloaded chapters:", error);
-          document.getElementById("downloadedChaptersList").innerHTML =
+          document.getElementById("downloadedGroups").innerHTML =
             '<div class="empty-cached">Failed to load downloaded chapters.</div>';
         }
       }
