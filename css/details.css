@@ -330,6 +330,64 @@
   cursor: not-allowed;
 }
 
+/* Download All button */
+#downloadAllChaptersBtn {
+  background: linear-gradient(
+    135deg,
+    var(--accent) 0%,
+    var(--accent-hover) 100%
+  );
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#downloadAllChaptersBtn::before {
+  content: "⬇️";
+  font-size: 1rem;
+}
+
+#downloadAllChaptersBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--accent-hover) 0%, #990000 100%);
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.5);
+  transform: translateY(-1px);
+}
+
+#downloadAllChaptersBtn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(255, 0, 0, 0.3);
+}
+
+#downloadAllChaptersBtn:disabled {
+  background: var(--surface-hover);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+#downloadAllChaptersBtn.downloading {
+  background: linear-gradient(
+    135deg,
+    var(--surface-hover) 0%,
+    var(--surface) 100%
+  );
+  color: var(--text-secondary);
+  cursor: wait;
+}
+
+#downloadAllChaptersBtn.downloading::before {
+  content: "⏳";
+}
+
 /* Download All container */
 .download-all-container {
   display: flex;
@@ -339,6 +397,7 @@
   background: var(--surface-elevated);
   border-radius: 8px;
   margin-bottom: 1rem;
+  border: 1px solid var(--border);
 }
 
 .download-status {
