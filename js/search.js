@@ -302,7 +302,7 @@ function renderResults(mangaList, append = false) {
       return `
         <div class="manga-card" data-manga-id="${manga.id}" style="animation-delay: ${index * 50}ms">
           <div class="manga-card-cover">
-            <img src="${coverUrl}" alt="${title}" loading="lazy" onerror="this.src='${getPlaceholderImage(256, 384, "No Cover")}'">
+            <img src="${coverUrl}" alt="${title}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="this.src='${getPlaceholderImage(256, 384, "No Cover")}'">
             <div class="manga-card-overlay"></div>
             ${badge}
           </div>
