@@ -214,14 +214,18 @@ async function handleImageRequest(request) {
   }
 
   try {
-    // Preserve referrer header for MangaDex image requests
-    const fetchOptions = {
+    // Get the referrer from the original request or use the page origin
+    const referrer = request.referrer || self.location.origin;
+
+    // Create a new request with explicit referrer preservation
+    const modifiedRequest = new Request(request.url, {
+      method: request.method,
+      headers: request.headers,
       mode: "cors",
       credentials: "omit",
-    };
-
-    // Clone request to preserve all headers including referrer
-    const modifiedRequest = new Request(request, fetchOptions);
+      referrer: referrer,
+      referrerPolicy: "no-referrer-when-downgrade",
+    });
 
     const networkResponse = await fetch(modifiedRequest);
     if (networkResponse.ok) {
