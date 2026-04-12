@@ -106,7 +106,6 @@ async function fetchMangaDetails(mangaId) {
 }
 
 async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
-  console.log(`[API] Fetching manga feed for: ${mangaId}`);
   const allChapters = [];
   const limit = 100;
   const maxOffset = 500; // MangaDex feed endpoint limit
@@ -134,7 +133,6 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
   const fetchPage = async (offset, order) => {
     const params = buildParams(offset, order);
     const url = `${API_BASE_URL}/manga/${mangaId}/feed?${params}`;
-    console.log(`[API] Feed URL (${order}, offset ${offset}): ${url}`);
 
     const response = await fetch(url);
     if (!response.ok) {
@@ -159,19 +157,9 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
           !chapter.attributes.isUnavailable &&
           !chapter.attributes.externalUrl;
 
-        if (!isValid && chapter.attributes?.externalUrl) {
-          console.log(
-            `[API] Chapter ${chapter.attributes.chapter} external:`,
-            chapter.attributes.externalUrl.substring(0, 50),
-          );
-        }
         if (!isValid) filteredCount++;
         return isValid;
       });
-
-      console.log(
-        `[API] Ascending: ${data.data.length} total, ${validChapters.length} valid, ${filteredCount} filtered`,
-      );
 
       allChapters.push(...validChapters);
 
@@ -205,10 +193,6 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
         return isValid;
       });
 
-      console.log(
-        `[API] Descending: ${data.data.length} total, ${validChapters.length} valid, ${filteredCount} filtered`,
-      );
-
       // Add chapters we don't already have
       const existingIds = new Set(allChapters.map((c) => c.id));
       const newChapters = validChapters.filter((c) => !existingIds.has(c.id));
@@ -224,10 +208,6 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
     console.error(`[API] Error fetching descending:`, error);
   }
 
-  console.log(
-    `[API] Total chapters fetched before dedup: ${allChapters.length}`,
-  );
-
   // Deduplicate chapters by chapter number, keeping the one with most pages
   const chapterMap = new Map();
   allChapters.forEach((chapter) => {
@@ -242,7 +222,6 @@ async function fetchMangaFeed(mangaId, translatedLanguage = ["en"]) {
   });
 
   const dedupedChapters = Array.from(chapterMap.values());
-  console.log(`[API] Total chapters after dedup: ${dedupedChapters.length}`);
   return { data: dedupedChapters };
 }
 
@@ -259,7 +238,6 @@ async function fetchChapterDetails(chapterId) {
 }
 
 async function fetchChapterPages(chapterId) {
-  console.log(`[API] Fetching chapter pages from at-home for: ${chapterId}`);
   const response = await fetch(`${API_BASE_URL}/at-home/server/${chapterId}`);
 
   if (!response.ok) {
@@ -276,7 +254,6 @@ async function fetchChapterPages(chapterId) {
   }
 
   const data = await response.json();
-  console.log(`[API] at-home response:`, JSON.stringify(data, null, 2));
 
   if (!data || typeof data !== "object") {
     throw new Error(
@@ -289,7 +266,6 @@ async function fetchChapterPages(chapterId) {
     !data.chapter?.hash ||
     !Array.isArray(data.chapter?.data)
   ) {
-    console.error(`[API] Invalid at-home data structure:`, data);
     throw new Error("Invalid chapter pages data structure");
   }
 
@@ -297,22 +273,10 @@ async function fetchChapterPages(chapterId) {
 }
 
 function getCoverUrl(mangaId, coverArt, size = "256") {
-  console.log(
-    "[getCoverUrl] mangaId:",
-    mangaId,
-    "coverArt:",
-    JSON.stringify(coverArt, null, 2),
-  );
-  if (!coverArt) {
-    console.log("[getCoverUrl] coverArt is null/undefined");
-    return null;
-  }
-  if (!coverArt.attributes) {
-    console.log("[getCoverUrl] coverArt.attributes is missing");
+  if (!coverArt?.attributes?.fileName) {
     return null;
   }
   const filename = coverArt.attributes.fileName;
-  console.log("[getCoverUrl] filename:", filename);
   return `${COVER_BASE_URL}/${mangaId}/${filename}.${size}.jpg`;
 }
 
