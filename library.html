@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Your manga library - Continue reading, favorites, and bookmarks on Enokku" />
+    <meta name="theme-color" content="#ff0000" />
+
+    <meta property="og:title" content="Library - Enokku" />
+    <meta property="og:description" content="Your personal manga collection and reading history" />
+    <meta property="og:type" content="website" />
+
+    <title>Library - Enokku</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/utilities.css" />
+    <link rel="stylesheet" href="css/cards.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="css/bottom-nav.css" />
+    <link rel="stylesheet" href="css/library.css" />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header class="site-header">
+      <div class="container">
+        <nav aria-label="Main navigation">
+          <a href="index.html" class="logo" aria-label="Enokku Home">Enokku</a>
+          <div class="nav-links">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="search.html" class="nav-link">Catalog</a>
+            <a href="library.html" class="nav-link active">Library</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main-content" class="library-main">
+      <div class="container">
+        <div class="library-header">
+          <h1 class="library-title">My Library</h1>
+          <p class="library-subtitle">Continue reading and manage your collection</p>
+        </div>
+
+        <nav class="library-tabs" aria-label="Library sections">
+          <button class="library-tab active" data-tab="continue" aria-selected="true">
+            <span>📖</span> Continue
+          </button>
+          <button class="library-tab" data-tab="recent" aria-selected="false">
+            <span>🕐</span> Recent
+          </button>
+          <button class="library-tab" data-tab="favorites" aria-selected="false">
+            <span>⭐</span> Favorites
+          </button>
+          <button class="library-tab" data-tab="bookmarks" aria-selected="false">
+            <span>🔖</span> Bookmarks
+          </button>
+        </nav>
+
+        <section class="library-content active" data-content="continue" aria-labelledby="continue-heading">
+          <div class="library-section-header">
+            <h2 id="continue-heading" class="library-section-title">Continue Reading</h2>
+            <button id="clearHistoryBtn" class="btn-text" type="button" style="display: none;">
+              Clear All
+            </button>
+          </div>
+          <div id="continueReadingGrid" class="library-grid">
+            <div class="loading">
+              <div class="spinner"></div>
+              <p>Loading your reading progress...</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="library-content" data-content="recent" aria-labelledby="recent-heading" hidden>
+          <h2 id="recent-heading" class="library-section-title">Recently Read</h2>
+          <div id="recentHistoryGrid" class="library-grid compact">
+            <div class="loading">
+              <div class="spinner"></div>
+              <p>Loading history...</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="library-content" data-content="favorites" aria-labelledby="favorites-heading" hidden>
+          <h2 id="favorites-heading" class="library-section-title">Favorites</h2>
+          <div id="favoritesGrid" class="library-grid">
+            <div class="loading">
+              <div class="spinner"></div>
+              <p>Loading favorites...</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="library-content" data-content="bookmarks" aria-labelledby="bookmarks-heading" hidden>
+          <h2 id="bookmarks-heading" class="library-section-title">Bookmarks</h2>
+          <div id="bookmarksGrid" class="library-grid compact">
+            <div class="loading">
+              <div class="spinner"></div>
+              <p>Loading bookmarks...</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>&copy; 2026 Enokku. Made with ❤️ by Enoch Gabriel Astor.</p>
+      </div>
+    </footer>
+
+    <nav class="bottom-nav" id="bottomNav">
+      <a href="index.html" class="bottom-nav-item" data-page="home">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+          <path d="M12 3L4 9v12h6v-6h4v6h6V9L12 3z"/>
+        </svg>
+        <span>Home</span>
+      </a>
+      <a href="search.html" class="bottom-nav-item" data-page="search">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+          <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 0 0 1.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 0 0-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 0 0 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </svg>
+        <span>Search</span>
+      </a>
+      <a href="library.html" class="bottom-nav-item active" data-page="library">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+          <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-3 2v12l3.5-2 3.5 2V4h-7z"/>
+        </svg>
+        <span>Library</span>
+      </a>
+      <a href="settings.html" class="bottom-nav-item" data-page="settings">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+          <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L3.16 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.58 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+        </svg>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <noscript>
+      <div class="noscript-warning">
+        <p>JavaScript is required to use the library. Please enable JavaScript in your browser settings.</p>
+      </div>
+    </noscript>
+
+    <script type="module" src="js/library.js"></script>
+  </body>
+</html>

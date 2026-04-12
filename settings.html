@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Settings and preferences for Enokku manga reader" />
+    <meta name="theme-color" content="#ff0000" />
+
+    <meta property="og:title" content="Settings - Enokku" />
+    <meta property="og:description" content="Customize your reading experience" />
+    <meta property="og:type" content="website" />
+
+    <title>Settings - Enokku</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/utilities.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="css/bottom-nav.css" />
+    <link rel="stylesheet" href="css/settings.css" />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header class="site-header">
+      <div class="container">
+        <nav aria-label="Main navigation">
+          <a href="index.html" class="logo" aria-label="Enokku Home">Enokku</a>
+          <div class="nav-links">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="search.html" class="nav-link">Catalog</a>
+            <a href="library.html" class="nav-link">Library</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main-content" class="settings-main">
+      <div class="container">
+        <div class="settings-header">
+          <h1 class="settings-title">Settings</h1>
+          <p class="settings-subtitle">Customize your reading experience</p>
+        </div>
+
+        <div class="settings-grid">
+          <section class="settings-section">
+            <h2 class="settings-section-title">
+              <span>📖</span> Reading Preferences
+            </h2>
+
+            <div class="settings-group">
+              <label class="settings-label" for="readingDirection">Reading Direction</label>
+              <div class="settings-control">
+                <select id="readingDirection" class="settings-select">
+                  <option value="rtl">Right to Left (Manga)</option>
+                  <option value="ltr">Left to Right (Manhwa)</option>
+                </select>
+              </div>
+              <p class="settings-hint">Default direction for the chapter reader</p>
+            </div>
+
+            <div class="settings-group">
+              <label class="settings-label" for="imageQuality">Image Quality</label>
+              <div class="settings-control">
+                <select id="imageQuality" class="settings-select">
+                  <option value="auto">Auto (Recommended)</option>
+                  <option value="high">High Quality</option>
+                  <option value="data-saver">Data Saver</option>
+                </select>
+              </div>
+              <p class="settings-hint">Higher quality uses more data</p>
+            </div>
+
+            <div class="settings-group">
+              <label class="settings-toggle" for="preloadNextChapter">
+                <span class="settings-toggle-label">Preload Next Chapter</span>
+                <input type="checkbox" id="preloadNextChapter" class="settings-toggle-input">
+                <span class="settings-toggle-slider"></span>
+              </label>
+              <p class="settings-hint">Automatically cache the next chapter while reading</p>
+            </div>
+          </section>
+
+          <section class="settings-section">
+            <h2 class="settings-section-title">
+              <span>🎨</span> Appearance
+            </h2>
+
+            <div class="settings-group">
+              <label class="settings-label" for="readerBackground">Reader Background</label>
+              <div class="settings-control">
+                <select id="readerBackground" class="settings-select">
+                  <option value="#0a0a0a">Pure Black</option>
+                  <option value="#141414">Dark Gray</option>
+                  <option value="#1a1a2e">Midnight Blue</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <label class="settings-label" for="fontSize">Interface Font Size</label>
+              <div class="settings-control">
+                <select id="fontSize" class="settings-select">
+                  <option value="small">Small</option>
+                  <option value="medium">Medium</option>
+                  <option value="large">Large</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <label class="settings-toggle" for="hapticFeedback">
+                <span class="settings-toggle-label">Haptic Feedback</span>
+                <input type="checkbox" id="hapticFeedback" class="settings-toggle-input">
+                <span class="settings-toggle-slider"></span>
+              </label>
+              <p class="settings-hint">Vibration on touch (mobile only)</p>
+            </div>
+          </section>
+
+          <section class="settings-section">
+            <h2 class="settings-section-title">
+              <span>💾</span> Offline & Storage
+            </h2>
+
+            <div class="settings-group">
+              <label class="settings-label" for="cacheSizeLimit">Cache Size Limit</label>
+              <div class="settings-control range-control">
+                <input type="range" id="cacheSizeLimit" class="settings-range" min="50" max="500" step="50" value="100">
+                <span class="settings-range-value" id="cacheSizeValue">100 MB</span>
+              </div>
+              <p class="settings-hint">Maximum storage for offline content</p>
+            </div>
+
+            <div class="settings-info">
+              <div class="settings-info-item">
+                <span class="settings-info-label">Storage Used:</span>
+                <span class="settings-info-value" id="storageUsage">Calculating...</span>
+              </div>
+              <div class="settings-info-item">
+                <span class="settings-info-label">Data Saved:</span>
+                <span class="settings-info-value" id="dataSaved">0 MB</span>
+              </div>
+            </div>
+
+            <div class="settings-actions">
+              <button id="clearCacheBtn" class="btn-secondary settings-action-btn">
+                <span>🗑️</span> Clear Cache
+              </button>
+            </div>
+          </section>
+
+          <section class="settings-section">
+            <h2 class="settings-section-title">
+              <span>💾</span> Data Management
+            </h2>
+
+            <div class="settings-actions">
+              <button id="exportDataBtn" class="btn-primary settings-action-btn">
+                <span>📤</span> Export Data
+              </button>
+              <button id="importDataBtn" class="btn-secondary settings-action-btn">
+                <span>📥</span> Import Data
+              </button>
+              <input type="file" id="importFileInput" accept=".json" hidden>
+            </div>
+            <p class="settings-hint">Backup and restore your reading history, favorites, and settings</p>
+          </section>
+
+          <section class="settings-section">
+            <h2 class="settings-section-title">
+              <span>ℹ️</span> About
+            </h2>
+
+            <div class="settings-info">
+              <div class="settings-info-item">
+                <span class="settings-info-label">Version:</span>
+                <span class="settings-info-value" id="appVersion">1.0.0</span>
+              </div>
+              <div class="settings-info-item">
+                <span class="settings-info-label">Service Worker:</span>
+                <span class="settings-info-value" id="swStatus">
+                  <span class="status-dot"></span> Checking...
+                </span>
+              </div>
+            </div>
+
+            <div class="settings-about">
+              <p>Enokku is a free manga and manhwa reader powered by the MangaDex API.</p>
+              <p>Built with ❤️ by Enoch Gabriel Astor.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>&copy; 2026 Enokku. Made with ❤️ by Enoch Gabriel Astor.</p>
+      </div>
+    </footer>
+
+    <nav class="bottom-nav" id="bottomNav">
+      <a href="index.html" class="bottom-nav-item" data-page="home">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+          <path d="M12 3L4 9v12h6v-6h4v6h6V9L12 3z"/>
+        </svg>
+        <span>Home</span>
+      </a>
+      <a href="search.html" class="bottom-nav-item" data-page="search">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+          <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 0 0 1.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 0 0-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 0 0 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </svg>
+        <span>Search</span>
+      </a>
+      <a href="library.html" class="bottom-nav-item" data-page="library">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+          <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-3 2v12l3.5-2 3.5 2V4h-7z"/>
+        </svg>
+        <span>Library</span>
+      </a>
+      <a href="settings.html" class="bottom-nav-item active" data-page="settings">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+          <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L3.16 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.58 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+        </svg>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <noscript>
+      <div class="noscript-warning">
+        <p>JavaScript is required to use settings. Please enable JavaScript in your browser settings.</p>
+      </div>
+    </noscript>
+
+    <script type="module" src="js/settings.js"></script>
+  </body>
+</html>

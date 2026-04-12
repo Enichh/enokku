@@ -1,0 +1,282 @@
+/* ===== Bottom Navigation for Mobile PWA ===== */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-top: 1px solid var(--glass-border);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+  transition: transform var(--transition-base) var(--ease-out-expo);
+}
+
+.bottom-nav.hidden {
+  transform: translateY(100%);
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 16px;
+  min-width: 64px;
+  min-height: 48px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-family: 'Space Mono', monospace;
+  transition: all var(--transition-fast) var(--ease-out-expo);
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-nav-item::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background var(--transition-fast);
+}
+
+.bottom-nav-item:active::before {
+  background: var(--surface-hover);
+}
+
+.bottom-nav-item svg {
+  width: 24px;
+  height: 24px;
+  transition: all var(--transition-fast);
+  color: var(--text-muted);
+}
+
+.bottom-nav-item span {
+  font-size: 0.7rem;
+  transition: all var(--transition-fast);
+}
+
+.bottom-nav-item.active,
+.bottom-nav-item:hover {
+  color: var(--accent);
+}
+
+.bottom-nav-item.active svg,
+.bottom-nav-item:hover svg {
+  color: var(--accent);
+  filter: drop-shadow(0 0 8px var(--accent-glow));
+}
+
+.bottom-nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Desktop: Hide bottom nav */
+@media (min-width: 769px) {
+  .bottom-nav {
+    display: none;
+  }
+
+  body {
+    padding-bottom: 0 !important;
+  }
+}
+
+/* Mobile: Adjust body padding and hide regular footer */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .site-footer {
+    padding-bottom: calc(1rem + 64px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Ensure content doesn't get hidden behind bottom nav */
+  main {
+    padding-bottom: calc(1rem + 64px);
+  }
+
+  /* Reader page: No bottom nav */
+  body.reader-page .bottom-nav {
+    display: none;
+  }
+
+  body.reader-page {
+    padding-bottom: 0;
+  }
+}
+
+/* Small mobile adjustments */
+@media (max-width: 380px) {
+  .bottom-nav-item {
+    padding: 8px 12px;
+    min-width: 56px;
+  }
+
+  .bottom-nav-item span {
+    font-size: 0.65rem;
+  }
+
+  .bottom-nav-item svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* Touch feedback */
+@media (hover: none) {
+  .bottom-nav-item:active {
+    transform: scale(0.95);
+  }
+
+  .bottom-nav-item:active svg {
+    color: var(--accent);
+  }
+}
+
+/* Haptic feedback indicator (visual only) */
+.bottom-nav-item.haptic::after {
+  animation: hapticPulse 0.2s ease-out;
+}
+
+@keyframes hapticPulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--accent-glow);
+  }
+  50% {
+    box-shadow: 0 0 20px 5px var(--accent-glow);
+  }
+  100% {
+    box-shadow: 0 0 0 0 var(--accent-glow);
+  }
+}
+
+/* Install prompt banner */
+.install-banner {
+  position: fixed;
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface-elevated);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-glow-md);
+  z-index: 999;
+  max-width: 90vw;
+  animation: slideUp var(--transition-base) var(--ease-out-expo);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.install-banner.hidden {
+  animation: slideDown var(--transition-base) var(--ease-out-expo) forwards;
+}
+
+@keyframes slideDown {
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+}
+
+.install-banner-text {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.install-banner-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.install-banner-btn:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.install-banner-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  transition: color var(--transition-fast);
+}
+
+.install-banner-close:hover {
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .install-banner {
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 8px);
+  }
+}
+
+@media (max-width: 400px) {
+  .install-banner {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .install-banner-text {
+    white-space: normal;
+    font-size: 0.85rem;
+  }
+}
+
+/* Hide install banner on desktop */
+@media (min-width: 769px) {
+  .install-banner {
+    display: none;
+  }
+}

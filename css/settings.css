@@ -1,0 +1,427 @@
+/* ===== Settings Page Styles ===== */
+
+.settings-main {
+  padding: 2rem 0;
+}
+
+.settings-header {
+  margin-bottom: 2rem;
+}
+
+.settings-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 2.5rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.settings-subtitle {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+/* Settings Grid */
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Settings Section */
+.settings-section {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.settings-section-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.settings-section-title span {
+  font-size: 1.1rem;
+}
+
+/* Settings Group */
+.settings-group {
+  margin-bottom: 1.5rem;
+}
+
+.settings-group:last-child {
+  margin-bottom: 0;
+}
+
+.settings-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.settings-control {
+  position: relative;
+}
+
+.settings-select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: "Space Mono", monospace;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23808080'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 20px;
+  padding-right: 2.5rem;
+}
+
+.settings-select:hover {
+  border-color: var(--accent);
+}
+
+.settings-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow-subtle);
+}
+
+.settings-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+}
+
+/* Toggle Switch */
+.settings-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.settings-toggle-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.settings-toggle-input {
+  display: none;
+}
+
+.settings-toggle-slider {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  transition: all var(--transition-fast);
+}
+
+.settings-toggle-slider::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: var(--text-secondary);
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+}
+
+.settings-toggle-input:checked + .settings-toggle-slider {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.settings-toggle-input:checked + .settings-toggle-slider::after {
+  transform: translateX(22px);
+  background: #fff;
+}
+
+/* Range Slider */
+.range-control {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.settings-range {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.settings-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.settings-range::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 10px var(--accent-glow);
+  transform: scale(1.1);
+}
+
+.settings-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+.settings-range-value {
+  font-family: "Space Mono", monospace;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  min-width: 60px;
+  text-align: right;
+}
+
+/* Settings Info */
+.settings-info {
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.settings-info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.settings-info-item:last-child {
+  border-bottom: none;
+}
+
+.settings-info-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.settings-info-value {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.status-dot.active {
+  background: var(--success);
+  box-shadow: 0 0 8px var(--success);
+}
+
+/* Settings Actions */
+.settings-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.settings-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem;
+  font-size: 0.9rem;
+}
+
+/* Toast Notification */
+.settings-toast {
+  position: fixed;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--success);
+  color: #000;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  opacity: 0;
+  transition: all var(--transition-base) var(--ease-out-expo);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.settings-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* About Section */
+.settings-about {
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.settings-about p {
+  margin-bottom: 0.5rem;
+}
+
+/* Connection Status Indicator */
+.connection-indicator {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: all var(--transition-base) var(--ease-out-expo);
+  z-index: 1001;
+  pointer-events: none;
+}
+
+.connection-indicator.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.connection-indicator.online {
+  background: var(--success);
+  color: #000;
+}
+
+.connection-indicator.offline {
+  background: var(--error);
+  color: #fff;
+}
+
+/* Update Notification */
+.update-notification {
+  position: fixed;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface-elevated);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-glow-md);
+  z-index: 999;
+}
+
+.update-notification span {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.update-notification button {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-family: "Space Mono", monospace;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.update-notification button:first-of-type {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: #fff;
+}
+
+.update-notification button:last-of-type {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .settings-main {
+    padding: 1rem 0;
+  }
+
+  .settings-title {
+    font-size: 2rem;
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .settings-section {
+    padding: 1rem;
+  }
+
+  .settings-toast {
+    bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .range-control {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .settings-range-value {
+    text-align: left;
+  }
+
+  .settings-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .settings-action-btn {
+    flex: 1;
+    min-width: 140px;
+  }
+}

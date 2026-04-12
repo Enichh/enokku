@@ -24,3 +24,25 @@
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "no-referrer-when-downgrade"
     Content-Security-Policy = "default-src 'self'; connect-src 'self'; img-src 'self' https://uploads.mangadex.org data: blob: https://*.mangadex.org https://*.mangadex.network; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com"
+
+# Cache static assets aggressively (they have content hashes in filenames)
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Never cache HTML files (they change every deploy)
+[[headers]]
+  for = "*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate, no-cache"
