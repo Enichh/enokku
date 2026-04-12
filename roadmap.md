@@ -3,6 +3,7 @@
 ## Current Architecture Status
 
 ### ✅ Completed Features
+
 - **Core Reader Infrastructure**: MangaDex API integration, Atsumaru fallback system
 - **Hybrid Chapter System**: Multi-source chapter aggregation with visual indicators
 - **Reading Progress Tracking**: localStorage-based progress persistence with scroll percentage tracking
@@ -10,15 +11,17 @@
 - **Manga Details**: Atsumaru-first chapter loading with pagination
 - **Chapter Reader**: Source-aware page loading, keyboard navigation, progress tracking
 - **Search System**: Advanced filtering, genre selection, content type filtering
-- **PWA Support**: Service worker, offline functionality, manifest
+- **PWA Support**: Service worker, offline functionality, manifest, install prompt fixes
 - **MSI Theme**: Red/black aesthetic with CSS custom properties
 
 ### 🚧 Active Development Areas
+
 - **PWA Enhancements**: Offline reading capabilities, caching strategies
 - **Performance Optimization**: Image loading, chapter preloading, API response caching
 - **UI/UX Refinements**: Mobile responsiveness, loading states, error handling
 
 ### 📋 Planned Features
+
 - **User Preferences**: Reading modes, theme customization, content filtering
 - **Social Features**: Favorites/bookmarks, reading statistics, recommendations
 - **Advanced Reader**: Zoom controls, reading direction options, double-page spread
@@ -54,16 +57,19 @@ c:\Users\Enoch Gabriel Astor\Desktop\enokku/
 ## Development Priorities
 
 ### High Priority
+
 1. **PWA Offline Support**: Complete offline reading functionality
 2. **Performance Optimization**: Image lazy loading, API caching
 3. **Mobile UX**: Touch gestures, responsive improvements
 
 ### Medium Priority
+
 1. **User Preferences**: Customizable reading experience
 2. **Error Handling**: Robust fallback mechanisms
 3. **Content Discovery**: Recommendation algorithms
 
 ### Low Priority
+
 1. **Social Features**: Sharing, community features
 2. **Analytics**: Reading statistics, usage tracking
 3. **Advanced Reader**: Zoom, pan, double-page modes
@@ -71,12 +77,14 @@ c:\Users\Enoch Gabriel Astor\Desktop\enokku/
 ## Technical Debt & Maintenance
 
 ### Areas Requiring Attention
+
 - **API Error Handling**: Standardize error responses across all modules
 - **Code Duplication**: Consolidate similar functions across modules
 - **Testing**: Add unit tests for core functionality
 - **Documentation**: Update inline documentation for complex functions
 
 ### Performance Considerations
+
 - **Bundle Size**: Optimize JavaScript module loading
 - **Image Optimization**: Implement WebP format support
 - **Caching Strategy**: Service worker cache management
@@ -85,6 +93,7 @@ c:\Users\Enoch Gabriel Astor\Desktop\enokku/
 ## Sacred Files (DO NOT MODIFY WITHOUT REVIEW)
 
 ### Core System Files
+
 - `js/reading-history.js` - Progress persistence logic
 - `js/hybrid-api.js` - Multi-source aggregation system
 - `css/variables.css` - Theme system foundation
@@ -92,6 +101,7 @@ c:\Users\Enoch Gabriel Astor\Desktop\enokku/
 - `netlify/functions/atsumaru-handler.js` - Atsumaru scraper
 
 ### Configuration Files
+
 - `netlify.toml` - Deployment and security configuration
 - `manifest.json` - PWA manifest
 - `sw.js` - Service worker (PWA functionality)

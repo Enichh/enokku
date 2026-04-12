@@ -509,5 +509,4 @@ export {
   clearAppCache,
   showConnectionStatus,
   checkForVersionUpdate,
-  dismissUpdate,
 };
