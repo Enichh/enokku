@@ -1,4 +1,4 @@
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const STATIC_CACHE = `enokku-static-${CACHE_VERSION}`;
 const API_CACHE = `enokku-api-${CACHE_VERSION}`;
 const IMAGE_CACHE = `enokku-images-${CACHE_VERSION}`;
@@ -109,7 +109,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (isImageRequest(request)) {
-    event.respondWith(handleImageRequest(request));
+    event.respondWith(handleImageRequest(request, event));
     return;
   }
 
@@ -205,7 +205,7 @@ async function handleAPIRequest(request) {
   }
 }
 
-async function handleImageRequest(request) {
+async function handleImageRequest(request, event) {
   const cache = await caches.open(IMAGE_CACHE);
   const cachedResponse = await cache.match(request);
 
@@ -214,10 +214,16 @@ async function handleImageRequest(request) {
   }
 
   try {
-    // Get the referrer from the original request or use the page origin
-    const referrer = request.referrer || self.location.origin;
+    // Get the proper referrer from the client
+    let referrer = self.location.origin;
+    if (event && event.clientId) {
+      const client = await self.clients.get(event.clientId);
+      if (client) {
+        referrer = client.url;
+      }
+    }
 
-    // Create a new request with explicit referrer preservation
+    // Create a new request with proper referrer
     const modifiedRequest = new Request(request.url, {
       method: request.method,
       headers: request.headers,
