@@ -207,36 +207,44 @@ async function handleAPIRequest(request) {
 
 async function handleImageRequest(request, event) {
   const cache = await caches.open(IMAGE_CACHE);
-  const cachedResponse = await cache.match(request);
 
+  // Create a clean URL without query params for caching
+  const url = new URL(request.url);
+  const isMangaDex = url.hostname.includes("mangadex.org");
+  const cleanUrl = isMangaDex ? `${url.origin}${url.pathname}` : request.url;
+  const cacheKey = new Request(cleanUrl);
+
+  const cachedResponse = await cache.match(cacheKey);
   if (cachedResponse) {
     return cachedResponse;
   }
 
   try {
-    // Get the proper referrer from the client
-    let referrer = self.location.origin;
-    if (event && event.clientId) {
-      const client = await self.clients.get(event.clientId);
-      if (client) {
-        referrer = client.url;
-      }
-    }
+    // For MangaDex: use no-referrer to bypass hotlink protection
+    // For other images: use the original request
+    const fetchOptions = isMangaDex
+      ? {
+          method: request.method,
+          headers: request.headers,
+          mode: "cors",
+          credentials: "omit",
+          referrer: "",
+          referrerPolicy: "no-referrer",
+        }
+      : {
+          method: request.method,
+          headers: request.headers,
+          mode: "cors",
+          credentials: "omit",
+        };
 
-    // Create a new request with proper referrer
-    const modifiedRequest = new Request(request.url, {
-      method: request.method,
-      headers: request.headers,
-      mode: "cors",
-      credentials: "omit",
-      referrer: referrer,
-      referrerPolicy: "no-referrer-when-downgrade",
-    });
+    const modifiedRequest = new Request(request.url, fetchOptions);
 
     const networkResponse = await fetch(modifiedRequest);
     if (networkResponse.ok) {
       await enforceCacheSizeLimit(cache);
-      cache.put(request, networkResponse.clone());
+      // Cache using the clean URL (without query params)
+      cache.put(cacheKey, networkResponse.clone());
     }
     return networkResponse;
   } catch (error) {
