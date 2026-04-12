@@ -1,95 +1,104 @@
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = "v1";
 const STATIC_CACHE = `enokku-static-${CACHE_VERSION}`;
 const API_CACHE = `enokku-api-${CACHE_VERSION}`;
 const IMAGE_CACHE = `enokku-images-${CACHE_VERSION}`;
 const MAX_IMAGE_CACHE_SIZE = 50 * 1024 * 1024;
 
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/search.html',
-  '/manga.html',
-  '/reader.html',
-  '/library.html',
-  '/settings.html',
-  '/offline.html',
-  '/css/reset.css',
-  '/css/variables.css',
-  '/css/base.css',
-  '/css/utilities.css',
-  '/css/cards.css',
-  '/css/hero.css',
-  '/css/sections.css',
-  '/css/tabs.css',
-  '/css/details.css',
-  '/css/reader.css',
-  '/css/search.css',
-  '/css/responsive.css',
-  '/css/bottom-nav.css',
-  '/js/api.js',
-  '/js/utils.js',
-  '/js/home.js',
-  '/js/catalog.js',
-  '/js/details-hybrid.js',
-  '/js/reader-hybrid.js',
-  '/js/reading-history.js',
-  '/js/search.js',
-  '/js/hybrid-api.js',
-  '/js/atsumaru-api.js',
-  '/js/tag-map.js',
-  '/js/pwa.js',
-  '/js/library.js',
-  '/js/settings.js',
-  '/assets/favicon.svg'
+  "/",
+  "/index.html",
+  "/search.html",
+  "/manga.html",
+  "/reader.html",
+  "/library.html",
+  "/settings.html",
+  "/offline.html",
+  "/css/reset.css",
+  "/css/variables.css",
+  "/css/base.css",
+  "/css/utilities.css",
+  "/css/cards.css",
+  "/css/hero.css",
+  "/css/sections.css",
+  "/css/tabs.css",
+  "/css/details.css",
+  "/css/reader.css",
+  "/css/search.css",
+  "/css/responsive.css",
+  "/css/bottom-nav.css",
+  "/js/api.js",
+  "/js/utils.js",
+  "/js/home.js",
+  "/js/catalog.js",
+  "/js/details-hybrid.js",
+  "/js/reader-hybrid.js",
+  "/js/reading-history.js",
+  "/js/search.js",
+  "/js/hybrid-api.js",
+  "/js/atsumaru-api.js",
+  "/js/tag-map.js",
+  "/js/pwa.js",
+  "/js/library.js",
+  "/js/settings.js",
+  "/assets/favicon.svg",
 ];
 
-self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker...');
+self.addEventListener("install", (event) => {
+  console.log("[SW] Installing service worker...");
   event.waitUntil(
-    caches.open(STATIC_CACHE)
+    caches
+      .open(STATIC_CACHE)
       .then((cache) => {
-        console.log('[SW] Caching static assets...');
+        console.log("[SW] Caching static assets...");
         return cache.addAll(STATIC_ASSETS);
       })
       .then(() => {
-        console.log('[SW] Static assets cached successfully');
+        console.log("[SW] Static assets cached successfully");
         return self.skipWaiting();
       })
       .catch((error) => {
-        console.error('[SW] Failed to cache static assets:', error);
-      })
+        console.error("[SW] Failed to cache static assets:", error);
+      }),
   );
 });
 
-self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating service worker...');
+self.addEventListener("activate", (event) => {
+  console.log("[SW] Activating service worker...");
   event.waitUntil(
-    caches.keys()
+    caches
+      .keys()
       .then((cacheNames) => {
         return Promise.all(
           cacheNames
             .filter((cacheName) => {
-              return cacheName.startsWith('enokku-') && 
-                     !cacheName.includes(CACHE_VERSION);
+              return (
+                cacheName.startsWith("enokku-") &&
+                !cacheName.includes(CACHE_VERSION)
+              );
             })
             .map((cacheName) => {
-              console.log('[SW] Deleting old cache:', cacheName);
+              console.log("[SW] Deleting old cache:", cacheName);
               return caches.delete(cacheName);
-            })
+            }),
         );
       })
       .then(() => {
-        console.log('[SW] Service worker activated');
+        console.log("[SW] Service worker activated");
         return self.clients.claim();
-      })
+      }),
   );
 });
 
-self.addEventListener('fetch', (event) => {
+self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  if (request.mode === 'navigate') {
+  // Skip chrome-extension requests (can't be cached)
+  if (url.protocol === "chrome-extension:" || url.protocol === "chrome:") {
+    return;
+  }
+
+  if (request.mode === "navigate") {
     event.respondWith(handleNavigation(request));
     return;
   }
@@ -108,16 +117,20 @@ self.addEventListener('fetch', (event) => {
 });
 
 function isAPIRequest(url) {
-  return url.pathname.startsWith('/api/') || 
-         url.pathname.startsWith('/atsumaru/') ||
-         url.hostname === 'api.mangadex.org';
+  return (
+    url.pathname.startsWith("/api/") ||
+    url.pathname.startsWith("/atsumaru/") ||
+    url.hostname === "api.mangadex.org"
+  );
 }
 
 function isImageRequest(request) {
-  const acceptHeader = request.headers.get('Accept') || '';
-  return request.destination === 'image' ||
-         acceptHeader.includes('image/') ||
-         request.url.includes('uploads.mangadex.org');
+  const acceptHeader = request.headers.get("Accept") || "";
+  return (
+    request.destination === "image" ||
+    acceptHeader.includes("image/") ||
+    request.url.includes("uploads.mangadex.org")
+  );
 }
 
 async function handleNavigation(request) {
@@ -129,7 +142,7 @@ async function handleNavigation(request) {
       return networkResponse;
     }
   } catch (error) {
-    console.log('[SW] Network failed, serving from cache:', request.url);
+    console.log("[SW] Network failed, serving from cache:", request.url);
   }
 
   const cachedResponse = await caches.match(request);
@@ -137,7 +150,7 @@ async function handleNavigation(request) {
     return cachedResponse;
   }
 
-  return caches.match('/offline.html');
+  return caches.match("/offline.html");
 }
 
 async function handleStaticRequest(request) {
@@ -154,8 +167,8 @@ async function handleStaticRequest(request) {
     }
     return networkResponse;
   } catch (error) {
-    console.error('[SW] Failed to fetch static resource:', request.url);
-    return new Response('Resource not available offline', { status: 503 });
+    console.error("[SW] Failed to fetch static resource:", request.url);
+    return new Response("Resource not available offline", { status: 503 });
   }
 }
 
@@ -181,13 +194,13 @@ async function handleAPIRequest(request) {
     }
     return networkResponse;
   } catch (error) {
-    console.error('[SW] API request failed:', request.url);
+    console.error("[SW] API request failed:", request.url);
     return new Response(
-      JSON.stringify({ error: 'Offline - Data not available' }),
-      { 
-        status: 503, 
-        headers: { 'Content-Type': 'application/json' } 
-      }
+      JSON.stringify({ error: "Offline - Data not available" }),
+      {
+        status: 503,
+        headers: { "Content-Type": "application/json" },
+      },
     );
   }
 }
@@ -201,15 +214,24 @@ async function handleImageRequest(request) {
   }
 
   try {
-    const networkResponse = await fetch(request);
+    // Preserve referrer header for MangaDex image requests
+    const fetchOptions = {
+      mode: "cors",
+      credentials: "omit",
+    };
+
+    // Clone request to preserve all headers including referrer
+    const modifiedRequest = new Request(request, fetchOptions);
+
+    const networkResponse = await fetch(modifiedRequest);
     if (networkResponse.ok) {
       await enforceCacheSizeLimit(cache);
       cache.put(request, networkResponse.clone());
     }
     return networkResponse;
   } catch (error) {
-    console.log('[SW] Image not cached:', request.url);
-    return new Response('', { status: 404 });
+    console.log("[SW] Image not cached:", request.url);
+    return new Response("", { status: 404 });
   }
 }
 
@@ -228,25 +250,25 @@ async function enforceCacheSizeLimit(cache) {
   if (totalSize > MAX_IMAGE_CACHE_SIZE) {
     const oldestRequest = keys[0];
     await cache.delete(oldestRequest);
-    console.log('[SW] Evicted oldest image from cache');
+    console.log("[SW] Evicted oldest image from cache");
   }
 }
 
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-reading-progress') {
+self.addEventListener("sync", (event) => {
+  if (event.tag === "sync-reading-progress") {
     event.waitUntil(syncReadingProgress());
   }
 });
 
 async function syncReadingProgress() {
-  const clients = await self.clients.matchAll({ type: 'window' });
+  const clients = await self.clients.matchAll({ type: "window" });
   clients.forEach((client) => {
-    client.postMessage({ type: 'SYNC_READING_PROGRESS' });
+    client.postMessage({ type: "SYNC_READING_PROGRESS" });
   });
 }
 
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 });

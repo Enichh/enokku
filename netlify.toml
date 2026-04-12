@@ -23,7 +23,7 @@
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "no-referrer-when-downgrade"
-    Content-Security-Policy = "default-src 'self'; connect-src 'self'; img-src 'self' https://uploads.mangadex.org data: blob: https://*.mangadex.org https://*.mangadex.network; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com"
+    Content-Security-Policy = "default-src 'self'; connect-src 'self' https://api.mangadex.org https://uploads.mangadex.org https://fonts.googleapis.com https://*.mangadex.network https://*.mangadex.org; img-src 'self' https://uploads.mangadex.org data: blob: https://*.mangadex.org https://*.mangadex.network; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-src 'self';"
 
 # Cache static assets aggressively (they have content hashes in filenames)
 [[headers]]
