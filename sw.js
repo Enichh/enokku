@@ -1,4 +1,4 @@
-const CACHE_VERSION = "v20";
+const CACHE_VERSION = "v21";
 const STATIC_CACHE = `enokku-static-${CACHE_VERSION}`;
 const API_CACHE = `enokku-api-${CACHE_VERSION}`;
 const IMAGE_CACHE = `enokku-images-${CACHE_VERSION}`;
