@@ -124,18 +124,76 @@ function renderHistoryCard(entry) {
   return card;
 }
 
-function loadContinueReading() {
+async function migrateOldHistoryEntry(entry) {
+  // Check if entry has Atsumaru short ID instead of MangaDex UUID
+  const isValidUUID =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      entry.mangaId,
+    );
+
+  if (!isValidUUID && entry.source === "atsumaru" && entry.mangaTitle) {
+    console.log(
+      `[Home] Migrating old entry: ${entry.mangaTitle} (ID: ${entry.mangaId})`,
+    );
+    try {
+      const searchResults = await searchManga(entry.mangaTitle, 5);
+      if (searchResults?.data?.length > 0) {
+        // Find best match by chapter count
+        const bestMatch = searchResults.data.reduce((best, current) => {
+          const bestChapters = parseInt(best.attributes?.lastChapter) || 0;
+          const currentChapters =
+            parseInt(current.attributes?.lastChapter) || 0;
+          return currentChapters > bestChapters ? current : best;
+        });
+
+        // Update entry with canonical MangaDex UUID
+        entry.mangaId = bestMatch.id;
+
+        // Also update cover to MangaDex cover
+        const coverArt = findRelationship(bestMatch, "cover_art");
+        if (coverArt) {
+          entry.coverUrl = getCoverUrl(bestMatch.id, coverArt, "256");
+        }
+
+        console.log(`[Home] Migrated to MangaDex ID: ${bestMatch.id}`);
+        return entry;
+      }
+    } catch (error) {
+      console.error(`[Home] Failed to migrate entry:`, error);
+    }
+  }
+  return entry;
+}
+
+async function loadContinueReading() {
   if (!continueReadingRow) return;
 
-  const history = getReadingHistory();
+  let history = getReadingHistory();
 
   if (history.length === 0) {
     continueReadingSection?.classList.add("hidden");
     return;
   }
 
+  // Migrate old entries with Atsumaru IDs in parallel
+  const migratedHistory = await Promise.all(
+    history.map((entry) => migrateOldHistoryEntry(entry)),
+  );
+
+  // Save migrated entries back to localStorage if any changed
+  const hasChanges = migratedHistory.some(
+    (entry, index) =>
+      entry.mangaId !== history[index].mangaId ||
+      entry.coverUrl !== history[index].coverUrl,
+  );
+
+  if (hasChanges) {
+    localStorage.setItem("reading_history", JSON.stringify(migratedHistory));
+    console.log("[Home] Saved migrated reading history");
+  }
+
   continueReadingRow.innerHTML = "";
-  history.forEach((entry) => {
+  migratedHistory.forEach((entry) => {
     continueReadingRow.appendChild(renderHistoryCard(entry));
   });
 

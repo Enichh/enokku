@@ -46,6 +46,7 @@ let currentChapterInfo = { number: "?", title: "" };
 // Reading history tracking
 let mangaTitleForHistory = "";
 let coverUrlForHistory = "";
+let canonicalMangaDexId = ""; // MangaDex UUID for canonical identification
 let debouncedSaveProgress = null;
 
 if (!chapterId) {
@@ -111,11 +112,11 @@ async function loadMangaDetailsForHistory() {
           mangaTitleForHistory =
             data.title || data.englishTitle || `Manga ${navigationMangaId}`;
 
-          // Also search MangaDex by title to get proper MangaDex cover
+          // Also search MangaDex by title to get canonical ID and proper cover
           try {
             const searchResults = await searchManga(mangaTitleForHistory, 5);
             if (searchResults?.data?.length > 0) {
-              // Find best match by chapter count
+              // Find best match by chapter count (prefer main series over doujinshi)
               const bestMatch = searchResults.data.reduce((best, current) => {
                 const bestChapters =
                   parseInt(best.attributes?.lastChapter) || 0;
@@ -123,6 +124,12 @@ async function loadMangaDetailsForHistory() {
                   parseInt(current.attributes?.lastChapter) || 0;
                 return currentChapters > bestChapters ? current : best;
               });
+              // Store canonical MangaDex UUID
+              canonicalMangaDexId = bestMatch.id;
+              console.log(
+                `[Reader] Found canonical MangaDex ID: ${canonicalMangaDexId}`,
+              );
+
               const coverArt = findRelationship(bestMatch, "cover_art");
               if (coverArt) {
                 coverUrlForHistory = getCoverUrl(bestMatch.id, coverArt, "256");
@@ -131,10 +138,12 @@ async function loadMangaDetailsForHistory() {
                 coverUrlForHistory = getPlaceholderImage(256, 384, "No Cover");
               }
             } else {
+              canonicalMangaDexId = "";
               coverUrlForHistory = getPlaceholderImage(256, 384, "No Cover");
             }
           } catch (searchError) {
             console.error("[Reader] MangaDex search failed:", searchError);
+            canonicalMangaDexId = "";
             coverUrlForHistory = getPlaceholderImage(256, 384, "No Cover");
           }
 
@@ -379,10 +388,11 @@ function updatePageIndicator() {
 }
 
 backToMangaBtn.addEventListener("click", () => {
-  // Use title as common ground for manga lookup
+  // Use canonical MangaDex ID as primary, fallback to original IDs
+  const navigationId = canonicalMangaDexId || mangaId || atsumaruMangaId;
   const title = mangaTitleForHistory || "Unknown";
-  if (mangaId || atsumaruMangaId) {
-    window.location.href = `manga.html?id=${mangaId || atsumaruMangaId}&title=${encodeURIComponent(title)}&source=${source}`;
+  if (navigationId) {
+    window.location.href = `manga.html?id=${navigationId}&title=${encodeURIComponent(title)}&source=${source}&atsumaruId=${atsumaruMangaId || ""}`;
   } else {
     window.location.href = "index.html";
   }
@@ -579,8 +589,12 @@ function saveProgressToHistory(percent) {
   const chapterTitleText =
     currentChapter?.attributes?.title || currentChapterInfo.title || "";
 
+  // Use canonical MangaDex UUID as primary mangaId if available
+  // This ensures Continue Reading works correctly across sources
+  const canonicalId = canonicalMangaDexId || mangaId;
+
   const payload = {
-    mangaId: navigationMangaId,
+    mangaId: canonicalId, // Always store MangaDex UUID as canonical ID
     mangaTitle:
       mangaTitleForHistory || `Manga ${navigationMangaId.slice(0, 8)}`,
     coverUrl: coverUrlForHistory || getPlaceholderImage(256, 384, "No Cover"),
@@ -589,7 +603,7 @@ function saveProgressToHistory(percent) {
     chapterTitle: chapterTitleText,
     scrollPercent: Math.round(percent),
     source: source,
-    atsumaruMangaId: atsumaruMangaId,
+    atsumaruMangaId: atsumaruMangaId, // Keep Atsumaru ID for chapter fetching
   };
   console.log(
     "[Reader] Continue Reading payload:",

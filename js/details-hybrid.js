@@ -28,6 +28,7 @@ const searchInput = document.getElementById("searchInput");
 const mangaId = getUrlParam("id");
 const sourceParam = getUrlParam("source") || "mangadex";
 const titleParam = getUrlParam("title");
+const atsumaruIdParam = getUrlParam("atsumaruId"); // Atsumaru ID for chapter fetching
 let allChapters = [];
 let currentPage = 0;
 const chaptersPerPage = 50;
@@ -209,6 +210,7 @@ function renderMangaDetailsHTML(
 
 async function loadChapters(allTitles) {
   console.log(`[Details] Loading chapters from Atsumaru for manga: ${mangaId}`);
+  console.log(`[Details] atsumaruIdParam: ${atsumaruIdParam}`);
   console.log(`[Details] Trying titles:`, allTitles);
   chapterListContainer.innerHTML = `
     <div class="loading">
@@ -218,31 +220,41 @@ async function loadChapters(allTitles) {
   `;
 
   try {
-    // Find manga on Atsumaru using title search
-    let atsumaruManga = null;
-    for (const title of allTitles) {
-      if (!title) continue;
-      atsumaruManga = await findAtsumaruManga(title);
-      if (atsumaruManga) {
-        console.log(`[Details] Atsumaru match: "${atsumaruManga.title}"`);
-        break;
-      }
-    }
+    let atsumaruMangaId = null;
 
-    if (!atsumaruManga) {
-      console.log(`[Details] No Atsumaru match found for any title`);
-      chapterListContainer.innerHTML = `
-        <div class="empty">
-          <p>No chapters available on Atsumaru</p>
-        </div>
-      `;
-      return;
+    // If atsumaruIdParam is provided, use it directly (from Continue Reading)
+    if (atsumaruIdParam) {
+      console.log(`[Details] Using provided Atsumaru ID: ${atsumaruIdParam}`);
+      atsumaruMangaId = atsumaruIdParam;
+    } else {
+      // Find manga on Atsumaru using title search
+      let atsumaruManga = null;
+      for (const title of allTitles) {
+        if (!title) continue;
+        atsumaruManga = await findAtsumaruManga(title);
+        if (atsumaruManga) {
+          console.log(`[Details] Atsumaru match: "${atsumaruManga.title}"`);
+          break;
+        }
+      }
+
+      if (!atsumaruManga) {
+        console.log(`[Details] No Atsumaru match found for any title`);
+        chapterListContainer.innerHTML = `
+          <div class="empty">
+            <p>No chapters available on Atsumaru</p>
+          </div>
+        `;
+        return;
+      }
+
+      atsumaruMangaId = atsumaruManga.id;
     }
 
     // Get chapters from Atsumaru
-    const chapters = await getAtsumaruChapters(atsumaruManga.id);
+    const chapters = await getAtsumaruChapters(atsumaruMangaId);
     allChapters = chapters;
-    hybridInfo = { source: "atsumaru", atsumaruId: atsumaruManga.id };
+    hybridInfo = { source: "atsumaru", atsumaruId: atsumaruMangaId };
 
     console.log(
       `[Details] Atsumaru result: ${allChapters.length} chapters found`,
@@ -435,7 +447,9 @@ function renderChapterPage(page) {
 
       // Add source-specific parameters
       if (chapter.source === "atsumaru") {
-        if (chapter.mangaId) params.set("mangaId", chapter.mangaId);
+        // Use hybridInfo.atsumaruId (from loadChapters) or atsumaruIdParam (from URL)
+        const atsumaruMangaId = hybridInfo?.atsumaruId || atsumaruIdParam;
+        if (atsumaruMangaId) params.set("mangaId", atsumaruMangaId);
         if (chapter.chapterId) params.set("chapterId", chapter.chapterId);
       } else if (chapter.source === "mangadex") {
         if (chapter.mangadexId) params.set("mangadexId", chapter.mangadexId);
@@ -551,7 +565,9 @@ function startReading() {
 
   // Add source-specific parameters
   if (targetChapter.source === "atsumaru") {
-    if (targetChapter.mangaId) params.set("mangaId", targetChapter.mangaId);
+    // Use hybridInfo.atsumaruId (from loadChapters) or atsumaruIdParam (from URL)
+    const atsumaruMangaId = hybridInfo?.atsumaruId || atsumaruIdParam;
+    if (atsumaruMangaId) params.set("mangaId", atsumaruMangaId);
     if (targetChapter.chapterId)
       params.set("chapterId", targetChapter.chapterId);
   } else if (targetChapter.source === "mangadex") {
