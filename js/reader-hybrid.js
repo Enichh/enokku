@@ -99,11 +99,11 @@ async function loadMangaDetailsForHistory() {
       const response = await fetch(`/atsumaru/manga?id=${navigationMangaId}`);
       if (response.ok) {
         const data = await response.json();
-        if (data?.manga) {
+        if (data) {
           mangaTitleForHistory =
-            data.manga.title || data.manga.name || `Manga ${navigationMangaId}`;
-          coverUrlForHistory = data.manga.cover
-            ? `/api/proxy?imageUrl=${encodeURIComponent(data.manga.cover)}`
+            data.title || data.englishTitle || `Manga ${navigationMangaId}`;
+          coverUrlForHistory = data.image
+            ? `/api/proxy?imageUrl=${encodeURIComponent(data.image)}`
             : getPlaceholderImage(256, 384, "No Cover");
         }
       }
