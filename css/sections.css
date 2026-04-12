@@ -124,6 +124,38 @@
   border-color: var(--accent);
 }
 
+/* Clear History button specific styling */
+#clearHistoryBtn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+#clearHistoryBtn::before {
+  content: "🗑️";
+  font-size: 0.9rem;
+}
+
+#clearHistoryBtn:hover {
+  background: rgba(255, 0, 0, 0.1);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+#clearHistoryBtn:active {
+  background: rgba(255, 0, 0, 0.2);
+  transform: scale(0.98);
+}
+
 /* History Card Meta */
 .history-card .meta {
   font-size: 0.75rem;

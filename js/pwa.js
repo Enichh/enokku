@@ -125,8 +125,8 @@ function setupInstallPrompt() {
   });
 }
 
-// Make install functions globally available even when banner isn't shown
-window.triggerInstall = async () => {
+// Define triggerInstall as local function for export
+async function triggerInstall() {
   if (!deferredInstallPrompt) {
     console.log("[PWA] No install prompt available");
     return;
@@ -147,7 +147,10 @@ window.triggerInstall = async () => {
   } catch (error) {
     console.error("[PWA] Install prompt failed:", error);
   }
-};
+}
+
+// Make install functions globally available even when banner isn't shown
+window.triggerInstall = triggerInstall;
 
 // Getter function for deferred prompt state
 export function getDeferredInstallPrompt() {
