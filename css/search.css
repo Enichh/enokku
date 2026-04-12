@@ -1,0 +1,1140 @@
+/* ============================================
+   SEARCH PAGE - Cinematic Dark Editorial Theme
+   ============================================ */
+
+/* Fallback fonts (no Google Fonts due to CSP) */
+/* Using system fonts that match the aesthetic */
+
+/* ============================================
+   MAIN LAYOUT
+   ============================================ */
+.search-page {
+  min-height: 100vh;
+  background: var(--bg-immersive);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Grain texture overlay */
+.search-page::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-container {
+  display: grid;
+  grid-template-columns: var(--filter-sidebar-width) 1fr;
+  gap: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 1024px) {
+  .search-container {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+}
+
+/* ============================================
+   FILTER SIDEBAR
+   ============================================ */
+.filter-sidebar {
+  position: sticky;
+  top: 2rem;
+  height: fit-content;
+  background: var(--surface-elevated);
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  padding: 1.5rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 4rem);
+}
+
+.filter-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filter-sidebar::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+}
+
+.filter-sidebar::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.filter-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+.filter-close-btn {
+  display: none;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  border: 2px solid var(--accent);
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all var(--transition-fast) ease;
+  z-index: 1001;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.filter-close-btn:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  transform: scale(1.1);
+}
+
+@media (max-width: 1024px) {
+  .filter-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.filter-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.filter-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1024px) {
+  .filter-sidebar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    max-height: 70vh;
+    border-radius: 20px 20px 0 0;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-subtle);
+    padding-top: 3.5rem;
+  }
+
+  .filter-sidebar.active {
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   CONTENT TYPE TABS
+   ============================================ */
+.content-type-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.content-type-tab {
+  font-family: "Space Mono", monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.75rem 1.25rem;
+  background: var(--bg-tertiary);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.content-type-tab::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent) 0%, #ff4500 100%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.content-type-tab span {
+  position: relative;
+  z-index: 1;
+}
+
+.content-type-tab:hover {
+  color: var(--text-primary);
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow-subtle);
+}
+
+.content-type-tab.active {
+  color: var(--text-primary);
+  border-color: var(--accent);
+  box-shadow: 0 0 30px var(--accent-glow);
+}
+
+.content-type-tab.active::before {
+  opacity: 0.2;
+}
+
+/* ============================================
+   GENRE CHIPS
+   ============================================ */
+.genre-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.genre-chip {
+  font-family: "Space Mono", monospace;
+  font-size: 0.7rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.genre-chip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.genre-chip span {
+  position: relative;
+  z-index: 1;
+}
+
+.genre-chip:hover {
+  color: var(--text-primary);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.genre-chip.active {
+  color: var(--text-primary);
+  border-color: var(--accent);
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.genre-chip.active::before {
+  opacity: 0.25;
+}
+
+.genre-chip.excluded {
+  color: var(--error);
+  border-color: var(--error);
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.genre-chip.excluded:hover {
+  opacity: 1;
+}
+
+/* ============================================
+   YEAR SELECTOR
+   ============================================ */
+.year-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.year-chip {
+  font-family: "Space Mono", monospace;
+  font-size: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.year-chip:hover {
+  color: var(--text-primary);
+  border-color: var(--accent);
+}
+
+.year-chip.active {
+  color: var(--text-primary);
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* ============================================
+   STATUS TOGGLES
+   ============================================ */
+.status-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.status-chip {
+  font-family: "Space Mono", monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 1rem;
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.status-chip:hover {
+  color: var(--text-primary);
+  border-color: var(--accent-hover);
+}
+
+.status-chip.active {
+  color: var(--text-primary);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 10px var(--accent-glow-subtle);
+}
+
+/* ============================================
+   CONTENT RATING
+   ============================================ */
+.rating-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rating-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.rating-option:hover {
+  background: var(--surface-hover);
+}
+
+.rating-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.rating-checkbox.checked {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.rating-checkbox.checked::after {
+  content: "✓";
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.rating-label {
+  font-family: "Space Mono", monospace;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.rating-option:hover .rating-label {
+  color: var(--text-primary);
+}
+
+/* ============================================
+   CLEAR FILTERS BUTTON
+   ============================================ */
+.clear-filters-btn {
+  font-family: "Space Mono", monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.clear-filters-btn:hover {
+  color: var(--error);
+  border-color: var(--error);
+  background: rgba(255, 68, 68, 0.1);
+}
+
+/* ============================================
+   MOBILE FILTER TOGGLE
+   ============================================ */
+.mobile-filter-toggle {
+  display: none;
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 56px;
+  height: 56px;
+  background: var(--accent);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 20px var(--accent-glow);
+  z-index: 998;
+  transition: all 0.2s ease;
+}
+
+.mobile-filter-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 30px var(--accent-glow);
+}
+
+.mobile-filter-toggle:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 1024px) {
+  .mobile-filter-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* ============================================
+   SEARCH HEADER
+   ============================================ */
+.search-header {
+  margin-bottom: 2rem;
+}
+
+.search-bar-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  min-width: 250px;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  padding-left: 3rem;
+  background: var(--surface-elevated);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-family: "Space Mono", monospace;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow-subtle);
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 1.25rem;
+}
+
+.sort-dropdown {
+  position: relative;
+  min-width: 200px;
+}
+
+.sort-select {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  padding-right: 3rem;
+  background: var(--surface-elevated);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-family: "Space Mono", monospace;
+  font-size: 0.9rem;
+  cursor: pointer;
+  appearance: none;
+  transition: all 0.2s ease;
+}
+
+.sort-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow-subtle);
+}
+
+.sort-arrow {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* ============================================
+   ACTIVE FILTER PILLS
+   ============================================ */
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  min-height: 2rem;
+}
+
+.active-filter-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background: var(--accent);
+  border-radius: 100px;
+  color: white;
+  font-family: "Space Mono", monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  animation: pillAppear 0.3s ease;
+}
+
+@keyframes pillAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.filter-remove {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-size: 0.6rem;
+}
+
+.filter-remove:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.results-count {
+  font-family: "Space Mono", monospace;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.results-count strong {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+/* ============================================
+   RESULTS GRID
+   ============================================ */
+.results-section {
+  margin-bottom: 3rem;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .results-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+  }
+}
+
+/* ============================================
+   MANGA CARDS (Search Page Variant)
+   ============================================ */
+.manga-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface-elevated);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  transform: scale(0.95) translateY(20px);
+}
+
+.manga-card.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.manga-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 0 30px var(--accent-glow-subtle);
+  z-index: 10;
+}
+
+.manga-card-cover {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+}
+
+.manga-card-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.manga-card:hover .manga-card-cover img {
+  transform: scale(1.1);
+}
+
+.manga-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    transparent 100%
+  );
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.manga-card:hover .manga-card-overlay {
+  opacity: 1;
+}
+
+.manga-card-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+}
+
+.manga-card-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.manga-card-meta {
+  font-family: "Space Mono", monospace;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.manga-card-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--accent);
+  border-radius: 4px;
+  font-family: "Space Mono", monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: white;
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* ============================================
+   LOADING & EMPTY STATES
+   ============================================ */
+.search-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+}
+
+.search-loading .spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0 20px var(--accent-glow-subtle);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.search-loading p {
+  font-family: "Space Mono", monospace;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+}
+
+.search-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+}
+
+.search-empty h3 {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.search-empty p {
+  font-family: "Space Mono", monospace;
+  font-size: 0.85rem;
+}
+
+/* ============================================
+   LOAD MORE BUTTON
+   ============================================ */
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+.load-more-btn {
+  font-family: "Space Mono", monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 1rem 3rem;
+  background: var(--surface-elevated);
+  border: 2px solid var(--border);
+  border-radius: 100px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.load-more-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent) 0%, #ff4500 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.load-more-btn span {
+  position: relative;
+  z-index: 1;
+}
+
+.load-more-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--accent);
+  box-shadow: 0 0 30px var(--accent-glow);
+}
+
+.load-more-btn:hover::before {
+  opacity: 0.15;
+}
+
+.load-more-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   SCROLL REVEAL ANIMATIONS
+   ============================================ */
+@keyframes cardReveal {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.manga-card.animate-in {
+  animation: cardReveal 0.5s ease forwards;
+}
+
+/* Stagger delay for cards */
+.manga-card:nth-child(1).animate-in {
+  animation-delay: 0ms;
+}
+.manga-card:nth-child(2).animate-in {
+  animation-delay: 50ms;
+}
+.manga-card:nth-child(3).animate-in {
+  animation-delay: 100ms;
+}
+.manga-card:nth-child(4).animate-in {
+  animation-delay: 150ms;
+}
+.manga-card:nth-child(5).animate-in {
+  animation-delay: 200ms;
+}
+.manga-card:nth-child(6).animate-in {
+  animation-delay: 250ms;
+}
+.manga-card:nth-child(7).animate-in {
+  animation-delay: 300ms;
+}
+.manga-card:nth-child(8).animate-in {
+  animation-delay: 350ms;
+}
+
+/* ============================================
+   HEADER ADJUSTMENTS FOR SEARCH PAGE
+   ============================================ */
+.site-header.search-header-compact {
+  padding: 1rem 0;
+  background: var(--bg-immersive);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.search-header-compact .logo {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1.75rem;
+  letter-spacing: 0.1em;
+}
+
+/* ============================================
+   EXCLUDE MODE TOGGLE
+   ============================================ */
+.exclude-mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.exclude-mode-toggle:hover {
+  background: var(--surface-hover);
+}
+
+.exclude-mode-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.exclude-mode-toggle label {
+  font-family: "Space Mono", monospace;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.exclude-mode-toggle.active label {
+  color: var(--error);
+}
+
+/* ============================================
+   GENRE CATEGORY HEADERS
+   ============================================ */
+.genre-category-title {
+  font-family: "Space Mono", monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  margin: 1rem 0 0.5rem;
+  padding-left: 0.5rem;
+  border-left: 2px solid var(--accent);
+}
+
+.genre-category-title:first-child {
+  margin-top: 0;
+}
+
+/* ============================================
+   MOBILE RESPONSIVE ENHANCEMENTS
+   ============================================ */
+@media (max-width: 480px) {
+  .search-container {
+    padding: 0.75rem;
+  }
+
+  .search-header {
+    margin-bottom: 1rem;
+  }
+
+  .search-bar-container {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .search-input-wrapper,
+  .sort-dropdown {
+    min-width: 100%;
+  }
+
+  .search-input,
+  .sort-select {
+    padding: 0.875rem 1rem;
+    padding-left: 2.75rem;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  .results-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .manga-card-title {
+    font-size: 0.9rem;
+  }
+
+  .manga-card-content {
+    padding: 0.75rem;
+  }
+
+  .manga-card-badge {
+    font-size: 0.6rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .active-filters {
+    margin-bottom: 1rem;
+  }
+
+  .active-filter-pill {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .mobile-filter-toggle {
+    bottom: 1rem;
+    right: 1rem;
+    width: 48px;
+    height: 48px;
+    font-size: 1.25rem;
+  }
+
+  .filter-sidebar {
+    max-height: 80vh;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .content-type-tab {
+    padding: 0.625rem 1rem;
+    font-size: 0.7rem;
+  }
+
+  .genre-chip {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.65rem;
+  }
+
+  .status-chip {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.65rem;
+  }
+
+  .year-chip {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.7rem;
+  }
+
+  .filter-title {
+    font-size: 1rem;
+  }
+
+  .filter-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+  }
+
+  .clear-filters-btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.7rem;
+  }
+
+  .load-more-btn {
+    padding: 0.875rem 2rem;
+    font-size: 0.75rem;
+  }
+
+  .search-empty h3 {
+    font-size: 1.25rem;
+  }
+
+  .results-count {
+    font-size: 0.75rem;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+  .results-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .manga-card-title {
+    font-size: 0.8rem;
+    -webkit-line-clamp: 1;
+  }
+
+  .manga-card-meta {
+    font-size: 0.6rem;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .manga-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .manga-card:active {
+    transform: scale(0.98);
+  }
+
+  .genre-chip:hover,
+  .content-type-tab:hover,
+  .year-chip:hover,
+  .status-chip:hover {
+    transform: none;
+  }
+
+  .genre-chip:active,
+  .content-type-tab:active,
+  .year-chip:active,
+  .status-chip:active {
+    transform: scale(0.95);
+  }
+}
+
+/* Landscape mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .filter-sidebar {
+    max-height: 90vh;
+  }
+
+  .mobile-filter-toggle {
+    display: none;
+  }
+}
