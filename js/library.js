@@ -85,14 +85,14 @@ async function loadContinueReading() {
       .map(
         (item) => `
       <div class="library-card" data-manga-id="${item.mangaId}" data-chapter-id="${item.chapterId}">
-        <a href="reader.html?chapter=${item.chapterId}&manga=${item.mangaId}&source=${item.source || "mangadex"}" class="library-card-link">
+        <a href="reader.html?id=${item.chapterId}&manga=${item.mangaId}&source=${item.source || "mangadex"}" class="library-card-link">
           <div class="library-card-cover">
             <img src="${item.coverUrl || "assets/favicon.svg"}" alt="${item.mangaTitle}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous">
             ${
-              item.progressPercent > 0
+              item.scrollPercent > 0
                 ? `
               <div class="library-card-progress">
-                <div class="library-card-progress-bar" style="width: ${item.progressPercent}%"></div>
+                <div class="library-card-progress-bar" style="width: ${item.scrollPercent}%"></div>
               </div>
             `
                 : ""
@@ -102,7 +102,7 @@ async function loadContinueReading() {
             <h4 class="library-card-title">${item.mangaTitle || "Unknown Manga"}</h4>
             <p class="library-card-chapter">Chapter ${item.chapterNumber || "?"}</p>
             <p class="library-card-meta">
-              <span>${item.progressPercent || 0}% read</span>
+              <span>${item.scrollPercent || 0}% read</span>
               <span>• ${formatRelativeTime(item.lastReadAt)}</span>
             </p>
           </div>

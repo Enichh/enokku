@@ -10,7 +10,7 @@ import {
 } from "./api.js";
 import { getChapterPagesHybrid, getSourceStyle } from "./hybrid-api.js";
 import { getUrlParam, getPlaceholderImage, debounce } from "./utils.js";
-import { saveReadingProgress } from "./reading-history.js";
+import { saveReadingProgress, getLastReadChapter } from "./reading-history.js";
 
 const chapterTitle = document.getElementById("chapterTitle");
 const readerImages = document.getElementById("readerImages");
@@ -87,6 +87,7 @@ async function loadChapter() {
     initDebouncedSave();
     updateFloatingProgress(0);
     saveProgressToHistory(0);
+    restoreScrollPosition();
 
     // console.log("[Reader] === loadChapter SUCCESS ===");
   } catch (error) {
@@ -593,6 +594,77 @@ function initPageObserver() {
 }
 
 // ===== End of Floating Reader Bar =====
+
+// ===== Scroll Position Restoration =====
+
+function restoreScrollPosition() {
+  const navigationMangaId = source === "atsumaru" ? atsumaruMangaId : mangaId;
+  const canonicalId = canonicalMangaDexId || mangaId;
+
+  if (!navigationMangaId || !chapterId || !canonicalId) return;
+
+  try {
+    const savedEntry = getLastReadChapter(canonicalId);
+    if (!savedEntry || savedEntry.chapterId !== chapterId) return;
+
+    const savedPercent = savedEntry.scrollPercent;
+    if (!savedPercent || savedPercent <= 0) return;
+
+    console.log(`[Reader] Restoring scroll position: ${savedPercent}%`);
+
+    // Wait for all images to load before restoring scroll
+    const images = readerImages.querySelectorAll("img");
+    let loadedImages = 0;
+
+    const onImageLoad = () => {
+      loadedImages++;
+      if (loadedImages === images.length) {
+        // All images loaded, now restore scroll position
+        setTimeout(() => {
+          const documentHeight = document.documentElement.scrollHeight;
+          const windowHeight = window.innerHeight;
+          const maxScroll = documentHeight - windowHeight;
+          const targetScroll = (maxScroll * savedPercent) / 100;
+
+          console.log(
+            `[Reader] Scrolling to position: ${targetScroll}px (${savedPercent}%)`,
+          );
+          window.scrollTo({
+            top: targetScroll,
+            behavior: "instant", // Use instant to avoid smooth scroll animation on load
+          });
+        }, 100); // Small delay to ensure layout is complete
+      }
+    };
+
+    // Check if images are already loaded
+    images.forEach((img) => {
+      if (img.complete) {
+        onImageLoad();
+      } else {
+        img.addEventListener("load", onImageLoad);
+        img.addEventListener("error", onImageLoad); // Count errors as loaded to avoid infinite wait
+      }
+    });
+
+    // Handle case with no images or all already loaded
+    if (images.length === 0) {
+      setTimeout(() => {
+        const documentHeight = document.documentElement.scrollHeight;
+        const windowHeight = window.innerHeight;
+        const maxScroll = documentHeight - windowHeight;
+        const targetScroll = (maxScroll * savedPercent) / 100;
+
+        window.scrollTo({
+          top: targetScroll,
+          behavior: "instant",
+        });
+      }, 100);
+    }
+  } catch (error) {
+    console.error("[Reader] Failed to restore scroll position:", error);
+  }
+}
 
 // ===== Reading History Functions =====
 
