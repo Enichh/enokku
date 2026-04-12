@@ -61,10 +61,10 @@ async function loadChapter() {
   //   "[Reader] chapterId:",
   //   chapterId,
   //   "mangaId:",
-    mangaId,
-    "source:",
-    source,
-  );
+  //   mangaId,
+  //   "source:",
+  //   source,
+  // );
 
   // Check initial floating bar visibility
   updateFloatingBarVisibility();
@@ -109,9 +109,9 @@ async function loadMangaDetailsForHistory() {
       if (response.ok) {
         const data = await response.json();
         // console.log(
-      //   "[Reader] Atsumaru API response:",
-      //   JSON.stringify(data, null, 2),
-      // );
+        //   "[Reader] Atsumaru API response:",
+        //   JSON.stringify(data, null, 2),
+        // );
         if (data) {
           mangaTitleForHistory =
             data.title || data.englishTitle || `Manga ${navigationMangaId}`;
@@ -131,8 +131,8 @@ async function loadMangaDetailsForHistory() {
               // Store canonical MangaDex UUID
               canonicalMangaDexId = bestMatch.id;
               // console.log(
-      //   `[Reader] Found canonical MangaDex ID: ${canonicalMangaDexId}`,
-      // );
+              //   `[Reader] Found canonical MangaDex ID: ${canonicalMangaDexId}`,
+              // );
 
               const coverArt = findRelationship(bestMatch, "cover_art");
               if (coverArt) {
