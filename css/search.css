@@ -443,6 +443,18 @@
   transition: all 0.2s ease;
 }
 
+.mobile-filter-toggle::before {
+  content: "☰";
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+/* Hide toggle when filter sidebar is active */
+.filter-sidebar.active ~ .mobile-filter-toggle,
+.mobile-filter-toggle.sidebar-active {
+  display: none;
+}
+
 .mobile-filter-toggle:hover {
   transform: scale(1.1);
   box-shadow: 0 6px 30px var(--accent-glow);

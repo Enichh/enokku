@@ -100,6 +100,7 @@ function setupEventListeners() {
   // Mobile filter toggle
   elements.mobileFilterToggle?.addEventListener("click", () => {
     elements.filterSidebar?.classList.add("active");
+    elements.mobileFilterToggle?.classList.add("sidebar-active");
     document.body.style.overflow = "hidden";
   });
 
@@ -114,6 +115,7 @@ function setupEventListeners() {
 
 function closeMobileFilters() {
   elements.filterSidebar?.classList.remove("active");
+  elements.mobileFilterToggle?.classList.remove("sidebar-active");
   if (document.body) {
     document.body.style.overflow = "";
   }
