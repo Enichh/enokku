@@ -257,6 +257,8 @@ async function loadChapters(allTitles) {
       return;
     }
 
+    // Apply initial sort based on currentSortOrder (default asc)
+    sortChapters();
     renderChapterPage(0);
   } catch (error) {
     console.error(`[Details] Error loading chapters:`, error);
@@ -302,6 +304,8 @@ async function renderAtsumaruOnlyDetails() {
       return;
     }
 
+    // Apply initial sort based on currentSortOrder (default asc)
+    sortChapters();
     renderChapterPage(0);
   } catch (error) {
     console.error(`[Details] Error loading Atsumaru chapters:`, error);
