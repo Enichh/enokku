@@ -6,6 +6,7 @@ import {
   getCoverUrl,
   findRelationship,
   getEnglishTitle,
+  searchManga,
 } from "./api.js";
 import { getChapterPagesHybrid, getSourceStyle } from "./hybrid-api.js";
 import { getUrlParam, getPlaceholderImage, debounce } from "./utils.js";
@@ -109,9 +110,34 @@ async function loadMangaDetailsForHistory() {
         if (data) {
           mangaTitleForHistory =
             data.title || data.englishTitle || `Manga ${navigationMangaId}`;
-          coverUrlForHistory = data.image
-            ? `/api/proxy?imageUrl=${encodeURIComponent(data.image)}`
-            : getPlaceholderImage(256, 384, "No Cover");
+
+          // Also search MangaDex by title to get proper MangaDex cover
+          try {
+            const searchResults = await searchManga(mangaTitleForHistory, 5);
+            if (searchResults?.data?.length > 0) {
+              // Find best match by chapter count
+              const bestMatch = searchResults.data.reduce((best, current) => {
+                const bestChapters =
+                  parseInt(best.attributes?.lastChapter) || 0;
+                const currentChapters =
+                  parseInt(current.attributes?.lastChapter) || 0;
+                return currentChapters > bestChapters ? current : best;
+              });
+              const coverArt = findRelationship(bestMatch, "cover_art");
+              if (coverArt) {
+                coverUrlForHistory = getCoverUrl(bestMatch.id, coverArt, "256");
+                console.log(`[Reader] Using MangaDex cover for history`);
+              } else {
+                coverUrlForHistory = getPlaceholderImage(256, 384, "No Cover");
+              }
+            } else {
+              coverUrlForHistory = getPlaceholderImage(256, 384, "No Cover");
+            }
+          } catch (searchError) {
+            console.error("[Reader] MangaDex search failed:", searchError);
+            coverUrlForHistory = getPlaceholderImage(256, 384, "No Cover");
+          }
+
           console.log(`[Reader] Set history title: "${mangaTitleForHistory}"`);
           console.log(`[Reader] Set history cover: "${coverUrlForHistory}"`);
         }

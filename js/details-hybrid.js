@@ -59,12 +59,17 @@ async function loadMangaDetails() {
         5,
       );
       if (searchResults?.data?.length > 0) {
-        // Use first result as the MangaDex manga
-        const manga = searchResults.data[0];
+        // Find the best match: prefer manga with highest chapter count
+        const bestMatch = searchResults.data.reduce((best, current) => {
+          const bestChapters = parseInt(best.attributes?.lastChapter) || 0;
+          const currentChapters =
+            parseInt(current.attributes?.lastChapter) || 0;
+          return currentChapters > bestChapters ? current : best;
+        });
         console.log(
-          `[Details] Found MangaDex match: ${getEnglishTitle(manga)}`,
+          `[Details] Found MangaDex match: ${getEnglishTitle(bestMatch)} (Ch. ${bestMatch.attributes?.lastChapter || "?"})`,
         );
-        await renderMangaDexDetails(manga);
+        await renderMangaDexDetails(bestMatch);
         return;
       }
     } catch (error) {
