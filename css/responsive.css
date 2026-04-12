@@ -208,33 +208,38 @@
   }
 
   /* ===== Compact Floating Reader Bar on Mobile ===== */
-  .floating-reader-bar {
-    bottom: 10px;
+  #floatingReaderBar {
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
     padding: 0.3rem 1rem;
     border-radius: 40px;
+    max-width: 95vw;
   }
 
-  .floating-reader-bar.collapsed {
+  #floatingReaderBar.collapsed {
     padding: 0.25rem 0.9rem;
     background: rgba(20, 20, 20, 0.85);
   }
 
-  .float-progress-only {
+  #floatingReaderBar.expanded {
+    transform: translateX(-50%) translateY(-10px);
+  }
+
+  #floatingReaderBar .float-progress-only {
     font-size: 0.9rem;
     font-weight: 500;
   }
 
   /* Keep expanded controls usable */
-  .float-expanded-controls {
+  #floatingReaderBar .float-expanded-controls {
     gap: 0.3rem;
   }
 
-  .float-nav-btn {
+  #floatingReaderBar .float-nav-btn {
     width: 32px;
     height: 32px;
   }
 
-  .float-expanded-center {
+  #floatingReaderBar .float-expanded-center {
     gap: 0.3rem;
     font-size: 0.8rem;
   }
@@ -246,7 +251,7 @@
     text-overflow: ellipsis;
   }
 
-  .float-back-to-top-btn {
+  #floatingReaderBar .float-back-to-top-btn {
     width: 26px;
     height: 26px;
   }
@@ -280,6 +285,7 @@
   /* Title font size adjustment */
   .two-column-sections .manga-card .title {
     font-size: 0.75rem;
+    line-clamp: 2;
     -webkit-line-clamp: 2;
   }
 
