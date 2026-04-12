@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Offline Chapters</title>
+</head>
+<body>
+    <h1>Debug Offline Chapters</h1>
+    <button onclick="checkOfflineChapters()">Check Offline Chapters</button>
+    <button onclick="clearDebugOutput()">Clear Output</button>
+    <pre id="debugOutput"></pre>
+
+    <script type="module">
+        import { getAllOfflineChapters } from "./js/offline-manager.js";
+
+        window.checkOfflineChapters = async function() {
+            const output = document.getElementById('debugOutput');
+            output.textContent = 'Checking offline chapters...\n\n';
+
+            try {
+                const chapters = await getAllOfflineChapters();
+                output.textContent += `Found ${chapters.length} chapters:\n\n`;
+
+                if (chapters.length === 0) {
+                    output.textContent += 'No chapters found. Checking database structure...\n';
+                    
+                    // Check if database exists and has the right stores
+                    const request = indexedDB.open('enokku-offline-v1');
+                    request.onsuccess = (event) => {
+                        const db = event.target.result;
+                        output.textContent += `Database exists with stores: ${Array.from(db.objectStoreNames).join(', ')}\n`;
+                        
+                        if (db.objectStoreNames.contains('offlineChapters')) {
+                            output.textContent += 'offlineChapters store exists\n';
+                            
+                            const transaction = db.transaction(['offlineChapters'], 'readonly');
+                            const store = transaction.objectStore('offlineChapters');
+                            const countRequest = store.count();
+                            
+                            countRequest.onsuccess = () => {
+                                output.textContent += `Chapter count in store: ${countRequest.result}\n`;
+                            };
+                            
+                            countRequest.onerror = () => {
+                                output.textContent += `Error counting chapters: ${countRequest.error}\n`;
+                            };
+                        } else {
+                            output.textContent += 'offlineChapters store does NOT exist!\n';
+                        }
+                    };
+                    
+                    request.onerror = (event) => {
+                        output.textContent += `Error opening database: ${request.error}\n`;
+                    };
+                } else {
+                    chapters.forEach((chapter, index) => {
+                        output.textContent += `Chapter ${index + 1}:\n`;
+                        output.textContent += `  ID: ${chapter.chapterId}\n`;
+                        output.textContent += `  Manga ID: ${chapter.mangaId}\n`;
+                        output.textContent += `  Chapter Number: ${chapter.chapterNumber}\n`;
+                        output.textContent += `  Chapter Title: ${chapter.chapterTitle}\n`;
+                        output.textContent += `  Page Count: ${chapter.pageCount}\n`;
+                        output.textContent += `  Cached At: ${new Date(chapter.cachedAt).toLocaleString()}\n`;
+                        output.textContent += `  Has Image URLs: ${chapter.imageUrls ? chapter.imageUrls.length : 'No'}\n`;
+                        output.textContent += '\n';
+                    });
+                }
+            } catch (error) {
+                output.textContent += `Error: ${error.message}\n`;
+                output.textContent += `Stack: ${error.stack}\n`;
+            }
+        };
+
+        window.clearDebugOutput = function() {
+            document.getElementById('debugOutput').textContent = '';
+        };
+    </script>
+</body>
+</html>

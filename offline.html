@@ -324,14 +324,19 @@
 
       async function loadDownloadedChapters() {
         try {
+          console.log("[Offline] Loading downloaded chapters...");
           const chapters = await getAllOfflineChapters();
+          console.log("[Offline] Found chapters:", chapters.length, chapters);
           const downloadedList = document.getElementById(
             "downloadedChaptersList",
           );
 
           if (chapters.length === 0) {
+            console.log("[Offline] No chapters found, checking database...");
             downloadedList.innerHTML =
-              '<div class="empty-cached">No downloaded chapters available. Chapters you read will be automatically cached for offline reading.</div>';
+              '<div class="empty-cached">No downloaded chapters available. Chapters you read will be automatically cached for offline reading. (Debug: ' +
+              chapters.length +
+              " chapters found in database)</div>";
             return;
           }
 
