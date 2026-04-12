@@ -93,13 +93,23 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  console.log(
+    "[SW] Fetch:",
+    request.method,
+    url.pathname,
+    "destination:",
+    request.destination,
+  );
+
   // Skip chrome-extension requests (can't be cached)
   if (url.protocol === "chrome-extension:" || url.protocol === "chrome:") {
+    console.log("[SW] Skipping chrome-extension request");
     return;
   }
 
   // Skip MangaDex images - let browser handle directly with img referrerpolicy
   if (url.hostname === "uploads.mangadex.org") {
+    console.log("[SW] Skipping MangaDex image:", url.hostname);
     return;
   }
 
@@ -178,28 +188,25 @@ async function handleStaticRequest(request) {
 }
 
 async function handleAPIRequest(request) {
+  console.log("[SW] handleAPIRequest:", request.url);
   const cache = await caches.open(API_CACHE);
   const cachedResponse = await cache.match(request);
 
   if (cachedResponse) {
-    fetch(request)
-      .then((networkResponse) => {
-        if (networkResponse.ok) {
-          cache.put(request, networkResponse);
-        }
-      })
-      .catch(() => {});
+    console.log("[SW] API cache hit:", request.url);
     return cachedResponse;
   }
 
   try {
     const networkResponse = await fetch(request);
+    console.log("[SW] API fetch status:", networkResponse.status, request.url);
     if (networkResponse.ok) {
       cache.put(request, networkResponse.clone());
+      console.log("[SW] API cached:", request.url);
     }
     return networkResponse;
   } catch (error) {
-    console.error("[SW] API request failed:", request.url);
+    console.error("[SW] API request failed:", request.url, error);
     return new Response(
       JSON.stringify({ error: "Offline - Data not available" }),
       {
@@ -211,6 +218,7 @@ async function handleAPIRequest(request) {
 }
 
 async function handleImageRequest(request, event) {
+  console.log("[SW] handleImageRequest:", request.url);
   const cache = await caches.open(IMAGE_CACHE);
 
   // Create a clean URL without query params for caching
@@ -218,11 +226,14 @@ async function handleImageRequest(request, event) {
   const isMangaDex = url.hostname.includes("mangadex.org");
   const cleanUrl = isMangaDex ? `${url.origin}${url.pathname}` : request.url;
   const cacheKey = new Request(cleanUrl);
+  console.log("[SW] Image cache key:", cleanUrl, "isMangaDex:", isMangaDex);
 
   const cachedResponse = await cache.match(cacheKey);
   if (cachedResponse) {
+    console.log("[SW] Image cache hit:", cleanUrl);
     return cachedResponse;
   }
+  console.log("[SW] Image cache miss:", cleanUrl);
 
   try {
     // For MangaDex: use no-referrer to bypass hotlink protection

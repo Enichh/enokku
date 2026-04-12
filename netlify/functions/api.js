@@ -31,6 +31,10 @@ exports.handler = async (event, context) => {
     const imageUrl = decodeURIComponent(queryParams.imageUrl);
 
     console.log("[Proxy] Image URL:", imageUrl);
+    console.log("[Proxy] Headers:", {
+      "User-Agent": "MangaDex-Static-Client/1.0",
+      Referer: "https://mangadex.org/",
+    });
 
     try {
       const response = await fetch(imageUrl, {
@@ -40,10 +44,24 @@ exports.handler = async (event, context) => {
         },
       });
 
+      console.log("[Proxy] Response status:", response.status);
+      console.log(
+        "[Proxy] Response content-type:",
+        response.headers.get("content-type"),
+      );
+
       if (!response.ok) {
+        console.error(
+          "[Proxy] Failed to fetch image:",
+          response.status,
+          response.statusText,
+        );
         return {
           statusCode: response.status,
-          body: JSON.stringify({ error: "Image not found" }),
+          body: JSON.stringify({
+            error: "Image not found",
+            status: response.status,
+          }),
           headers: {
             "Access-Control-Allow-Origin": "*",
             "Content-Type": "application/json",
@@ -53,6 +71,11 @@ exports.handler = async (event, context) => {
 
       const imageBuffer = await response.arrayBuffer();
       const contentType = response.headers.get("content-type") || "image/jpeg";
+      console.log(
+        "[Proxy] Successfully fetched image, size:",
+        imageBuffer.byteLength,
+        "bytes",
+      );
 
       return {
         statusCode: 200,
