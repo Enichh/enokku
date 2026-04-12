@@ -291,19 +291,29 @@
 
       async function loadCachedContent() {
         try {
+          console.log("[Offline] Loading cached content...");
           const readingList = getReadingHistory();
+          console.log(
+            "[Offline] Reading history loaded:",
+            readingList.length,
+            "items",
+          );
+          console.log("[Offline] Reading history data:", readingList);
           const cachedList = document.getElementById("cachedList");
 
           if (readingList.length === 0) {
+            console.log("[Offline] No reading history found");
             cachedList.innerHTML =
               '<div class="empty-cached">No reading history available. Start reading to see content here.</div>';
             return;
           }
 
-          cachedList.innerHTML = readingList
+          console.log("[Offline] Rendering reading list items...");
+          const readingListHTML = readingList
             .slice(0, 5)
-            .map(
-              (item) => `
+            .map((item) => {
+              console.log("[Offline] Processing reading item:", item);
+              return `
             <a href="reader.html?id=${item.chapterId}&manga=${item.mangaId}&source=${item.source || "mangadex"}" class="cached-item">
               <img src="${item.coverUrl || "assets/favicon.svg"}" alt="" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous">
               <div class="cached-item-info">
@@ -311,11 +321,14 @@
                 <div class="cached-item-chapter">Chapter ${item.chapterNumber || "?"}</div>
               </div>
             </a>
-          `,
-            )
+          `;
+            })
             .join("");
+          console.log("[Offline] Setting reading list HTML...");
+          cachedList.innerHTML = readingListHTML;
+          console.log("[Offline] Reading list rendered successfully");
         } catch (error) {
-          console.error("Failed to load cached content:", error);
+          console.error("[Offline] Failed to load cached content:", error);
         }
 
         // Load downloaded chapters
@@ -341,24 +354,39 @@
           }
 
           // Group chapters by manga
+          console.log("[Offline] Grouping chapters by manga...");
           const chaptersByManga = {};
           chapters.forEach((chapter) => {
+            console.log("[Offline] Processing chapter for grouping:", chapter);
             if (!chaptersByManga[chapter.mangaId]) {
               chaptersByManga[chapter.mangaId] = [];
             }
             chaptersByManga[chapter.mangaId].push(chapter);
           });
+          console.log(
+            "[Offline] Chapters grouped by manga:",
+            Object.keys(chaptersByManga),
+          );
 
           let html = "";
           for (const [mangaId, mangaChapters] of Object.entries(
             chaptersByManga,
           )) {
+            console.log(
+              `[Offline] Processing manga group: ${mangaId} with ${mangaChapters.length} chapters`,
+            );
+
             // Get manga title from cached metadata
             const mangaMetadata = await getCachedMangaMetadata(mangaId);
+            console.log(
+              `[Offline] Manga metadata for ${mangaId}:`,
+              mangaMetadata,
+            );
             const mangaTitle =
               mangaMetadata?.title ||
               mangaMetadata?.attributes?.title ||
               `Manga ${mangaId.slice(0, 8)}...`;
+            console.log(`[Offline] Using manga title: ${mangaTitle}`);
 
             html += `
               <div class="offline-manga-group">
@@ -367,6 +395,7 @@
             `;
 
             mangaChapters.forEach((chapter) => {
+              console.log("[Offline] Rendering chapter:", chapter);
               const cachedAt = new Date(chapter.cachedAt).toLocaleDateString();
               const size = formatBytes(chapter.pageCount * 500 * 1024); // Estimate 500KB per page
 
@@ -377,6 +406,10 @@
               const readerParams = isAtsumaru
                 ? `id=${chapter.chapterId}&manga=${chapter.mangaId}&source=atsumaru`
                 : `id=${chapter.chapterId}&manga=${chapter.mangaId}`;
+
+              console.log(
+                `[Offline] Chapter ${chapter.chapterId} - Atsumaru: ${isAtsumaru}, Params: ${readerParams}`,
+              );
 
               html += `
                 <a href="reader.html?${readerParams}" class="cached-item">
@@ -399,7 +432,9 @@
             `;
           }
 
+          console.log("[Offline] Setting downloaded chapters HTML...");
           downloadedList.innerHTML = html;
+          console.log("[Offline] Downloaded chapters rendered successfully");
         } catch (error) {
           console.error("Failed to load downloaded chapters:", error);
           document.getElementById("downloadedChaptersList").innerHTML =
@@ -421,7 +456,10 @@
         }, 1500);
       });
 
-      document.addEventListener("DOMContentLoaded", loadCachedContent);
+      document.addEventListener("DOMContentLoaded", () => {
+        console.log("[Offline] DOM Content Loaded - initializing offline page...");
+        loadCachedContent();
+      });
     </script>
   </body>
 </html>
