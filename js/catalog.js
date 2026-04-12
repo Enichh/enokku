@@ -34,7 +34,7 @@ function renderMangaCard(manga) {
   const card = document.createElement("div");
   card.className = "manga-card";
   card.innerHTML = `
-        <img src="${coverUrl}" alt="${title}" loading="lazy" referrerpolicy="no-referrer">
+        <img src="${coverUrl}" alt="${title}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous">
         <div class="info">
             <div class="title">${title}</div>
             <div class="meta">${manga.attributes.year || "N/A"} · ${manga.attributes.status || "Unknown"}</div>

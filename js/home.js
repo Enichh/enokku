@@ -71,7 +71,7 @@ function renderMangaCard(manga) {
   const card = document.createElement("div");
   card.className = "manga-card";
   card.innerHTML = `
-    <img src="${coverUrl}" alt="${title}" loading="lazy" referrerpolicy="no-referrer">
+    <img src="${coverUrl}" alt="${title}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous">
     <div class="info">
       <div class="title">${title}</div>
       <div class="meta">${manga.attributes.year || "N/A"} · ${manga.attributes.status || "Unknown"}</div>
@@ -94,7 +94,7 @@ function renderHistoryCard(entry) {
   const card = document.createElement("div");
   card.className = "manga-card history-card";
   card.innerHTML = `
-    <img src="${entry.coverUrl}" alt="${entry.mangaTitle}" loading="lazy" referrerpolicy="no-referrer">
+    <img src="${entry.coverUrl}" alt="${entry.mangaTitle}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous">
     <div class="info">
       <div class="title">${entry.mangaTitle}</div>
       <div class="meta">${entry.scrollPercent}% • Ch. ${entry.chapterNumber}</div>

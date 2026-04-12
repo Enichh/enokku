@@ -185,7 +185,7 @@ function renderMangaDetailsHTML(
 
   mangaDetailsContainer.innerHTML = `
     <div class="manga-cover">
-      <img id="mangaCoverImg" src="${coverUrl}" alt="${title}" referrerpolicy="no-referrer">
+      <img id="mangaCoverImg" src="${coverUrl}" alt="${title}" referrerpolicy="no-referrer" crossorigin="anonymous">
       <button id="startReadingBtn" class="start-reading-btn">
         <span class="btn-text">▶ Start Reading</span>
         <span class="btn-text-mobile">▶ Read</span>
@@ -286,7 +286,7 @@ async function renderAtsumaruOnlyDetails() {
   // For Atsumaru-only, show minimal details and load chapters directly
   mangaDetailsContainer.innerHTML = `
     <div class="manga-cover">
-      <img id="mangaCoverImg" src="${getPlaceholderImage(512, 768, "No Cover")}" alt="Manga Cover" referrerpolicy="no-referrer">
+      <img id="mangaCoverImg" src="${getPlaceholderImage(512, 768, "No Cover")}" alt="Manga Cover" referrerpolicy="no-referrer" crossorigin="anonymous">
       <button id="startReadingBtn" class="start-reading-btn">
         <span class="btn-text">▶ Start Reading</span>
         <span class="btn-text-mobile">▶ Read</span>

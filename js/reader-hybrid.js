@@ -371,6 +371,7 @@ function renderPages() {
     img.loading = index < 3 ? "eager" : "lazy";
     img.dataset.page = index;
     img.referrerPolicy = "no-referrer";
+    img.crossOrigin = "anonymous";
 
     img.onload = () => {
       console.log(`[Reader] Page ${index + 1} loaded`);
