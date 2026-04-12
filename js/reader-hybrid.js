@@ -204,7 +204,11 @@ async function loadChapterBySource() {
   }
 
   pages = pageUrls.map((url, index) => ({
-    url,
+    // Use proxy for Atsumaru, direct for MangaDex
+    url:
+      source === "atsumaru"
+        ? `/api/proxy?imageUrl=${encodeURIComponent(url)}`
+        : url,
     alt: `Page ${index + 1}`,
   }));
 
