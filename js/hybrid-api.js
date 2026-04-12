@@ -169,10 +169,10 @@ export async function getChapterPagesHybrid(chapter) {
 // Source styling helpers
 export function getSourceStyle(source) {
   const styles = {
-    [SOURCES.MANGADEX]: { color: "#ff6740", icon: "📖", name: "MangaDex" },
-    [SOURCES.ATSUMARU]: { color: "#10b981", icon: "📚", name: "Atsumaru" },
+    [SOURCES.MANGADEX]: { color: "#ff6740", name: "MangaDex" },
+    [SOURCES.ATSUMARU]: { color: "#10b981", name: "Atsumaru" },
   };
-  return styles[source] || { color: "#888", icon: "❓", name: source };
+  return styles[source] || { color: "#888", name: source };
 }
 
 export { SOURCES, SOURCE_PRIORITY, findAtsumaruManga, getAtsumaruChapters };

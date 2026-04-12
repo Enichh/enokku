@@ -72,7 +72,7 @@ async function loadContinueReading() {
     if (readingList.length === 0) {
       container.innerHTML = `
         <div class="library-empty">
-          <div class="library-empty-icon">📚</div>
+          <div class="library-empty-icon"></div>
           <h3>No Reading History</h3>
           <p>Start reading manga to see your progress here</p>
           <a href="index.html" class="btn-primary">Browse Manga</a>
@@ -142,7 +142,7 @@ async function loadRecentHistory() {
     if (readingList.length === 0) {
       container.innerHTML = `
         <div class="library-empty">
-          <div class="library-empty-icon">📖</div>
+          <div class="library-empty-icon"></div>
           <h3>No Recent History</h3>
           <p>Your recently read manga will appear here</p>
         </div>
@@ -226,7 +226,7 @@ function loadBookmarks() {
   if (bookmarks.length === 0) {
     container.innerHTML = `
       <div class="library-empty">
-        <div class="library-empty-icon">🔖</div>
+        <div class="library-empty-icon"></div>
         <h3>No Bookmarks</h3>
         <p>Bookmark specific pages while reading to see them here</p>
       </div>

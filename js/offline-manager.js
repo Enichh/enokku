@@ -25,7 +25,7 @@ function showOfflineIndicator(message = "Reading offline") {
   const indicator = document.createElement("div");
   indicator.className = "offline-reading-indicator";
   indicator.innerHTML = `
-    <span class="offline-icon">📴</span>
+    <span class="offline-icon"></span>
     <span class="offline-text">${message}</span>
   `;
 

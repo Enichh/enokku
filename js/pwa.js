@@ -88,10 +88,7 @@ function showConnectionStatus(status) {
 
   const indicator = document.createElement("div");
   indicator.className = `connection-indicator ${status}`;
-  indicator.innerHTML =
-    status === "online"
-      ? "<span>📡</span> Back online"
-      : "<span>⚠️</span> Offline mode";
+  indicator.innerHTML = status === "online" ? "Back online" : "Offline mode";
 
   document.body.appendChild(indicator);
 
@@ -187,7 +184,7 @@ function showCustomInstallPrompt() {
   const banner = document.createElement("div");
   banner.className = "install-banner";
   banner.innerHTML = `
-    <span class="install-banner-text">📱 Install Enokku for offline reading</span>
+    <span class="install-banner-text">Install Enokku for offline reading</span>
     <button class="install-banner-btn" onclick="triggerInstall()">Install</button>
     <button class="install-banner-close" onclick="dismissInstall()">×</button>
   `;
@@ -207,7 +204,7 @@ function showUpdateNotification() {
   const notification = document.createElement("div");
   notification.className = "update-notification";
   notification.innerHTML = `
-    <span>🔄 Update available</span>
+    <span>Update available</span>
     <button onclick="updateApp()">Update</button>
     <button onclick="this.parentElement.remove()">Later</button>
   `;
@@ -455,7 +452,7 @@ function showEnhancedUpdateNotification(newVersion) {
 
   notification.innerHTML = `
     <div class="update-notification-content">
-      <span>🔄 Update available (${newVersion})</span>
+      <span>Update available (${newVersion})</span>
       <button class="update-btn-primary" onclick="applyUpdate()">Update Now</button>
       <button class="update-btn-secondary" onclick="dismissUpdate()">Later</button>
     </div>

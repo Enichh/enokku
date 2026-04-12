@@ -107,7 +107,7 @@
       }
 
       .cached-content h2::before {
-        content: "📚";
+        content: "";
       }
 
       .cached-list {
@@ -202,7 +202,7 @@
   </head>
   <body>
     <div class="connection-status" id="connectionStatus">
-      <span>📡</span> You're back online!
+      You're back online!
     </div>
 
     <main class="offline-container">
@@ -227,14 +227,10 @@
 
       <div class="offline-actions">
         <button class="offline-btn primary" onclick="retryConnection()">
-          <span>🔄</span> Retry Connection
+          Retry Connection
         </button>
-        <a href="index.html" class="offline-btn">
-          <span>🏠</span> Go to Home
-        </a>
-        <a href="library.html" class="offline-btn">
-          <span>📚</span> View Library
-        </a>
+        <a href="index.html" class="offline-btn"> Go to Home </a>
+        <a href="library.html" class="offline-btn"> View Library </a>
       </div>
 
       <section class="cached-content" id="cachedContent">

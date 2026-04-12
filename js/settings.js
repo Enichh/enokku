@@ -228,9 +228,9 @@ function updateInstallButtonState() {
   const isInstalled = localStorage.getItem("enokku_installed") === "true";
 
   if (isStandalone || isInstalled) {
-    installBtn.textContent = "✓ Already Installed";
+    installBtn.textContent = "Already Installed";
     installBtn.disabled = true;
-    installBtn.innerHTML = "<span>✓</span> Already Installed";
+    installBtn.innerHTML = "Already Installed";
   } else {
     // Check if install prompt is available
     setTimeout(() => {
@@ -401,7 +401,7 @@ window.checkForUpdatesManual = async () => {
   if (!statusEl) return;
 
   statusEl.innerHTML =
-    '<span class="update-checking">🔄 Checking for updates...</span>';
+    '<span class="update-checking">Checking for updates...</span>';
 
   try {
     await checkForVersionUpdate();
@@ -410,7 +410,7 @@ window.checkForUpdatesManual = async () => {
     const hasNotification = document.querySelector(".update-notification");
     if (!hasNotification) {
       statusEl.innerHTML =
-        '<span class="update-current">✅ App is up to date</span>';
+        '<span class="update-current">App is up to date</span>';
 
       // Clear status after 3 seconds
       setTimeout(() => {
@@ -418,12 +418,12 @@ window.checkForUpdatesManual = async () => {
       }, 3000);
     } else {
       statusEl.innerHTML =
-        '<span class="update-available">🔄 Update available! Click "Update Now" above.</span>';
+        '<span class="update-available">Update available! Click "Update Now" above.</span>';
     }
   } catch (error) {
     console.error("Manual update check failed:", error);
     statusEl.innerHTML =
-      '<span class="update-error">❌ Check failed. Try again.</span>';
+      '<span class="update-error">Check failed. Try again.</span>';
 
     setTimeout(() => {
       statusEl.innerHTML = "";

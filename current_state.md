@@ -112,5 +112,20 @@
 
 ---
 
-**Last Updated**: 2026-04-13 02:31
-**Session Type**: Chapter Downloading Implementation Complete
+### 2026-04-13 02:41 - Export Fixes and UI Styling
+
+- **Action**: Fixed JavaScript export errors and styled download/clear buttons with MSI theme
+- **Status**: Completed and pushed to production
+- **Files Modified**: `js/pwa.js`, `js/offline-manager.js`, `css/details.css`, `css/sections.css`, `manga.html`, `library.html`
+- **Changes**:
+  - Fixed `triggerInstall` export in pwa.js (defined as local function)
+  - Fixed `getOfflineChapterCount` export in offline-manager.js
+  - Removed duplicate `getDeferredInstallPrompt` export
+  - Styled "Download All Chapters" button with MSI red gradient, glow effects, and download icon
+  - Styled "Clear All" button in library with trash icon and red hover effects
+- **Next**: Continue testing chapter downloads and PWA functionality
+
+---
+
+**Last Updated**: 2026-04-13 02:41
+**Session Type**: Export Bug Fixes and UI Polish
