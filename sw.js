@@ -436,7 +436,11 @@ self.addEventListener("fetch", (event) => {
 
     case "network-first":
       event.respondWith(
-        handleNavigation(request).catch(() => {
+        handleNavigation(request).catch((error) => {
+          console.log(
+            "[SW] Network-first failed, falling back to offline.html:",
+            error,
+          );
           return caches.match("/offline.html");
         }),
       );
