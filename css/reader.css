@@ -4,6 +4,11 @@
   margin: 0 auto;
 }
 
+/* Override body background for reader to prevent status bar color */
+body {
+  background-color: transparent !important;
+}
+
 /* Reader Header – Glassmorphism effect */
 .reader-header {
   background: var(--glass-bg);
