@@ -25,6 +25,9 @@ import {
   getCachedMangaMetadata,
   isOnline,
   isChapterCached,
+  preloadChapter,
+  getOfflineChapterCount,
+  MAX_CACHED_CHAPTERS,
 } from "./offline-manager.js";
 
 const mangaDetailsContainer = document.getElementById("mangaDetails");
@@ -40,6 +43,8 @@ let currentPage = 0;
 const chaptersPerPage = 50;
 let hybridInfo = null;
 let currentSortOrder = "asc"; // 'asc' or 'desc'
+let downloadAllInProgress = false;
+let pendingDownloads = new Set();
 
 if (!mangaId) {
   showError("mangaDetails", "No manga ID provided");
@@ -388,6 +393,9 @@ async function loadChapters(allTitles) {
     sortChapters();
     renderChapterPage(0);
 
+    // Show download all container when chapters are loaded
+    document.querySelector(".download-all-container").style.display = "block";
+
     // Cache the chapter list for offline access
     await cacheMangaMetadata(mangaId, {
       title: document.querySelector("h1")?.textContent || "Unknown",
@@ -523,7 +531,7 @@ async function renderAtsumaruOnlyDetails() {
   }
 }
 
-function renderChapterPage(page) {
+async function renderChapterPage(page) {
   console.log(`[Details] Rendering chapter page ${page}`);
   currentPage = page;
   const totalPages = Math.ceil(allChapters.length / chaptersPerPage);
@@ -561,15 +569,20 @@ function renderChapterPage(page) {
   pageChapters.forEach((chapter) => {
     const chapterNum = chapter.chapter || "?";
     const chapterTitle = chapter.title || "";
+    const chapterId = chapter.id;
 
     html += `
-      <div class="chapter-item" 
-           data-chapter-id="${chapter.id}" 
-           data-source="${chapter.source}">
-        <div>
+      <div class="chapter-item" data-chapter-id="${chapterId}" data-source="${chapter.source}">
+        <div class="chapter-info">
           <div class="chapter-title">
             Chapter ${chapterNum}${chapterTitle ? ` - ${chapterTitle}` : ""}
           </div>
+        </div>
+        <div class="chapter-actions">
+          <button class="btn-download-chapter" data-chapter-id="${chapterId}" data-chapter-number="${chapterNum}">
+            <span class="download-icon"></span>
+            <span class="download-text">Download</span>
+          </button>
         </div>
       </div>
     `;
@@ -652,14 +665,105 @@ function renderChapterPage(page) {
       window.location.href = `reader.html?${params.toString()}`;
     });
   });
+
+  // Update download button states
+  await updateChapterDownloadStatus();
 }
 
-window.goToChapterPage = function (page) {
-  const totalPages = Math.ceil(allChapters.length / chaptersPerPage);
-  if (page < 0 || page >= totalPages) return;
-  renderChapterPage(page);
-  chapterListContainer.scrollIntoView({ behavior: "smooth" });
-};
+async function updateChapterDownloadStatus() {
+  const chapterItems = document.querySelectorAll(".chapter-item");
+  for (const item of chapterItems) {
+    const chapterId = item.dataset.chapterId;
+    const btn = item.querySelector(".btn-download-chapter");
+    if (!btn) continue;
+
+    const isCached = await isChapterCached(chapterId);
+    if (isCached) {
+      btn.classList.add("downloaded");
+      btn.querySelector(".download-text").textContent = "Downloaded";
+      btn.disabled = true;
+    } else {
+      // Reset in case it was previously marked downloading
+      btn.classList.remove("downloaded", "downloading");
+      btn.querySelector(".download-text").textContent = "Download";
+      btn.disabled = false;
+    }
+  }
+}
+
+function getChapterDataFromList(chapterId) {
+  return allChapters.find((ch) => ch.id === chapterId);
+}
+
+// Add event listener for download buttons
+chapterListContainer.addEventListener("click", async (e) => {
+  const downloadBtn = e.target.closest(".btn-download-chapter");
+  if (!downloadBtn) return;
+
+  e.stopPropagation(); // Prevent navigating to reader
+
+  const chapterId = downloadBtn.dataset.chapterId;
+  const chapterNumber = downloadBtn.dataset.chapterNumber;
+  const chapterData = getChapterDataFromList(chapterId);
+
+  if (!chapterData) {
+    console.error("Chapter not found");
+    return;
+  }
+
+  if (
+    downloadBtn.classList.contains("downloaded") ||
+    downloadBtn.classList.contains("downloading")
+  ) {
+    return;
+  }
+
+  // Mark as downloading
+  downloadBtn.classList.add("downloading");
+  downloadBtn.querySelector(".download-text").textContent = "Downloading...";
+  downloadBtn.disabled = true;
+
+  try {
+    const { getChapterPagesHybrid } = await import("./hybrid-api.js");
+    const pageUrls = await getChapterPagesHybrid({
+      source: chapterData.source,
+      mangadexId:
+        chapterData.source === "mangadex"
+          ? chapterData.mangadexId || chapterData.id
+          : null,
+      mangaId: hybridInfo?.atsumaruId || atsumaruIdParam,
+      chapterId:
+        chapterData.source === "atsumaru"
+          ? chapterData.chapterId || chapterData.id.replace("atsu-", "")
+          : null,
+    });
+
+    const processedUrls =
+      chapterData.source === "atsumaru"
+        ? pageUrls.map(
+            (url) => `/api/proxy?imageUrl=${encodeURIComponent(url)}`,
+          )
+        : pageUrls;
+
+    const success = await preloadChapter(chapterId, mangaId, processedUrls, {
+      chapterNumber: chapterData.chapter,
+      chapterTitle: chapterData.title,
+    });
+
+    if (success) {
+      downloadBtn.classList.remove("downloading");
+      downloadBtn.classList.add("downloaded");
+      downloadBtn.querySelector(".download-text").textContent = "Downloaded";
+    } else {
+      throw new Error("Download failed");
+    }
+  } catch (error) {
+    console.error("Download error:", error);
+    downloadBtn.classList.remove("downloading");
+    downloadBtn.querySelector(".download-text").textContent = "Retry";
+    downloadBtn.disabled = false;
+  }
+});
 
 function deduplicateChapters(chapters) {
   const seen = new Set();
@@ -868,5 +972,82 @@ const debouncedSearch = debounce((query) => {
 searchInput?.addEventListener("input", (e) => {
   debouncedSearch(e.target.value.trim());
 });
+
+// Download All functionality
+const downloadAllBtn = document.getElementById("downloadAllChaptersBtn");
+if (downloadAllBtn) {
+  downloadAllBtn.addEventListener("click", async () => {
+    if (downloadAllInProgress) return;
+
+    // Check storage limit
+    const currentCount = await getOfflineChapterCount();
+    const chaptersToDownload = allChapters.filter((ch) => {
+      // Skip already cached chapters
+      const btn = document.querySelector(
+        `.btn-download-chapter[data-chapter-id="${ch.id}"]`,
+      );
+      return btn && !btn.classList.contains("downloaded");
+    });
+
+    if (chaptersToDownload.length === 0) {
+      document.getElementById("downloadAllStatus").textContent =
+        "All chapters already downloaded!";
+      return;
+    }
+
+    if (currentCount + chaptersToDownload.length > MAX_CACHED_CHAPTERS) {
+      const proceed = confirm(
+        `Downloading ${chaptersToDownload.length} chapters will exceed the ${MAX_CACHED_CHAPTERS}-chapter cache limit. ` +
+          `The oldest downloaded chapters will be automatically removed. Continue?`,
+      );
+      if (!proceed) return;
+    }
+
+    downloadAllInProgress = true;
+    const statusEl = document.getElementById("downloadAllStatus");
+    const container = document.querySelector(".download-all-container");
+    if (container) container.style.display = "block";
+
+    // beforeunload warning
+    const beforeUnloadHandler = (e) => {
+      if (downloadAllInProgress) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", beforeUnloadHandler);
+
+    let completed = 0;
+    for (const chapter of chaptersToDownload) {
+      const btn = document.querySelector(
+        `.btn-download-chapter[data-chapter-id="${chapter.id}"]`,
+      );
+      if (btn) {
+        statusEl.textContent = `Downloading ${completed + 1}/${chaptersToDownload.length} - Chapter ${chapter.chapter || "?"}`;
+        btn.click(); // Trigger individual download
+        // Wait for download to complete
+        await new Promise((resolve) => {
+          const checkInterval = setInterval(() => {
+            if (
+              btn.classList.contains("downloaded") ||
+              btn.classList.contains("downloading") === false
+            ) {
+              clearInterval(checkInterval);
+              resolve();
+            }
+          }, 200);
+        });
+        completed++;
+      }
+      // Delay between chapters
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+
+    downloadAllInProgress = false;
+    window.removeEventListener("beforeunload", beforeUnloadHandler);
+    statusEl.textContent = "All downloads completed!";
+    setTimeout(() => (statusEl.textContent = ""), 3000);
+  });
+}
 
 loadMangaDetails();
