@@ -143,10 +143,16 @@ window.triggerInstall = async () => {
     }
 
     deferredInstallPrompt = null;
+    window.deferredInstallPrompt = null;
   } catch (error) {
     console.error("[PWA] Install prompt failed:", error);
   }
 };
+
+// Getter function for deferred prompt state
+export function getDeferredInstallPrompt() {
+  return deferredInstallPrompt;
+}
 
 window.dismissInstall = () => {
   localStorage.setItem("enokku_install_dismissed", Date.now().toString());
@@ -509,4 +515,6 @@ export {
   clearAppCache,
   showConnectionStatus,
   checkForVersionUpdate,
+  triggerInstall,
+  getDeferredInstallPrompt,
 };

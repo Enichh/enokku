@@ -1,4 +1,9 @@
-import { getCacheStats, clearAppCache, checkForVersionUpdate } from "./pwa.js";
+import {
+  getCacheStats,
+  clearAppCache,
+  checkForVersionUpdate,
+  getDeferredInstallPrompt,
+} from "./pwa.js";
 import {
   getAllOfflineChapters,
   removeOfflineChapter,
@@ -27,6 +32,11 @@ function initSettings() {
   loadSettingsUI();
   updateCacheStats();
   setupBottomNav();
+
+  // Register background sync if enabled
+  if (currentSettings.backgroundSync) {
+    registerBackgroundSync("sync-reading-progress").catch(console.warn);
+  }
 }
 
 function loadSettings() {
@@ -224,12 +234,12 @@ function updateInstallButtonState() {
   } else {
     // Check if install prompt is available
     setTimeout(() => {
-      if (window.deferredInstallPrompt) {
+      if (getDeferredInstallPrompt()) {
         installBtn.disabled = false;
       } else {
-        installBtn.textContent = "⏳ Install Unavailable";
+        installBtn.textContent = "Install Unavailable";
         installBtn.disabled = true;
-        installBtn.innerHTML = "<span>⏳</span> Install Unavailable";
+        installBtn.innerHTML = "<span>Install Unavailable";
       }
     }, 2000); // Wait a bit for install prompt to be captured
   }
@@ -237,7 +247,6 @@ function updateInstallButtonState() {
 
 async function updateCacheStats() {
   const usageElement = document.getElementById("storageUsage");
-  const dataSavedElement = document.getElementById("dataSaved");
 
   try {
     // Get accurate offline storage usage from image cache
@@ -250,12 +259,6 @@ async function updateCacheStats() {
 
     if (usageElement) {
       usageElement.textContent = `${offlineUsageMB} MB / ${quotaMB} MB (${offlineStorage.percentage}%)`;
-    }
-
-    if (dataSavedElement) {
-      const saved = localStorage.getItem("enokku_data_saved") || "0";
-      const savedMB = (parseInt(saved) / 1024 / 1024).toFixed(1);
-      dataSavedElement.textContent = `${savedMB} MB`;
     }
   } catch (error) {
     console.error("[Settings] Failed to get cache stats:", error);
@@ -428,33 +431,64 @@ window.checkForUpdatesManual = async () => {
   }
 };
 
-window.clearAppCacheManual = async () => {
+// Clear cache only (preserve service worker)
+window.clearAppCache = async () => {
   const statusEl = document.getElementById("updateStatus");
   if (!statusEl) return;
 
-  statusEl.innerHTML =
-    '<span class="update-checking">🧹 Clearing cache...</span>';
+  statusEl.innerHTML = '<span class="update-checking">Clearing cache...</span>';
 
   try {
     await clearAppCache();
 
-    // Also try to unregister service worker
+    statusEl.innerHTML = '<span class="update-success">Cache cleared!</span>';
+
+    // Update cache stats
+    setTimeout(() => {
+      updateCacheStats();
+    }, 1000);
+  } catch (error) {
+    console.error("Cache clear failed:", error);
+    statusEl.innerHTML =
+      '<span class="update-error">Clear failed. Try manually clearing browser cache.</span>';
+  }
+};
+
+// Reset app (clear cache + unregister service worker + reload)
+window.resetApp = async () => {
+  const statusEl = document.getElementById("updateStatus");
+  if (!statusEl) return;
+
+  if (
+    !confirm(
+      "Reset app? This will clear all cached data, unregister the service worker, and reload the page. Your settings and reading history will be preserved.",
+    )
+  ) {
+    return;
+  }
+
+  statusEl.innerHTML = '<span class="update-checking">Resetting app...</span>';
+
+  try {
+    await clearAppCache();
+
+    // Unregister service worker
     const registration = await navigator.serviceWorker.getRegistration();
     if (registration) {
       await registration.unregister();
     }
 
     statusEl.innerHTML =
-      '<span class="update-success">✅ Cache cleared! Reloading...</span>';
+      '<span class="update-success">App reset! Reloading...</span>';
 
     // Reload after short delay
     setTimeout(() => {
       window.location.reload();
     }, 1500);
   } catch (error) {
-    console.error("Cache clear failed:", error);
+    console.error("App reset failed:", error);
     statusEl.innerHTML =
-      '<span class="update-error">❌ Clear failed. Try manually clearing browser cache.</span>';
+      '<span class="update-error">Reset failed. Try manually clearing browser cache.</span>';
   }
 };
 
