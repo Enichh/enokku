@@ -20,6 +20,7 @@ const nextChapterBtn = document.getElementById("nextChapter");
 const prevChapterBottomBtn = document.getElementById("prevChapterBottom");
 const nextChapterBottomBtn = document.getElementById("nextChapterBottom");
 const backToMangaBtn = document.getElementById("backToManga");
+const readerFooter = document.querySelector(".reader-footer");
 
 const chapterId = getUrlParam("id");
 const mangaId = getUrlParam("manga");
@@ -64,6 +65,9 @@ async function loadChapter() {
     "source:",
     source,
   );
+
+  // Check initial floating bar visibility
+  updateFloatingBarVisibility();
 
   readerImages.innerHTML = `
     <div class="loading">
@@ -484,12 +488,31 @@ if (floatingBar) {
   floatingBar.addEventListener("click", handleFloatingBarTap);
 }
 
+function updateFloatingBarVisibility() {
+  if (!floatingBar || !readerFooter) return;
+
+  const footerRect = readerFooter.getBoundingClientRect();
+  const windowHeight = window.innerHeight;
+
+  // Hide floating bar when footer is visible (within 100px of bottom)
+  const isFooterVisible = footerRect.top < windowHeight + 100;
+
+  if (isFooterVisible) {
+    floatingBar.style.opacity = "0";
+    floatingBar.style.pointerEvents = "none";
+  } else {
+    floatingBar.style.opacity = "1";
+    floatingBar.style.pointerEvents = "auto";
+  }
+}
+
 window.addEventListener(
   "scroll",
   () => {
     if (floatingBar && !floatingBar.classList.contains("collapsed")) {
       collapseFloatingBar();
     }
+    updateFloatingBarVisibility();
   },
   { passive: true },
 );

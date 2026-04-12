@@ -254,7 +254,9 @@
   border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-lg), var(--shadow-glow-sm);
   border-radius: 50px;
-  transition: all var(--transition-base) var(--ease-out-expo);
+  transition:
+    all var(--transition-base) var(--ease-out-expo),
+    opacity 0.3s ease;
   max-width: 90vw;
   padding: 0.75rem 1.5rem;
   color: var(--text-primary);
