@@ -151,6 +151,7 @@ function handleClearHistory() {
 }
 
 function showRowLoading(rowElement) {
+  if (!rowElement) return;
   rowElement.innerHTML = `
     <div class="loading-small">
       <div class="spinner-small"></div>
@@ -159,10 +160,13 @@ function showRowLoading(rowElement) {
 }
 
 function showRowError(rowElement, message) {
+  if (!rowElement) return;
   rowElement.innerHTML = `<div class="error-small">${message}</div>`;
 }
 
 async function loadSection(fetchFn, rowElement, sectionName) {
+  if (!rowElement) return;
+
   showRowLoading(rowElement);
 
   try {
