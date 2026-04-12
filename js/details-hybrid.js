@@ -4,6 +4,7 @@ import {
   getCoverUrl,
   findRelationship,
   getEnglishTitle,
+  searchManga,
 } from "./api.js";
 import {
   getChaptersHybrid,
@@ -26,6 +27,7 @@ const searchInput = document.getElementById("searchInput");
 
 const mangaId = getUrlParam("id");
 const sourceParam = getUrlParam("source") || "mangadex";
+const titleParam = getUrlParam("title");
 let allChapters = [];
 let currentPage = 0;
 const chaptersPerPage = 50;
@@ -36,14 +38,38 @@ if (!mangaId) {
   showError("mangaDetails", "No manga ID provided");
 }
 
+// Check if ID is a valid MangaDex UUID (36 chars with hyphens) or Atsumaru short ID
+function isValidMangaDexId(id) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    id,
+  );
+}
+
 async function loadMangaDetails() {
   showLoading("mangaDetails");
 
-  // If explicitly Atsumaru source, skip MangaDex fetch
-  if (sourceParam === "atsumaru") {
-    console.log("[Details] Atsumaru source detected, skipping MangaDex fetch");
-    renderAtsumaruOnlyDetails();
-    return;
+  // If ID is not a valid MangaDex UUID, try to find by title
+  if (!isValidMangaDexId(mangaId) && titleParam) {
+    console.log(
+      `[Details] ID ${mangaId} is not MangaDex UUID, searching by title: ${titleParam}`,
+    );
+    try {
+      const searchResults = await searchManga(
+        decodeURIComponent(titleParam),
+        5,
+      );
+      if (searchResults?.data?.length > 0) {
+        // Use first result as the MangaDex manga
+        const manga = searchResults.data[0];
+        console.log(
+          `[Details] Found MangaDex match: ${getEnglishTitle(manga)}`,
+        );
+        await renderMangaDexDetails(manga);
+        return;
+      }
+    } catch (error) {
+      console.error(`[Details] Title search failed:`, error);
+    }
   }
 
   try {
@@ -81,18 +107,7 @@ async function loadMangaDetails() {
         })
         .join(" ") || "";
 
-    renderMangaDetailsHTML(
-      title,
-      coverUrl,
-      author?.attributes?.name,
-      manga.attributes.year,
-      manga.attributes.status,
-      description,
-      tags,
-      allTitles,
-    );
-
-    await loadChapters(allTitles);
+    await renderMangaDexDetails(manga);
   } catch (error) {
     console.error(`[Details] Error loading manga details:`, error);
     mangaDetailsContainer.innerHTML = `
@@ -101,6 +116,53 @@ async function loadMangaDetails() {
       </div>
     `;
   }
+}
+
+async function renderMangaDexDetails(manga) {
+  const coverArt = findRelationship(manga, "cover_art");
+  const author = findRelationship(manga, "author");
+
+  const coverUrl = coverArt
+    ? getCoverUrl(manga.id, coverArt, "512")
+    : getPlaceholderImage(512, 768, "No Cover");
+
+  const title = getEnglishTitle(manga);
+
+  const allTitles = [
+    title,
+    ...(manga.attributes.altTitles?.map((t) => Object.values(t)[0]) || []),
+    manga.attributes.title?.ja || "",
+    manga.attributes.title?.["ja-ro"] || "",
+    manga.attributes.title?.ko || "",
+    manga.attributes.title?.["ko-ro"] || "",
+  ].filter(Boolean);
+
+  const altTitles = allTitles.slice(1).join(", ") || "";
+  const description =
+    manga.attributes.description?.en ||
+    Object.values(manga.attributes.description || {})[0] ||
+    "No description available";
+
+  const tags =
+    manga.attributes.tags
+      ?.map((tag) => {
+        const tagName = tag.attributes?.name?.en || "";
+        return tagName ? `<span class="status">${tagName}</span>` : "";
+      })
+      .join(" ") || "";
+
+  renderMangaDetailsHTML(
+    title,
+    coverUrl,
+    author?.attributes?.name,
+    manga.attributes.year,
+    manga.attributes.status,
+    description,
+    tags,
+    allTitles,
+  );
+
+  await loadChapters(allTitles);
 }
 
 function renderMangaDetailsHTML(

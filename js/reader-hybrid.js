@@ -342,8 +342,10 @@ function updatePageIndicator() {
 }
 
 backToMangaBtn.addEventListener("click", () => {
-  if (mangaId) {
-    window.location.href = `manga.html?id=${mangaId}&source=${source}`;
+  // Use title as common ground for manga lookup
+  const title = mangaTitleForHistory || "Unknown";
+  if (mangaId || atsumaruMangaId) {
+    window.location.href = `manga.html?id=${mangaId || atsumaruMangaId}&title=${encodeURIComponent(title)}&source=${source}`;
   } else {
     window.location.href = "index.html";
   }
