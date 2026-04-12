@@ -96,16 +96,27 @@ async function loadMangaDetailsForHistory() {
   try {
     if (source === "atsumaru") {
       // Fetch Atsumaru manga details from Atsumaru API
+      console.log(
+        `[Reader] Fetching Atsumaru manga details for: ${navigationMangaId}`,
+      );
       const response = await fetch(`/atsumaru/manga?id=${navigationMangaId}`);
       if (response.ok) {
         const data = await response.json();
+        console.log(
+          "[Reader] Atsumaru API response:",
+          JSON.stringify(data, null, 2),
+        );
         if (data) {
           mangaTitleForHistory =
             data.title || data.englishTitle || `Manga ${navigationMangaId}`;
           coverUrlForHistory = data.image
             ? `/api/proxy?imageUrl=${encodeURIComponent(data.image)}`
             : getPlaceholderImage(256, 384, "No Cover");
+          console.log(`[Reader] Set history title: "${mangaTitleForHistory}"`);
+          console.log(`[Reader] Set history cover: "${coverUrlForHistory}"`);
         }
+      } else {
+        console.error(`[Reader] Atsumaru API failed: ${response.status}`);
       }
     } else {
       // Fetch MangaDex manga details
@@ -542,7 +553,7 @@ function saveProgressToHistory(percent) {
   const chapterTitleText =
     currentChapter?.attributes?.title || currentChapterInfo.title || "";
 
-  saveReadingProgress({
+  const payload = {
     mangaId: navigationMangaId,
     mangaTitle:
       mangaTitleForHistory || `Manga ${navigationMangaId.slice(0, 8)}`,
@@ -553,7 +564,12 @@ function saveProgressToHistory(percent) {
     scrollPercent: Math.round(percent),
     source: source,
     atsumaruMangaId: atsumaruMangaId,
-  });
+  };
+  console.log(
+    "[Reader] Continue Reading payload:",
+    JSON.stringify(payload, null, 2),
+  );
+  saveReadingProgress(payload);
 }
 
 // =====
