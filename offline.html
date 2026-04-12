@@ -348,9 +348,16 @@
           for (const [mangaId, mangaChapters] of Object.entries(
             chaptersByManga,
           )) {
+            // Get manga title from cached metadata
+            const mangaMetadata = await getCachedMangaMetadata(mangaId);
+            const mangaTitle =
+              mangaMetadata?.title ||
+              mangaMetadata?.attributes?.title ||
+              `Manga ${mangaId.slice(0, 8)}...`;
+
             html += `
               <div class="offline-manga-group">
-                <h3 class="offline-manga-title">Manga ${mangaId.slice(0, 8)}...</h3>
+                <h3 class="offline-manga-title">${mangaTitle}</h3>
                 <div class="offline-chapter-items">
             `;
 
@@ -358,8 +365,16 @@
               const cachedAt = new Date(chapter.cachedAt).toLocaleDateString();
               const size = formatBytes(chapter.pageCount * 500 * 1024); // Estimate 500KB per page
 
+              // Detect Atsumaru chapters by checking if chapterId starts with 'atsu-' or source is 'atsumaru'
+              const isAtsumaru =
+                chapter.chapterId?.startsWith("atsu-") ||
+                chapter.source === "atsumaru";
+              const readerParams = isAtsumaru
+                ? `id=${chapter.chapterId}&manga=${chapter.mangaId}&source=atsumaru`
+                : `id=${chapter.chapterId}&manga=${chapter.mangaId}`;
+
               html += `
-                <a href="reader.html?id=${chapter.chapterId}&manga=${chapter.mangaId}" class="cached-item">
+                <a href="reader.html?${readerParams}" class="cached-item">
                   <div class="cached-item-info">
                     <div class="cached-item-title">
                       Chapter ${chapter.chapterNumber || "?"}
