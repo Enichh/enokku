@@ -277,9 +277,7 @@ function getCoverUrl(mangaId, coverArt, size = "256") {
     return null;
   }
   const filename = coverArt.attributes.fileName;
-  // Add cache-busting timestamp to bypass MangaDex hotlink protection
-  const timestamp = Date.now();
-  return `${COVER_BASE_URL}/${mangaId}/${filename}.${size}.jpg?t=${timestamp}`;
+  return `${COVER_BASE_URL}/${mangaId}/${filename}.${size}.jpg`;
 }
 
 function findRelationship(item, type) {

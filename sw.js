@@ -98,6 +98,11 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Skip MangaDex images - let browser handle directly with img referrerpolicy
+  if (url.hostname === "uploads.mangadex.org") {
+    return;
+  }
+
   if (request.mode === "navigate") {
     event.respondWith(handleNavigation(request));
     return;
