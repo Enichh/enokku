@@ -1,9 +1,19 @@
 import { getCacheStats, clearAppCache, checkForVersionUpdate } from "./pwa.js";
+import {
+  getAllOfflineChapters,
+  removeOfflineChapter,
+  estimateStorageUsage,
+  formatBytes,
+  registerBackgroundSync,
+} from "./offline-manager.js";
+import { clearAllOfflineData } from "./db.js";
+import { triggerInstall } from "./pwa.js";
 
 const SETTINGS_DEFAULTS = {
   readingDirection: "rtl",
   imageQuality: "auto",
   preloadNextChapter: true,
+  backgroundSync: true,
   readerBackground: "#0a0a0a",
   fontSize: "medium",
   hapticFeedback: true,
@@ -92,6 +102,27 @@ function setupEventListeners() {
     });
   }
 
+  const backgroundSync = document.getElementById("backgroundSync");
+  if (backgroundSync) {
+    backgroundSync.checked = currentSettings.backgroundSync;
+    backgroundSync.addEventListener("change", async (e) => {
+      currentSettings.backgroundSync = e.target.checked;
+      saveSettings();
+
+      if (e.target.checked) {
+        // Register background sync when enabled
+        const success = await registerBackgroundSync("sync-reading-progress");
+        if (success) {
+          showSettingSaved("Background sync enabled");
+        } else {
+          showSettingSaved("Background sync not supported");
+        }
+      } else {
+        showSettingSaved("Background sync disabled");
+      }
+    });
+  }
+
   const cacheSizeLimit = document.getElementById("cacheSizeLimit");
   const cacheSizeValue = document.getElementById("cacheSizeValue");
   if (cacheSizeLimit && cacheSizeValue) {
@@ -126,12 +157,35 @@ function setupEventListeners() {
   if (importFileInput) {
     importFileInput.addEventListener("change", handleImportData);
   }
+
+  // Offline management event handlers
+  const manageOfflineBtn = document.getElementById("manageOfflineBtn");
+  if (manageOfflineBtn) {
+    manageOfflineBtn.addEventListener("click", toggleOfflineChaptersSection);
+  }
+
+  const clearAllOfflineBtn = document.getElementById("clearAllOfflineBtn");
+  if (clearAllOfflineBtn) {
+    clearAllOfflineBtn.addEventListener("click", handleClearAllOffline);
+  }
+
+  const installBtn = document.getElementById("installBtn");
+  if (installBtn) {
+    installBtn.addEventListener("click", triggerInstall);
+  }
 }
 
-function loadSettingsUI() {
+async function loadSettingsUI() {
   const versionElement = document.getElementById("appVersion");
   if (versionElement) {
-    versionElement.textContent = "1.0.0";
+    try {
+      const response = await fetch("version.json");
+      const versionData = await response.json();
+      versionElement.textContent = versionData.version || "1.0.0";
+    } catch (error) {
+      console.error("[Settings] Failed to load version:", error);
+      versionElement.textContent = "1.0.0";
+    }
   }
 
   const swStatus = document.getElementById("swStatus");
@@ -186,12 +240,16 @@ async function updateCacheStats() {
   const dataSavedElement = document.getElementById("dataSaved");
 
   try {
-    const stats = await getCacheStats();
+    // Get accurate offline storage usage from image cache
+    const offlineStorage = await estimateStorageUsage();
+    const offlineUsageMB = (offlineStorage.usage / 1024 / 1024).toFixed(1);
+
+    // Get total storage quota from browser
+    const totalStats = await getCacheStats();
+    const quotaMB = (totalStats.quota / 1024 / 1024).toFixed(0);
 
     if (usageElement) {
-      const usageMB = (stats.usage / 1024 / 1024).toFixed(1);
-      const quotaMB = (stats.quota / 1024 / 1024).toFixed(0);
-      usageElement.textContent = `${usageMB} MB / ${quotaMB} MB (${stats.percentage}%)`;
+      usageElement.textContent = `${offlineUsageMB} MB / ${quotaMB} MB (${offlineStorage.percentage}%)`;
     }
 
     if (dataSavedElement) {
@@ -241,6 +299,15 @@ function showSettingSaved(message) {
 }
 
 function exportUserData() {
+  // Warn about offline content not being backed up
+  const includeOffline = confirm(
+    "Note: Downloaded chapters and images will NOT be included in the backup due to their large size. Only your settings, reading history, favorites, and bookmarks will be exported.\n\nDo you want to continue?",
+  );
+
+  if (!includeOffline) {
+    return;
+  }
+
   const data = {
     version: 1,
     exportedAt: Date.now(),
@@ -250,6 +317,7 @@ function exportUserData() {
     ),
     favorites: JSON.parse(localStorage.getItem("enokku_favorites") || "[]"),
     bookmarks: JSON.parse(localStorage.getItem("enokku_bookmarks") || "[]"),
+    note: "Downloaded chapters and images are not included in this backup",
   };
 
   const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -410,6 +478,133 @@ function getSetting(key) {
 function setSetting(key, value) {
   currentSettings[key] = value;
   saveSettings();
+}
+
+// Offline Management Functions
+function toggleOfflineChaptersSection() {
+  const section = document.getElementById("offlineChaptersSection");
+  const btn = document.getElementById("manageOfflineBtn");
+
+  if (section.style.display === "none") {
+    section.style.display = "block";
+    btn.innerHTML = "<span>Hide Chapters</span> Manage";
+    loadOfflineChapters();
+  } else {
+    section.style.display = "none";
+    btn.innerHTML = "<span>Downloaded Chapters</span> Manage";
+  }
+}
+
+async function loadOfflineChapters() {
+  const listContainer = document.getElementById("offlineChaptersList");
+
+  try {
+    const chapters = await getAllOfflineChapters();
+
+    if (chapters.length === 0) {
+      listContainer.innerHTML = `
+        <div class="empty-state">
+          <p>No downloaded chapters found.</p>
+          <p>Chapters you read will be automatically cached for offline reading.</p>
+        </div>
+      `;
+      return;
+    }
+
+    // Group chapters by manga
+    const chaptersByManga = {};
+    chapters.forEach((chapter) => {
+      if (!chaptersByManga[chapter.mangaId]) {
+        chaptersByManga[chapter.mangaId] = [];
+      }
+      chaptersByManga[chapter.mangaId].push(chapter);
+    });
+
+    let html = "";
+    for (const [mangaId, mangaChapters] of Object.entries(chaptersByManga)) {
+      html += `
+        <div class="offline-manga-group">
+          <h4 class="offline-manga-title">Manga ${mangaId.slice(0, 8)}...</h4>
+          <div class="offline-chapter-items">
+      `;
+
+      mangaChapters.forEach((chapter) => {
+        const cachedAt = new Date(chapter.cachedAt).toLocaleDateString();
+        const size = formatBytes(chapter.pageCount * 500 * 1024); // Estimate 500KB per page
+
+        html += `
+          <div class="offline-chapter-item">
+            <div class="offline-chapter-info">
+              <div class="offline-chapter-title">
+                Chapter ${chapter.chapterNumber || "?"}
+                ${chapter.chapterTitle ? ` - ${chapter.chapterTitle}` : ""}
+              </div>
+              <div class="offline-chapter-meta">
+                Cached: ${cachedAt} | Est. ${size}
+              </div>
+            </div>
+            <button class="btn-remove-chapter" data-chapter-id="${chapter.chapterId}">
+              Remove
+            </button>
+          </div>
+        `;
+      });
+
+      html += `
+          </div>
+        </div>
+      `;
+    }
+
+    listContainer.innerHTML = html;
+
+    // Add event listeners to remove buttons
+    listContainer.querySelectorAll(".btn-remove-chapter").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        const chapterId = e.target.dataset.chapterId;
+        if (confirm("Remove this chapter from offline storage?")) {
+          await removeOfflineChapter(chapterId);
+          loadOfflineChapters(); // Refresh the list
+          updateCacheStats(); // Update storage usage
+          showSettingSaved("Chapter removed from offline storage");
+        }
+      });
+    });
+  } catch (error) {
+    console.error("[Settings] Failed to load offline chapters:", error);
+    listContainer.innerHTML = `
+      <div class="error-state">
+        <p>Failed to load downloaded chapters.</p>
+      </div>
+    `;
+  }
+}
+
+async function handleClearAllOffline() {
+  if (
+    !confirm(
+      "Remove all downloaded chapters? This will free up storage space but you'll need an internet connection to read these chapters again.",
+    )
+  ) {
+    return;
+  }
+
+  try {
+    // Clear IndexedDB data
+    await clearAllOfflineData();
+
+    // Also clear the image cache to remove orphaned images
+    if ("caches" in window) {
+      await caches.delete("enokku-images");
+    }
+
+    loadOfflineChapters(); // Refresh the list
+    updateCacheStats(); // Update storage usage
+    showSettingSaved("All offline chapters and images removed");
+  } catch (error) {
+    console.error("[Settings] Failed to clear offline data:", error);
+    alert("Failed to clear offline chapters. Please try again.");
+  }
 }
 
 window.handleClearCache = handleClearCache;

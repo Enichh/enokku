@@ -113,6 +113,21 @@
                 Automatically cache the next chapter while reading
               </p>
             </div>
+
+            <div class="settings-group">
+              <label class="settings-toggle" for="backgroundSync">
+                <span class="settings-toggle-label">Background Sync</span>
+                <input
+                  type="checkbox"
+                  id="backgroundSync"
+                  class="settings-toggle-input"
+                />
+                <span class="settings-toggle-slider"></span>
+              </label>
+              <p class="settings-hint">
+                Sync reading progress when connection is restored
+              </p>
+            </div>
           </section>
 
           <section class="settings-section">
@@ -199,11 +214,36 @@
 
             <div class="settings-actions">
               <button
+                id="manageOfflineBtn"
+                class="btn-secondary settings-action-btn"
+              >
+                <span>Downloaded Chapters</span> Manage
+              </button>
+              <button
                 id="clearCacheBtn"
                 class="btn-secondary settings-action-btn"
               >
-                <span>🗑️</span> Clear Cache
+                <span>Clear Cache</span>
               </button>
+            </div>
+
+            <div
+              class="offline-chapters-section"
+              id="offlineChaptersSection"
+              style="display: none"
+            >
+              <h3 class="settings-subtitle">Downloaded Chapters</h3>
+              <div class="offline-chapters-list" id="offlineChaptersList">
+                <div class="loading-indicator">
+                  <div class="spinner"></div>
+                  <p>Loading downloaded chapters...</p>
+                </div>
+              </div>
+              <div class="offline-chapters-actions">
+                <button id="clearAllOfflineBtn" class="btn-danger">
+                  <span>Remove All Chapters</span>
+                </button>
+              </div>
             </div>
           </section>
 
@@ -252,11 +292,7 @@
             <div class="settings-pwa-section">
               <h3 class="settings-subtitle">App Installation</h3>
               <div class="settings-pwa-buttons">
-                <button
-                  class="btn-primary settings-action-btn"
-                  onclick="triggerInstall()"
-                  id="installBtn"
-                >
+                <button class="btn-primary settings-action-btn" id="installBtn">
                   <span>📱</span> Install App
                 </button>
               </div>

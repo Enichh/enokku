@@ -11,6 +11,14 @@ import {
 import { getChapterPagesHybrid, getSourceStyle } from "./hybrid-api.js";
 import { getUrlParam, getPlaceholderImage, debounce } from "./utils.js";
 import { saveReadingProgress, getLastReadChapter } from "./reading-history.js";
+import {
+  isOnline,
+  showOfflineIndicator,
+  hideOfflineIndicator,
+  preloadChapter,
+  preloadNextChapter,
+  getOfflineChapter,
+} from "./offline-manager.js";
 
 const chapterTitle = document.getElementById("chapterTitle");
 const readerImages = document.getElementById("readerImages");
@@ -69,17 +77,50 @@ async function loadChapter() {
   // Check initial floating bar visibility
   updateFloatingBarVisibility();
 
-  readerImages.innerHTML = `
-    <div class="loading">
-      <div class="spinner"></div>
-      <p>Loading chapter...</p>
-    </div>
-  `;
+  // Check if offline
+  if (!isOnline()) {
+    readerImages.innerHTML = `
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading chapter from offline cache...</p>
+      </div>
+    `;
+    showOfflineIndicator();
+  } else {
+    readerImages.innerHTML = `
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading chapter...</p>
+      </div>
+    `;
+    hideOfflineIndicator();
+  }
 
   try {
     await loadChapterBySource();
     await loadMangaDetailsForHistory();
-    await loadChapterNavigation();
+
+    // Try to load navigation, but don't fail if offline
+    try {
+      await loadChapterNavigation();
+    } catch (navError) {
+      console.warn(
+        "[Reader] Navigation unavailable offline, using cached metadata",
+      );
+      const cachedChapter = await getOfflineChapter(chapterId);
+      if (cachedChapter) {
+        updateFloatingChapterInfo(
+          cachedChapter.chapterNumber,
+          cachedChapter.chapterTitle,
+          false,
+          false,
+        );
+        chapterTitle.textContent = `Chapter ${cachedChapter.chapterNumber}`;
+      }
+      allChapters = [];
+      currentChapterIndex = -1;
+    }
+
     renderPages();
     updatePageIndicator();
     updateChapterButtons();
@@ -88,6 +129,18 @@ async function loadChapter() {
     updateFloatingProgress(0);
     saveProgressToHistory(0);
     restoreScrollPosition();
+
+    // Preload current chapter for offline reading
+    if (isOnline() && pages.length > 0) {
+      const pageUrls = pages.map((p) => p.url);
+      const chapterInfo = allChapters[currentChapterIndex];
+      preloadChapter(chapterId, mangaId || atsumaruMangaId, pageUrls, {
+        chapterNumber: chapterInfo?.attributes?.chapter || chapterInfo?.chapter,
+        chapterTitle: chapterInfo?.attributes?.title || chapterInfo?.title,
+      }).catch((err) => {
+        console.log("[Reader] Preloading failed (non-critical):", err);
+      });
+    }
 
     // console.log("[Reader] === loadChapter SUCCESS ===");
   } catch (error) {
@@ -182,6 +235,29 @@ async function loadChapterBySource() {
   // Set fallback floating bar chapter info
   updateFloatingChapterInfo("?", "", false, false);
 
+  // Check if offline and use cached chapter data if available
+  if (!isOnline()) {
+    console.log("[Reader] Offline - attempting to load from cache");
+    const cachedChapter = await getOfflineChapter(chapterId);
+
+    if (cachedChapter && cachedChapter.imageUrls?.length > 0) {
+      console.log(
+        `[Reader] Using cached chapter: ${cachedChapter.pageCount} pages`,
+      );
+      pages = cachedChapter.imageUrls.map((url, index) => ({
+        url,
+        alt: `Page ${index + 1}`,
+      }));
+      chapterTitle.textContent = "Chapter";
+      return;
+    }
+
+    throw new Error(
+      "Chapter not available offline. Please connect to the internet.",
+    );
+  }
+
+  // Online - fetch from source
   // Get chapter data from URL params based on source
   // For Atsumaru, strip the atsu- prefix from chapterId for API calls
   const rawChapterId =
@@ -201,7 +277,7 @@ async function loadChapterBySource() {
   const pageUrls = await getChapterPagesHybrid(chapterData);
 
   if (!pageUrls || pageUrls.length === 0) {
-    throw new Error(`No pages found from ${style.name}`);
+    throw new Error(`No pages found from ${source}`);
   }
 
   pages = pageUrls.map((url, index) => ({
@@ -429,6 +505,27 @@ function updateFloatingProgress(percent) {
     current: currentChapterIndex + 1,
     total: allChapters.length,
   };
+
+  // Auto-preload next chapter when user reaches 80%
+  if (
+    percent >= 80 &&
+    isOnline() &&
+    currentChapterIndex >= 0 &&
+    allChapters.length > 0
+  ) {
+    const navigationMangaId = source === "atsumaru" ? atsumaruMangaId : mangaId;
+    preloadNextChapter(
+      chapterId,
+      navigationMangaId,
+      allChapters,
+      currentChapterIndex,
+    ).catch((err) => {
+      console.log(
+        "[Reader] Next chapter preloading failed (non-critical):",
+        err,
+      );
+    });
+  }
 }
 
 function updateFloatingChapterInfo(
@@ -566,6 +663,7 @@ function initPageObserver() {
   if (images.length === 0) return;
 
   let maxVisibleIndex = 0;
+  let hasPreloadedNext = false;
 
   pageObserver = new IntersectionObserver(
     (entries) => {
@@ -579,6 +677,24 @@ function initPageObserver() {
           updateFloatingProgress(percent);
           if (debouncedSaveProgress) {
             debouncedSaveProgress(percent);
+          }
+
+          // Preload next chapter when user reaches 80% of current chapter
+          if (percent >= 80 && !hasPreloadedNext && allChapters.length > 0) {
+            hasPreloadedNext = true;
+            const navigationMangaId =
+              source === "atsumaru" ? atsumaruMangaId : mangaId;
+            preloadNextChapter(
+              chapterId,
+              navigationMangaId,
+              allChapters,
+              currentChapterIndex,
+            ).catch((err) => {
+              console.log(
+                "[Reader] Next chapter preload failed (non-critical):",
+                err,
+              );
+            });
           }
         }
       });
