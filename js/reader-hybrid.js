@@ -91,16 +91,32 @@ async function loadChapter() {
 
 async function loadMangaDetailsForHistory() {
   const navigationMangaId = source === "atsumaru" ? atsumaruMangaId : mangaId;
-  if (!navigationMangaId || source !== "mangadex") return;
+  if (!navigationMangaId) return;
 
   try {
-    const mangaData = await fetchMangaDetails(navigationMangaId);
-    if (mangaData?.data) {
-      mangaTitleForHistory = getEnglishTitle(mangaData.data);
-      const coverArt = findRelationship(mangaData.data, "cover_art");
-      coverUrlForHistory = coverArt
-        ? getCoverUrl(mangaData.data.id, coverArt, "256")
-        : getPlaceholderImage(256, 384, "No Cover");
+    if (source === "atsumaru") {
+      // Fetch Atsumaru manga details from Atsumaru API
+      const response = await fetch(`/atsumaru/manga?id=${navigationMangaId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data?.manga) {
+          mangaTitleForHistory =
+            data.manga.title || data.manga.name || `Manga ${navigationMangaId}`;
+          coverUrlForHistory = data.manga.cover
+            ? `/api/proxy?imageUrl=${encodeURIComponent(data.manga.cover)}`
+            : getPlaceholderImage(256, 384, "No Cover");
+        }
+      }
+    } else {
+      // Fetch MangaDex manga details
+      const mangaData = await fetchMangaDetails(navigationMangaId);
+      if (mangaData?.data) {
+        mangaTitleForHistory = getEnglishTitle(mangaData.data);
+        const coverArt = findRelationship(mangaData.data, "cover_art");
+        coverUrlForHistory = coverArt
+          ? getCoverUrl(mangaData.data.id, coverArt, "256")
+          : getPlaceholderImage(256, 384, "No Cover");
+      }
     }
   } catch (error) {
     console.error("[Reader] Failed to load manga details for history:", error);
