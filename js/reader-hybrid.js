@@ -204,7 +204,7 @@ async function loadChapterBySource() {
   }
 
   pages = pageUrls.map((url, index) => ({
-    url: `/api/proxy?imageUrl=${encodeURIComponent(url)}`,
+    url,
     alt: `Page ${index + 1}`,
   }));
 
