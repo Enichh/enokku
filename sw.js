@@ -492,6 +492,8 @@ async function handleNavigation(request) {
   const cache = await caches.open(STATIC_CACHE);
   const url = new URL(request.url);
 
+  console.log("[SW] Navigation request:", request.url);
+
   try {
     // Try network first with shorter timeout for mobile
     const timeout = url.pathname.includes("mangadex.org") ? 3000 : 5000;
@@ -515,11 +517,14 @@ async function handleNavigation(request) {
   }
 
   // Fall back to cache immediately when network fails
+  console.log("[SW] Checking cache for:", request.url);
   const cached = await cache.match(request);
   if (cached) {
     console.log("[SW] Serving from cache:", request.url);
     return cached;
   }
+
+  console.log("[SW] Cache miss for:", request.url);
 
   // Ultimate fallback to offline page
   const offlinePage = await cache.match("/offline.html");
@@ -540,7 +545,23 @@ async function handleNavigation(request) {
     console.error("[SW] Failed to fetch offline.html:", offlineError);
   }
 
-  throw new Error("No cached response available");
+  // Final fallback - return basic offline response instead of throwing
+  return new Response(
+    `<!DOCTYPE html>
+    <html>
+      <head><title>Offline - Enokku</title></head>
+      <body>
+        <h1>Offline</h1>
+        <p>You are currently offline. Please check your internet connection.</p>
+        <p><a href="/">Go Home</a></p>
+      </body>
+    </html>`,
+    {
+      status: 200,
+      statusText: "OK",
+      headers: { "Content-Type": "text/html" },
+    },
+  );
 }
 
 // ============================================
