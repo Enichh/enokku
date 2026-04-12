@@ -518,11 +518,27 @@ async function handleNavigation(request) {
 
   // Fall back to cache immediately when network fails
   console.log("[SW] Checking cache for:", request.url);
-  // Normalize URL: strip query params for cache lookup since we cache clean URLs
-  const cached =
-    (await cache.match(request)) || (await cache.match(url.pathname));
+
+  // Try exact match first
+  let cached = await cache.match(request);
+  if (!cached) {
+    // Try without query string
+    const cleanUrl = url.origin + url.pathname;
+    cached = await cache.match(cleanUrl);
+  }
+  if (!cached) {
+    // Try relative path
+    cached = await cache.match(url.pathname);
+  }
+  if (!cached) {
+    // Try with just path (some caches store relative paths)
+    cached = await cache.match(
+      new Request(url.pathname, { headers: request.headers }),
+    );
+  }
+
   if (cached) {
-    console.log("[SW] Serving from cache:", request.url);
+    console.log("[SW] Serving from cache:", cached.url || request.url);
     return cached;
   }
 
