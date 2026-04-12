@@ -4,3 +4,6 @@ AI.md
 
 # Local Netlify folder
 .netlify
+
+# Windsurf skills markdown files
+.windsurf/**/*.md
