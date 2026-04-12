@@ -435,15 +435,7 @@ self.addEventListener("fetch", (event) => {
       break;
 
     case "network-first":
-      event.respondWith(
-        handleNavigation(request).catch((error) => {
-          console.log(
-            "[SW] Network-first failed, falling back to offline.html:",
-            error,
-          );
-          return caches.match("/offline.html");
-        }),
-      );
+      event.respondWith(handleNavigation(request));
       break;
 
     case "network-only":
@@ -520,19 +512,9 @@ async function handleNavigation(request) {
       request.url,
       error.message,
     );
-
-    // For mobile browsers, immediately try offline page if network fails
-    if (
-      error.message === "timeout" ||
-      error.message.includes("Failed to fetch")
-    ) {
-      console.log(
-        "[SW] Network timeout/failure detected, checking offline page",
-      );
-    }
   }
 
-  // Fall back to cache
+  // Fall back to cache immediately when network fails
   const cached = await cache.match(request);
   if (cached) {
     console.log("[SW] Serving from cache:", request.url);
