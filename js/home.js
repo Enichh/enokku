@@ -289,4 +289,6 @@ mobileMenuToggle?.addEventListener("click", () => {
 clearHistoryBtn?.addEventListener("click", handleClearHistory);
 loadContinueReading();
 
-loadAllSections();
+loadAllSections().catch((error) => {
+  console.error("[home] Failed to load sections:", error);
+});
