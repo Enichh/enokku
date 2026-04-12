@@ -327,7 +327,7 @@ function updatePageIndicator() {
 
 backToMangaBtn.addEventListener("click", () => {
   if (mangaId) {
-    window.location.href = `manga.html?id=${mangaId}`;
+    window.location.href = `manga.html?id=${mangaId}&source=${source}`;
   } else {
     window.location.href = "index.html";
   }

@@ -5,7 +5,11 @@ import {
   findRelationship,
   getEnglishTitle,
 } from "./api.js";
-import { getChaptersHybrid, findAtsumaruManga, getAtsumaruChapters } from "./hybrid-api.js";
+import {
+  getChaptersHybrid,
+  findAtsumaruManga,
+  getAtsumaruChapters,
+} from "./hybrid-api.js";
 import {
   getUrlParam,
   formatDate,
@@ -21,11 +25,12 @@ const chapterListContainer = document.getElementById("chapterList");
 const searchInput = document.getElementById("searchInput");
 
 const mangaId = getUrlParam("id");
+const sourceParam = getUrlParam("source") || "mangadex";
 let allChapters = [];
 let currentPage = 0;
 const chaptersPerPage = 50;
 let hybridInfo = null;
-let currentSortOrder = 'asc'; // 'asc' or 'desc'
+let currentSortOrder = "asc"; // 'asc' or 'desc'
 
 if (!mangaId) {
   showError("mangaDetails", "No manga ID provided");
@@ -33,6 +38,13 @@ if (!mangaId) {
 
 async function loadMangaDetails() {
   showLoading("mangaDetails");
+
+  // If explicitly Atsumaru source, skip MangaDex fetch
+  if (sourceParam === "atsumaru") {
+    console.log("[Details] Atsumaru source detected, skipping MangaDex fetch");
+    renderAtsumaruOnlyDetails();
+    return;
+  }
 
   try {
     const { data: manga } = await fetchMangaDetails(mangaId);
@@ -69,31 +81,62 @@ async function loadMangaDetails() {
         })
         .join(" ") || "";
 
-    mangaDetailsContainer.innerHTML = `
-      <div class="manga-cover">
-        <img id="mangaCoverImg" src="${coverUrl}" alt="${title}" referrerpolicy="no-referrer">
-        <button id="startReadingBtn" class="start-reading-btn">
-          <span class="btn-text">▶ Start Reading</span>
-          <span class="btn-text-mobile">▶ Read</span>
-        </button>
-      </div>
-      <div class="manga-info">
-        <h1>${title}</h1>
-        ${altTitles ? `<div class="alt-titles">${truncateText(altTitles, 100)}</div>` : ""}
-        <div class="status">${manga.attributes.status || "Unknown"} · ${author?.attributes?.name || "Unknown Author"}</div>
-        <div style="margin: 0.5rem 0;">${tags}</div>
-        <div class="description">${truncateText(description, 500)}</div>
-      </div>
-    `;
-
-    const img = mangaDetailsContainer.querySelector("#mangaCoverImg");
-    img.addEventListener("error", () => {
-      img.src = getPlaceholderImage(512, 768, "No Cover");
-    });
+    renderMangaDetailsHTML(
+      title,
+      coverUrl,
+      author?.attributes?.name,
+      manga.attributes.year,
+      manga.attributes.status,
+      description,
+      tags,
+      allTitles,
+    );
 
     await loadChapters(allTitles);
   } catch (error) {
-    showError("mangaDetails", error.message);
+    console.error(`[Details] Error loading manga details:`, error);
+    mangaDetailsContainer.innerHTML = `
+      <div class="error">
+        <p>Error loading manga details: ${error.message}</p>
+      </div>
+    `;
+  }
+}
+
+function renderMangaDetailsHTML(
+  title,
+  coverUrl,
+  authorName,
+  year,
+  status,
+  description,
+  tags,
+  allTitles,
+) {
+  const altTitles = allTitles?.slice(1).join(", ") || "";
+
+  mangaDetailsContainer.innerHTML = `
+    <div class="manga-cover">
+      <img id="mangaCoverImg" src="${coverUrl}" alt="${title}" referrerpolicy="no-referrer">
+      <button id="startReadingBtn" class="start-reading-btn">
+        <span class="btn-text">▶ Start Reading</span>
+        <span class="btn-text-mobile">▶ Read</span>
+      </button>
+    </div>
+    <div class="manga-info">
+      <h1>${title}</h1>
+      ${altTitles ? `<div class="alt-titles">${truncateText(altTitles, 100)}</div>` : ""}
+      <div class="status">${status || "Unknown"} · ${authorName || "Unknown Author"}</div>
+      <div style="margin: 0.5rem 0;">${tags}</div>
+      <div class="description">${truncateText(description, 500)}</div>
+    </div>
+  `;
+
+  const img = mangaDetailsContainer.querySelector("#mangaCoverImg");
+  if (img) {
+    img.addEventListener("error", () => {
+      img.src = getPlaceholderImage(512, 768, "No Cover");
+    });
   }
 }
 
@@ -132,7 +175,7 @@ async function loadChapters(allTitles) {
     // Get chapters from Atsumaru
     const chapters = await getAtsumaruChapters(atsumaruManga.id);
     allChapters = chapters;
-    hybridInfo = { source: 'atsumaru', atsumaruId: atsumaruManga.id };
+    hybridInfo = { source: "atsumaru", atsumaruId: atsumaruManga.id };
 
     console.log(
       `[Details] Atsumaru result: ${allChapters.length} chapters found`,
@@ -158,6 +201,51 @@ async function loadChapters(allTitles) {
   }
 }
 
+async function renderAtsumaruOnlyDetails() {
+  // For Atsumaru-only, show minimal details and load chapters directly
+  mangaDetailsContainer.innerHTML = `
+    <div class="manga-cover">
+      <img id="mangaCoverImg" src="${getPlaceholderImage(512, 768, "No Cover")}" alt="Manga Cover" referrerpolicy="no-referrer">
+      <button id="startReadingBtn" class="start-reading-btn">
+        <span class="btn-text">▶ Start Reading</span>
+        <span class="btn-text-mobile">▶ Read</span>
+      </button>
+    </div>
+    <div class="manga-info">
+      <h1 class="manga-title">Manga</h1>
+      <div class="manga-meta">
+        <span class="status">Atsumaru Source</span>
+      </div>
+      <p class="manga-description">Loading from Atsumaru...</p>
+    </div>
+  `;
+
+  // Try to find Atsumaru manga by ID directly
+  try {
+    const chapters = await getAtsumaruChapters(mangaId);
+    allChapters = chapters;
+    hybridInfo = { source: "atsumaru", atsumaruId: mangaId };
+
+    if (allChapters.length === 0) {
+      chapterListContainer.innerHTML = `
+        <div class="empty">
+          <p>No chapters available on Atsumaru</p>
+        </div>
+      `;
+      return;
+    }
+
+    renderChapterPage(0);
+  } catch (error) {
+    console.error(`[Details] Error loading Atsumaru chapters:`, error);
+    chapterListContainer.innerHTML = `
+      <div class="error">
+        <p>Error loading chapters: ${error.message}</p>
+      </div>
+    `;
+  }
+}
+
 function renderChapterPage(page) {
   console.log(`[Details] Rendering chapter page ${page}`);
   currentPage = page;
@@ -169,13 +257,13 @@ function renderChapterPage(page) {
   let html = `
     <div class="chapter-header">
       <div class="sort-controls">
-        <button id="sortAscBtn" class="sort-btn ${currentSortOrder === 'asc' ? 'active' : ''}" title="Sort ascending (oldest first)">
+        <button id="sortAscBtn" class="sort-btn ${currentSortOrder === "asc" ? "active" : ""}" title="Sort ascending (oldest first)">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             <path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/>
           </svg>
           Ascending
         </button>
-        <button id="sortDescBtn" class="sort-btn ${currentSortOrder === 'desc' ? 'active' : ''}" title="Sort descending (newest first)">
+        <button id="sortDescBtn" class="sort-btn ${currentSortOrder === "desc" ? "active" : ""}" title="Sort descending (newest first)">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             <path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/>
           </svg>
@@ -225,35 +313,42 @@ function renderChapterPage(page) {
   chapterListContainer.innerHTML = html;
 
   // Add event listeners for sort buttons
-  const sortAscBtn = document.getElementById('sortAscBtn');
-  const sortDescBtn = document.getElementById('sortDescBtn');
-  
-  console.log(`[Details] Sort buttons found:`, { sortAscBtn: !!sortAscBtn, sortDescBtn: !!sortDescBtn });
-  
+  const sortAscBtn = document.getElementById("sortAscBtn");
+  const sortDescBtn = document.getElementById("sortDescBtn");
+
+  console.log(`[Details] Sort buttons found:`, {
+    sortAscBtn: !!sortAscBtn,
+    sortDescBtn: !!sortDescBtn,
+  });
+
   if (sortAscBtn) {
-    sortAscBtn.addEventListener('click', () => {
-      console.log(`[Details] Asc button clicked, current order: ${currentSortOrder}`);
-      if (currentSortOrder !== 'asc') {
-        currentSortOrder = 'asc';
+    sortAscBtn.addEventListener("click", () => {
+      console.log(
+        `[Details] Asc button clicked, current order: ${currentSortOrder}`,
+      );
+      if (currentSortOrder !== "asc") {
+        currentSortOrder = "asc";
         sortChapters();
       }
     });
   }
-  
+
   if (sortDescBtn) {
-    sortDescBtn.addEventListener('click', () => {
-      console.log(`[Details] Desc button clicked, current order: ${currentSortOrder}`);
-      if (currentSortOrder !== 'desc') {
-        currentSortOrder = 'desc';
+    sortDescBtn.addEventListener("click", () => {
+      console.log(
+        `[Details] Desc button clicked, current order: ${currentSortOrder}`,
+      );
+      if (currentSortOrder !== "desc") {
+        currentSortOrder = "desc";
         sortChapters();
       }
     });
   }
 
   // Add event listener for Start Reading button
-  const startReadingBtn = document.getElementById('startReadingBtn');
+  const startReadingBtn = document.getElementById("startReadingBtn");
   if (startReadingBtn) {
-    startReadingBtn.addEventListener('click', startReading);
+    startReadingBtn.addEventListener("click", startReading);
   }
 
   pageChapters.forEach((chapter) => {
@@ -289,82 +384,93 @@ window.goToChapterPage = function (page) {
 
 function sortChapters() {
   console.log(`[Details] Sorting chapters: ${currentSortOrder}`);
-  console.log(`[Details] Chapters before sort:`, allChapters.map(c => ({ id: c.id, chapter: c.chapter })));
-  
+  console.log(
+    `[Details] Chapters before sort:`,
+    allChapters.map((c) => ({ id: c.id, chapter: c.chapter })),
+  );
+
   // Sort chapters based on current sort order
   allChapters.sort((a, b) => {
     const aChapter = parseFloat(a.chapter) || 0;
     const bChapter = parseFloat(b.chapter) || 0;
-    
-    if (currentSortOrder === 'asc') {
+
+    if (currentSortOrder === "asc") {
       return aChapter - bChapter;
     } else {
       return bChapter - aChapter;
     }
   });
-  
-  console.log(`[Details] Chapters after sort:`, allChapters.map(c => ({ id: c.id, chapter: c.chapter })));
-  
+
+  console.log(
+    `[Details] Chapters after sort:`,
+    allChapters.map((c) => ({ id: c.id, chapter: c.chapter })),
+  );
+
   // Update button active states before re-rendering
-  const sortAscBtn = document.getElementById('sortAscBtn');
-  const sortDescBtn = document.getElementById('sortDescBtn');
-  
+  const sortAscBtn = document.getElementById("sortAscBtn");
+  const sortDescBtn = document.getElementById("sortDescBtn");
+
   if (sortAscBtn && sortDescBtn) {
-    if (currentSortOrder === 'asc') {
-      sortAscBtn.classList.add('active');
-      sortDescBtn.classList.remove('active');
+    if (currentSortOrder === "asc") {
+      sortAscBtn.classList.add("active");
+      sortDescBtn.classList.remove("active");
     } else {
-      sortAscBtn.classList.remove('active');
-      sortDescBtn.classList.add('active');
+      sortAscBtn.classList.remove("active");
+      sortDescBtn.classList.add("active");
     }
-    console.log(`[Details] Button states updated:`, { 
-      ascActive: sortAscBtn.classList.contains('active'),
-      descActive: sortDescBtn.classList.contains('active')
+    console.log(`[Details] Button states updated:`, {
+      ascActive: sortAscBtn.classList.contains("active"),
+      descActive: sortDescBtn.classList.contains("active"),
     });
   }
-  
+
   // Re-render from first page
   renderChapterPage(0);
 }
 
 function startReading() {
   console.log(`[Details] Start Reading clicked`);
-  
+
   // Check for reading progress in localStorage
   const progressKey = `reading_progress_${mangaId}`;
   const savedProgress = localStorage.getItem(progressKey);
-  
+
   let targetChapter = null;
-  
+
   if (savedProgress) {
     try {
       const progress = JSON.parse(savedProgress);
       // Find the saved chapter in the current list
-      targetChapter = allChapters.find(ch => 
-        ch.id === progress.chapterId || 
-        (ch.source === 'atsumaru' && ch.chapterId === progress.chapterId) ||
-        (ch.source === 'mangadex' && ch.mangadexId === progress.mangadexId)
+      targetChapter = allChapters.find(
+        (ch) =>
+          ch.id === progress.chapterId ||
+          (ch.source === "atsumaru" && ch.chapterId === progress.chapterId) ||
+          (ch.source === "mangadex" && ch.mangadexId === progress.mangadexId),
       );
-      
+
       if (targetChapter) {
-        console.log(`[Details] Found saved progress: Chapter ${targetChapter.chapter}`);
+        console.log(
+          `[Details] Found saved progress: Chapter ${targetChapter.chapter}`,
+        );
       }
     } catch (error) {
-      console.error('[Details] Error parsing saved progress:', error);
+      console.error("[Details] Error parsing saved progress:", error);
     }
   }
-  
+
   // If no saved progress, use the first chapter from the sorted list
   if (!targetChapter && allChapters.length > 0) {
     targetChapter = allChapters[0];
-    console.log(`[Details] No saved progress, using first chapter: Chapter ${targetChapter.chapter}`);
+    console.log(
+      `[Details] No saved progress, using first chapter: Chapter ${targetChapter.chapter}`,
+    );
   }
-  
+
   if (!targetChapter) {
-    console.error('[Details] No chapters available for reading');
+    console.error("[Details] No chapters available for reading");
     return;
   }
-  
+
   // Navigate to the reader
   const params = new URLSearchParams({
     id: targetChapter.id,
@@ -375,9 +481,11 @@ function startReading() {
   // Add source-specific parameters
   if (targetChapter.source === "atsumaru") {
     if (targetChapter.mangaId) params.set("mangaId", targetChapter.mangaId);
-    if (targetChapter.chapterId) params.set("chapterId", targetChapter.chapterId);
+    if (targetChapter.chapterId)
+      params.set("chapterId", targetChapter.chapterId);
   } else if (targetChapter.source === "mangadex") {
-    if (targetChapter.mangadexId) params.set("mangadexId", targetChapter.mangadexId);
+    if (targetChapter.mangadexId)
+      params.set("mangadexId", targetChapter.mangadexId);
   }
 
   window.location.href = `reader.html?${params.toString()}`;
