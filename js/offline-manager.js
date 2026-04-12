@@ -407,6 +407,7 @@ export {
   getOfflineChaptersForManga,
   removeOfflineChapter,
   preloadNextChapter,
+  getOfflineChapterCount,
   cacheMangaMetadata,
   getCachedMangaMetadata,
   estimateStorageUsage,

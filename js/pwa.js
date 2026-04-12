@@ -516,5 +516,4 @@ export {
   showConnectionStatus,
   checkForVersionUpdate,
   triggerInstall,
-  getDeferredInstallPrompt,
 };
