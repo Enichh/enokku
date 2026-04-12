@@ -2,17 +2,25 @@ const PWA_CONFIG = {
   SW_PATH: "/sw.js",
   INSTALL_PROMPT_DELAY: 5000,
   ENGAGEMENT_THRESHOLD: 3,
+  UPDATE_CHECK_INTERVAL: 5 * 60 * 1000, // 5 minutes
+  VERSION_URL: "/version.json",
 };
 
 let deferredInstallPrompt = null;
 let pageViewCount = parseInt(localStorage.getItem("enokku_page_views") || "0");
 let installPromptDismissed = localStorage.getItem("enokku_install_dismissed");
+let lastUserActivity = Date.now();
+let updateCheckInterval = null;
 
 function initPWA() {
   registerServiceWorker();
   trackEngagement();
   setupOnlineOfflineListeners();
   setupInstallPrompt();
+  setupUserActivityTracking();
+  checkForVersionUpdate();
+  startPeriodicUpdateCheck();
+  restoreStateAfterUpdate();
 }
 
 async function registerServiceWorker() {
@@ -254,6 +262,233 @@ if (document.readyState === "loading") {
   initPWA();
 }
 
+// ============================================
+// PWA UPDATE MANAGEMENT
+// ============================================
+
+function setupUserActivityTracking() {
+  const activityEvents = [
+    "scroll",
+    "click",
+    "touchstart",
+    "keydown",
+    "mousemove",
+  ];
+  activityEvents.forEach((event) => {
+    window.addEventListener(
+      event,
+      () => {
+        lastUserActivity = Date.now();
+      },
+      { passive: true },
+    );
+  });
+}
+
+async function checkForVersionUpdate() {
+  try {
+    const response = await fetch(PWA_CONFIG.VERSION_URL, {
+      cache: "no-store",
+      headers: { Accept: "application/json" },
+    });
+
+    if (!response.ok) {
+      console.log("[PWA] Version check failed:", response.status);
+      return;
+    }
+
+    const { version } = await response.json();
+    const currentVersion = localStorage.getItem("enokku_app_version");
+
+    if (currentVersion && currentVersion !== version) {
+      console.log(`[PWA] Update available: ${currentVersion} -> ${version}`);
+      showEnhancedUpdateNotification(version);
+    } else if (!currentVersion) {
+      // First time - store current version
+      localStorage.setItem("enokku_app_version", version);
+    }
+  } catch (error) {
+    console.log("[PWA] Version check error:", error);
+  }
+}
+
+function startPeriodicUpdateCheck() {
+  updateCheckInterval = setInterval(async () => {
+    // Only check if user hasn't been active recently (30 seconds)
+    const timeSinceActivity = Date.now() - lastUserActivity;
+    if (timeSinceActivity > 30000) {
+      try {
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (registration) {
+          await registration.update();
+          console.log("[PWA] Periodic update check triggered");
+        }
+        // Also check version.json directly
+        await checkForVersionUpdate();
+      } catch (error) {
+        console.log("[PWA] Periodic update check failed:", error);
+      }
+    }
+  }, PWA_CONFIG.UPDATE_CHECK_INTERVAL);
+}
+
+function getPlatform() {
+  const ua = navigator.userAgent;
+  if (/iPad|iPhone|iPod/.test(ua)) return "ios";
+  if (/Android/.test(ua)) return "android";
+  return "desktop";
+}
+
+function isPWA() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true
+  );
+}
+
+function saveStateBeforeUpdate() {
+  // Save current path for restoration
+  const currentPath = window.location.pathname + window.location.search;
+  sessionStorage.setItem("enokku_return_path", currentPath);
+
+  // Save scroll position
+  sessionStorage.setItem("enokku_scroll_pos", window.scrollY.toString());
+
+  // Save any form data if on a form page
+  const forms = document.querySelectorAll("form");
+  if (forms.length > 0) {
+    const formData = {};
+    forms.forEach((form, index) => {
+      const inputs = form.querySelectorAll("input, textarea, select");
+      formData[index] = {};
+      inputs.forEach((input) => {
+        if (input.name || input.id) {
+          formData[index][input.name || input.id] = input.value;
+        }
+      });
+    });
+    sessionStorage.setItem("enokku_form_data", JSON.stringify(formData));
+  }
+}
+
+function restoreStateAfterUpdate() {
+  const returnPath = sessionStorage.getItem("enokku_return_path");
+  const scrollPos = sessionStorage.getItem("enokku_scroll_pos");
+  const formDataStr = sessionStorage.getItem("enokku_form_data");
+
+  // If we were redirected from a different path, restore it
+  if (
+    returnPath &&
+    returnPath !== window.location.pathname + window.location.search
+  ) {
+    sessionStorage.removeItem("enokku_return_path");
+    window.location.href = returnPath;
+    return;
+  }
+
+  // Restore scroll position
+  if (scrollPos) {
+    const scrollY = parseInt(scrollPos, 10);
+    if (!isNaN(scrollY) && scrollY > 0) {
+      // Wait for page to fully load before scrolling
+      setTimeout(() => {
+        window.scrollTo(0, scrollY);
+      }, 100);
+    }
+    sessionStorage.removeItem("enokku_scroll_pos");
+  }
+
+  // Restore form data
+  if (formDataStr) {
+    try {
+      const formData = JSON.parse(formDataStr);
+      const forms = document.querySelectorAll("form");
+      forms.forEach((form, index) => {
+        if (formData[index]) {
+          const inputs = form.querySelectorAll("input, textarea, select");
+          inputs.forEach((input) => {
+            const key = input.name || input.id;
+            if (key && formData[index][key] !== undefined) {
+              input.value = formData[index][key];
+            }
+          });
+        }
+      });
+    } catch (e) {
+      console.log("[PWA] Failed to restore form data:", e);
+    }
+    sessionStorage.removeItem("enokku_form_data");
+  }
+}
+
+function showEnhancedUpdateNotification(newVersion) {
+  // Remove existing notification
+  const existing = document.querySelector(".update-notification");
+  if (existing) existing.remove();
+
+  const notification = document.createElement("div");
+  notification.className = "update-notification";
+
+  const platform = getPlatform();
+  const isMobileDevice = platform === "ios" || platform === "android";
+
+  notification.innerHTML = `
+    <div class="update-notification-content">
+      <span>🔄 Update available (${newVersion})</span>
+      <button class="update-btn-primary" onclick="applyUpdate()">Update Now</button>
+      <button class="update-btn-secondary" onclick="dismissUpdate()">Later</button>
+    </div>
+  `;
+
+  document.body.appendChild(notification);
+
+  // Show with animation
+  requestAnimationFrame(() => {
+    notification.classList.add("visible");
+  });
+
+  // Auto-hide after 15 seconds if not interacted
+  setTimeout(() => {
+    if (notification.parentNode) {
+      notification.classList.add("fading");
+      setTimeout(() => notification.remove(), 500);
+    }
+  }, 15000);
+}
+
+window.applyUpdate = () => {
+  // Save current state before reloading
+  saveStateBeforeUpdate();
+
+  // Trigger service worker update
+  if (navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type: "SKIP_WAITING" });
+  }
+
+  // Show loading state
+  const notification = document.querySelector(".update-notification");
+  if (notification) {
+    notification.innerHTML = `
+      <div class="update-notification-content">
+        <span>⏳ Updating...</span>
+      </div>
+    `;
+  }
+
+  // Reload after short delay to let SW activate
+  setTimeout(() => {
+    window.location.reload();
+  }, 1000);
+};
+
+window.dismissUpdate = () => {
+  const notification = document.querySelector(".update-notification");
+  if (notification) {
+    notification.classList.add("fading");
+    setTimeout(() => notification.remove(), 500);
+  }
+};
+
 export {
   initPWA,
   syncReadingProgress,
@@ -261,4 +496,7 @@ export {
   getCacheStats,
   clearAppCache,
   showConnectionStatus,
+  checkForVersionUpdate,
+  applyUpdate,
+  dismissUpdate,
 };

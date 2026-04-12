@@ -1,4 +1,8 @@
-const CACHE_VERSION = "v23";
+// Use build timestamp for cache versioning - changes with each deploy
+// This ensures old caches are automatically invalidated on new deploys
+const BUILD_TIMESTAMP = "__BUILD_TIMESTAMP__";
+const CACHE_VERSION =
+  BUILD_TIMESTAMP === "__BUILD_TIMESTAMP__" ? "v23" : BUILD_TIMESTAMP;
 const STATIC_CACHE = `enokku-static-${CACHE_VERSION}`;
 const API_CACHE = `enokku-api-${CACHE_VERSION}`;
 const IMAGE_CACHE = `enokku-images-${CACHE_VERSION}`;
@@ -13,6 +17,7 @@ const STATIC_ASSETS = [
   "/library.html",
   "/settings.html",
   "/offline.html",
+  "/version.json",
   "/css/reset.css",
   "/css/variables.css",
   "/css/base.css",
@@ -105,6 +110,16 @@ self.addEventListener("fetch", (event) => {
   // Skip MangaDex images - let browser handle directly with img referrerpolicy
   if (url.hostname === "uploads.mangadex.org") {
     // console.log("[SW] Skipping MangaDex image:", url.hostname);
+    return;
+  }
+
+  // Never cache version.json - always fetch fresh for update detection
+  if (url.pathname === "/version.json") {
+    event.respondWith(
+      fetch(request, { cache: "no-store" }).catch(() => {
+        return caches.match(request);
+      }),
+    );
     return;
   }
 

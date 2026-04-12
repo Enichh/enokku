@@ -1,0 +1,5 @@
+{
+  "version": "GIT_COMMIT_HASH",
+  "timestamp": 0,
+  "buildDate": "DEPLOY_DATE"
+}
