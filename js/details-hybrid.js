@@ -394,7 +394,11 @@ async function loadChapters(allTitles) {
     renderChapterPage(0);
 
     // Show download all container when chapters are loaded
-    document.querySelector(".download-all-container").style.display = "block";
+    const downloadContainer = document.querySelector(".download-all-container");
+    if (downloadContainer) {
+      downloadContainer.style.display = "block";
+      console.log("[Details] Download container shown");
+    }
 
     // Cache the chapter list for offline access
     await cacheMangaMetadata(mangaId, {
@@ -975,9 +979,17 @@ searchInput?.addEventListener("input", (e) => {
 
 // Download All functionality
 const downloadAllBtn = document.getElementById("downloadAllChaptersBtn");
+console.log("[Details] Download button found:", downloadAllBtn);
 if (downloadAllBtn) {
-  downloadAllBtn.addEventListener("click", async () => {
-    if (downloadAllInProgress) return;
+  console.log("[Details] Attaching click listener to download button");
+  downloadAllBtn.addEventListener("click", async (e) => {
+    console.log("[Details] Download All button clicked");
+    e.preventDefault();
+    e.stopPropagation();
+    if (downloadAllInProgress) {
+      console.log("[Details] Download already in progress, ignoring click");
+      return;
+    }
 
     // Check storage limit
     const currentCount = await getOfflineChapterCount();
