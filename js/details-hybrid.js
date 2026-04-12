@@ -649,7 +649,11 @@ async function renderChapterPage(page) {
     const el = chapterListContainer.querySelector(
       `[data-chapter-id="${chapter.id}"]`,
     );
-    el.addEventListener("click", () => {
+    el.addEventListener("click", (e) => {
+      // Don't navigate if clicking the download button
+      if (e.target.closest(".btn-download-chapter")) {
+        return;
+      }
       const params = new URLSearchParams({
         id: chapter.id,
         manga: mangaId,
