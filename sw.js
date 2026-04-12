@@ -494,28 +494,64 @@ async function handleImageRequest(request, url) {
  */
 async function handleNavigation(request) {
   const cache = await caches.open(STATIC_CACHE);
+  const url = new URL(request.url);
 
   try {
-    // Try network first
-    const networkResponse = await fetch(request);
+    // Try network first with shorter timeout for mobile
+    const timeout = url.pathname.includes("mangadex.org") ? 3000 : 5000;
+    const networkResponse = await Promise.race([
+      fetch(request),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("timeout")), timeout),
+      ),
+    ]);
+
     if (networkResponse.ok) {
       await cache.put(request, networkResponse.clone());
       return networkResponse;
     }
   } catch (error) {
-    console.log("[SW] Network failed for navigation:", request.url);
+    console.log(
+      "[SW] Network failed for navigation:",
+      request.url,
+      error.message,
+    );
+
+    // For mobile browsers, immediately try offline page if network fails
+    if (
+      error.message === "timeout" ||
+      error.message.includes("Failed to fetch")
+    ) {
+      console.log(
+        "[SW] Network timeout/failure detected, checking offline page",
+      );
+    }
   }
 
   // Fall back to cache
   const cached = await cache.match(request);
   if (cached) {
+    console.log("[SW] Serving from cache:", request.url);
     return cached;
   }
 
   // Ultimate fallback to offline page
   const offlinePage = await cache.match("/offline.html");
   if (offlinePage) {
+    console.log("[SW] Serving offline page for:", request.url);
     return offlinePage;
+  }
+
+  // If offline.html not cached, try to fetch it
+  try {
+    const offlineResponse = await fetch("/offline.html");
+    if (offlineResponse.ok) {
+      await cache.put("/offline.html", offlineResponse.clone());
+      console.log("[SW] Cached and serving offline page");
+      return offlineResponse;
+    }
+  } catch (offlineError) {
+    console.error("[SW] Failed to fetch offline.html:", offlineError);
   }
 
   throw new Error("No cached response available");

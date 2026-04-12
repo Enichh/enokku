@@ -28,7 +28,7 @@ function initPWA() {
 
 async function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) {
-    // console.log('[PWA] Service workers not supported');
+    console.log("[PWA] Service workers not supported on", getPlatform());
     return;
   }
 
@@ -36,7 +36,30 @@ async function registerServiceWorker() {
     const registration = await navigator.serviceWorker.register(
       PWA_CONFIG.SW_PATH,
     );
-    // console.log('[PWA] Service worker registered:', registration.scope);
+    console.log(
+      "[PWA] Service worker registered on",
+      getPlatform(),
+      ":",
+      registration.scope,
+    );
+
+    // Verify service worker is active on mobile
+    if (getPlatform() !== "desktop") {
+      setTimeout(async () => {
+        const activeWorker = registration.active;
+        if (activeWorker) {
+          console.log(
+            "[PWA] Service worker is active on mobile:",
+            activeWorker.state,
+          );
+        } else {
+          console.warn(
+            "[PWA] Service worker not active on mobile, state:",
+            registration.installing?.state,
+          );
+        }
+      }, 1000);
+    }
 
     registration.addEventListener("updatefound", () => {
       const newWorker = registration.installing;
@@ -52,7 +75,25 @@ async function registerServiceWorker() {
       }
     });
   } catch (error) {
-    console.error("[PWA] Service worker registration failed:", error);
+    console.error(
+      "[PWA] Service worker registration failed on",
+      getPlatform(),
+      ":",
+      error,
+    );
+
+    // On mobile, retry registration once after a delay
+    if (getPlatform() !== "desktop") {
+      console.log("[PWA] Retrying service worker registration on mobile...");
+      setTimeout(async () => {
+        try {
+          await navigator.serviceWorker.register(PWA_CONFIG.SW_PATH);
+          console.log("[PWA] Mobile retry registration successful");
+        } catch (retryError) {
+          console.error("[PWA] Mobile retry registration failed:", retryError);
+        }
+      }, 2000);
+    }
   }
 }
 
@@ -63,20 +104,41 @@ function trackEngagement() {
 
 function setupOnlineOfflineListeners() {
   window.addEventListener("online", () => {
-    // console.log('[PWA] Connection restored');
+    console.log("[PWA] Connection restored - Mobile detected:", getPlatform());
     document.body.classList.remove("offline");
     showConnectionStatus("online");
     syncReadingProgress();
   });
 
   window.addEventListener("offline", () => {
-    // console.log('[PWA] Connection lost');
+    console.log("[PWA] Connection lost - Mobile detected:", getPlatform());
     document.body.classList.add("offline");
     showConnectionStatus("offline");
+
+    // Force navigation to offline.html on mobile when offline
+    if (
+      getPlatform() !== "desktop" &&
+      !window.location.pathname.includes("offline.html")
+    ) {
+      console.log("[PWA] Redirecting to offline.html on mobile");
+      window.location.href = "/offline.html";
+    }
   });
 
   if (!navigator.onLine) {
+    console.log("[PWA] Initially offline - Mobile detected:", getPlatform());
     document.body.classList.add("offline");
+
+    // Force navigation to offline.html on mobile when initially offline
+    if (
+      getPlatform() !== "desktop" &&
+      !window.location.pathname.includes("offline.html")
+    ) {
+      console.log(
+        "[PWA] Redirecting to offline.html on mobile (initial state)",
+      );
+      window.location.href = "/offline.html";
+    }
   }
 }
 
