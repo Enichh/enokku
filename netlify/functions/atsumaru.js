@@ -93,38 +93,6 @@ class AtsumaruScraper {
         }
       }
 
-      // Fetch and convert cover image to base64
-      let imageData = null;
-      if (data.poster?.image) {
-        try {
-          const imageUrl = `${BASE_URL}/${data.poster.image}`;
-          console.log(`[Atsumaru] Fetching cover image: ${imageUrl}`);
-          const imageResponse = await this.session.get(imageUrl, {
-            responseType: "arraybuffer",
-            headers: {
-              Accept: "image/*",
-            },
-          });
-          const buffer = Buffer.from(imageResponse.data, "binary");
-          const base64 = buffer.toString("base64");
-          const mimeType =
-            imageResponse.headers["content-type"] || "image/jpeg";
-          imageData = `data:${mimeType};base64,${base64}`;
-          console.log(
-            `[Atsumaru] Cover image converted to base64, size: ${buffer.length} bytes`,
-          );
-        } catch (imageError) {
-          console.warn(
-            `[Atsumaru] Failed to fetch cover image:`,
-            imageError.message,
-          );
-          // Keep original URL as fallback
-          imageData = data.poster?.image
-            ? `${BASE_URL}/${data.poster.image}`
-            : null;
-        }
-      }
-
       return {
         id: data.id,
         title: data.title,
@@ -133,7 +101,7 @@ class AtsumaruScraper {
         type: data.type,
         status: data.status,
         isAdult: data.isAdult,
-        image: imageData,
+        image: data.poster?.image ? `${BASE_URL}/${data.poster.image}` : null,
         otherNames: data.otherNames || [],
         genres: data.genres?.map((g) => g.name) || [],
         chapters: chapters.map((ch) => ({
