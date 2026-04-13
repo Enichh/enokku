@@ -1,3 +1,10 @@
+import {
+  fetchMangaDetails,
+  getCoverUrl,
+  findRelationship,
+  getEnglishTitle,
+  searchManga,
+} from "./api.js";
 import { getChapterPagesHybrid, SOURCES } from "./hybrid-api.js";
 import { getUrlParam, getPlaceholderImage, debounce } from "./utils.js";
 import { saveReadingProgress, getLastReadChapter } from "./reading-history.js";
@@ -94,11 +101,36 @@ async function loadMangaDetailsForHistory() {
       if (data) {
         mangaTitleForHistory =
           data.title || data.englishTitle || `Manga ${navigationMangaId}`;
-        // Proxy Atsumaru images to fix CORS
-        coverUrlForHistory = data.image
-          ? `/api/proxy?imageUrl=${encodeURIComponent(data.image)}`
-          : getPlaceholderImage(256, 384, "No Cover");
-        canonicalMangaDexId = mangaId; // Use the mangaId from URL as canonical
+
+        // Search MangaDex by title to get canonical ID and proper cover
+        try {
+          const searchResults = await searchManga(mangaTitleForHistory, 5);
+          if (searchResults?.data?.length > 0) {
+            // Find best match by chapter count (prefer main series over doujinshi)
+            const bestMatch = searchResults.data.reduce((best, current) => {
+              const bestChapters = parseInt(best.attributes?.lastChapter) || 0;
+              const currentChapters =
+                parseInt(current.attributes?.lastChapter) || 0;
+              return currentChapters > bestChapters ? current : best;
+            });
+            // Store canonical MangaDex UUID
+            canonicalMangaDexId = bestMatch.id;
+
+            const coverArt = findRelationship(bestMatch, "cover_art");
+            if (coverArt) {
+              coverUrlForHistory = getCoverUrl(bestMatch.id, coverArt, "256");
+            } else {
+              coverUrlForHistory = getPlaceholderImage(256, 384, "No Cover");
+            }
+          } else {
+            canonicalMangaDexId = "";
+            coverUrlForHistory = getPlaceholderImage(256, 384, "No Cover");
+          }
+        } catch (searchError) {
+          console.error("[Reader] MangaDex search failed:", searchError);
+          canonicalMangaDexId = "";
+          coverUrlForHistory = getPlaceholderImage(256, 384, "No Cover");
+        }
       }
     } else {
       console.error(`[Reader] Atsumaru API failed: ${response.status}`);

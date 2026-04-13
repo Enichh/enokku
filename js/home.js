@@ -93,12 +93,8 @@ function renderMangaCard(manga) {
 function renderHistoryCard(entry) {
   const card = document.createElement("div");
   card.className = "manga-card history-card";
-  // Proxy Atsumaru cover URLs to fix CORS
-  const proxiedCoverUrl = entry.coverUrl?.includes("atsu.moe")
-    ? `/api/proxy?imageUrl=${encodeURIComponent(entry.coverUrl)}`
-    : entry.coverUrl;
   card.innerHTML = `
-    <img src="${proxiedCoverUrl}" alt="${entry.mangaTitle}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous">
+    <img src="${entry.coverUrl}" alt="${entry.mangaTitle}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous">
     <div class="info">
       <div class="title">${entry.mangaTitle}</div>
       <div class="meta">${entry.scrollPercent}% • Ch. ${entry.chapterNumber}</div>
