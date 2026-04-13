@@ -18,7 +18,6 @@ let updateCheckInterval = null;
 function initPWA() {
   registerServiceWorker();
   trackEngagement();
-  setupOnlineOfflineListeners();
   setupInstallPrompt();
   setupUserActivityTracking();
   checkForVersionUpdate();
@@ -102,68 +101,6 @@ function trackEngagement() {
   localStorage.setItem("enokku_page_views", pageViewCount.toString());
 }
 
-function setupOnlineOfflineListeners() {
-  window.addEventListener("online", () => {
-    console.log("[PWA] Connection restored - Mobile detected:", getPlatform());
-    document.body.classList.remove("offline");
-    showConnectionStatus("online");
-    syncReadingProgress();
-  });
-
-  window.addEventListener("offline", () => {
-    console.log("[PWA] Connection lost - Mobile detected:", getPlatform());
-    document.body.classList.add("offline");
-    showConnectionStatus("offline");
-
-    // Force navigation to offline.html on mobile when offline
-    if (
-      getPlatform() !== "desktop" &&
-      !window.location.pathname.includes("offline.html")
-    ) {
-      console.log("[PWA] Redirecting to offline.html on mobile");
-      window.location.href = "/offline.html";
-    }
-  });
-
-  if (!navigator.onLine) {
-    console.log("[PWA] Initially offline - Mobile detected:", getPlatform());
-    document.body.classList.add("offline");
-
-    // Force navigation to offline.html on mobile when initially offline
-    if (
-      getPlatform() !== "desktop" &&
-      !window.location.pathname.includes("offline.html")
-    ) {
-      console.log(
-        "[PWA] Redirecting to offline.html on mobile (initial state)",
-      );
-      window.location.href = "/offline.html";
-    }
-  }
-}
-
-function showConnectionStatus(status) {
-  const existingIndicator = document.querySelector(".connection-indicator");
-  if (existingIndicator) {
-    existingIndicator.remove();
-  }
-
-  const indicator = document.createElement("div");
-  indicator.className = `connection-indicator ${status}`;
-  indicator.innerHTML = status === "online" ? "Back online" : "Offline mode";
-
-  document.body.appendChild(indicator);
-
-  requestAnimationFrame(() => {
-    indicator.classList.add("visible");
-  });
-
-  setTimeout(() => {
-    indicator.classList.remove("visible");
-    setTimeout(() => indicator.remove(), 300);
-  }, 2000);
-}
-
 function setupInstallPrompt() {
   window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
@@ -176,7 +113,6 @@ function setupInstallPrompt() {
   });
 
   window.addEventListener("appinstalled", () => {
-    // console.log('[PWA] App installed');
     deferredInstallPrompt = null;
     window.deferredInstallPrompt = deferredInstallPrompt; // Update global reference
     hideInstallBanner();
@@ -246,7 +182,7 @@ function showCustomInstallPrompt() {
   const banner = document.createElement("div");
   banner.className = "install-banner";
   banner.innerHTML = `
-    <span class="install-banner-text">Install Enokku for offline reading</span>
+    <span class="install-banner-text">Install Enokku for a native app experience</span>
     <button class="install-banner-btn" onclick="triggerInstall()">Install</button>
     <button class="install-banner-close" onclick="dismissInstall()">×</button>
   `;
@@ -279,21 +215,6 @@ function showUpdateNotification() {
     }
     window.location.reload();
   };
-}
-
-async function syncReadingProgress() {
-  if (!("sync" in navigator)) {
-    console.log("[PWA] Background sync not supported");
-    return;
-  }
-
-  try {
-    await navigator.serviceWorker.ready;
-    await navigator.serviceWorker.sync.register("sync-reading-progress");
-    console.log("[PWA] Reading progress sync registered");
-  } catch (error) {
-    console.error("[PWA] Sync registration failed:", error);
-  }
 }
 
 function requestPersistentStorage() {
@@ -584,11 +505,9 @@ window.dismissUpdate = () => {
 
 export {
   initPWA,
-  syncReadingProgress,
   requestPersistentStorage,
   getCacheStats,
   clearAppCache,
-  showConnectionStatus,
   checkForVersionUpdate,
   triggerInstall,
 };
