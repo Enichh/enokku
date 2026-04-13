@@ -94,7 +94,7 @@ function renderHistoryCard(entry) {
   const card = document.createElement("div");
   card.className = "manga-card history-card";
   card.innerHTML = `
-    <img src="${entry.coverUrl}" alt="${entry.mangaTitle}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="this.closest('.manga-card').style.display='none'">
+    <img src="${entry.coverUrl}" alt="${entry.mangaTitle}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous">
     <div class="info">
       <div class="title">${entry.mangaTitle}</div>
       <div class="meta">${entry.scrollPercent}% • Ch. ${entry.chapterNumber}</div>
@@ -110,15 +110,10 @@ function renderHistoryCard(entry) {
   });
 
   card.addEventListener("click", () => {
-    const source = entry.source || "mangadex";
     const mangaId = entry.mangaId;
     const chapterId = entry.chapterId;
-
-    if (source === "atsumaru" && entry.atsumaruMangaId) {
-      window.location.href = `reader.html?id=${chapterId}&manga=${mangaId}&source=atsumaru&mangaId=${entry.atsumaruMangaId}`;
-    } else {
-      window.location.href = `reader.html?id=${chapterId}&manga=${mangaId}&source=mangadex`;
-    }
+    // After migration, always use MangaDex ID for navigation
+    window.location.href = `reader.html?id=${chapterId}&manga=${mangaId}&source=mangadex`;
   });
 
   return card;
