@@ -245,7 +245,7 @@ async function preloadNextChapter(
       nextChapter.source === "mangadex"
         ? nextChapter.mangadexId || nextChapter.id
         : null,
-    mangaId: nextChapter.atsumaruMangaId,
+    mangaId: nextChapter.source === "atsumaru" ? nextChapter.mangaId : null,
     chapterId:
       nextChapter.source === "atsumaru"
         ? nextChapter.chapterId || nextChapter.id.replace("atsu-", "")
