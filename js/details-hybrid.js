@@ -1,6 +1,5 @@
 import {
   fetchMangaDetails,
-  fetchMangaFeed,
   getCoverUrl,
   findRelationship,
   getEnglishTitle,
