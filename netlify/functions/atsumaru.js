@@ -101,6 +101,9 @@ class AtsumaruScraper {
           console.log(`[Atsumaru] Fetching cover image: ${imageUrl}`);
           const imageResponse = await this.session.get(imageUrl, {
             responseType: "arraybuffer",
+            headers: {
+              Accept: "image/*",
+            },
           });
           const buffer = Buffer.from(imageResponse.data, "binary");
           const base64 = buffer.toString("base64");
