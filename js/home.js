@@ -93,12 +93,8 @@ function renderMangaCard(manga) {
 function renderHistoryCard(entry) {
   const card = document.createElement("div");
   card.className = "manga-card history-card";
-  // Proxy any remaining Atsumaru URLs in cached history to fix CORS
-  const proxiedCoverUrl = entry.coverUrl?.includes("atsu.moe")
-    ? `/api/proxy?imageUrl=${encodeURIComponent(entry.coverUrl)}`
-    : entry.coverUrl;
   card.innerHTML = `
-    <img src="${proxiedCoverUrl}" alt="${entry.mangaTitle}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous">
+    <img src="${entry.coverUrl}" alt="${entry.mangaTitle}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous">
     <div class="info">
       <div class="title">${entry.mangaTitle}</div>
       <div class="meta">${entry.scrollPercent}% • Ch. ${entry.chapterNumber}</div>
@@ -153,14 +149,16 @@ async function migrateOldHistoryEntry(entry) {
         // Update entry with canonical MangaDex UUID
         entry.mangaId = bestMatch.id;
 
-        // Also update cover to MangaDex cover
+        // Update cover to MangaDex cover (proxied)
         const coverArt = findRelationship(bestMatch, "cover_art");
         if (coverArt) {
           entry.coverUrl = getCoverUrl(bestMatch.id, coverArt, "256");
         }
 
         console.log(`[Home] Migrated to MangaDex ID: ${bestMatch.id}`);
-        return entry;
+      } else {
+        // No MangaDex match found, keep Atsumaru ID and original cover
+        console.log(`[Home] No MangaDex match, keeping Atsumaru entry`);
       }
     } catch (error) {
       console.error(`[Home] Failed to migrate entry:`, error);
