@@ -202,10 +202,7 @@ async function renderMangaDexDetails(manga) {
 }
 
 async function renderAtsumaruDetails(manga) {
-  console.log("[Details] Atsumaru manga object:", manga);
-  console.log("[Details] manga.image:", manga.image);
   const coverUrl = manga.image || getPlaceholderImage(512, 768, "No Cover");
-  console.log("[Details] coverUrl:", coverUrl);
   const title = manga.title || manga.englishTitle || "Unknown Title";
   const description = manga.description || "No description available";
   const status = manga.status || "Unknown";
@@ -246,7 +243,7 @@ function renderMangaDetailsHTML(
 
   mangaDetailsContainer.innerHTML = `
     <div class="manga-cover">
-      <img id="mangaCoverImg" src="${coverUrl}" alt="${title}" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="console.error('[Details] Image load error:', this.src);">
+      <img id="mangaCoverImg" src="${coverUrl}" alt="${title}" referrerpolicy="no-referrer" crossorigin="anonymous">
       <button id="startReadingBtn" class="start-reading-btn">
         <span class="btn-text">▶ Start Reading</span>
         <span class="btn-text-mobile">▶ Read</span>
