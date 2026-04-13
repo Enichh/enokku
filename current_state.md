@@ -141,5 +141,19 @@
 
 ---
 
-**Last Updated**: 2026-04-13 03:50
-**Session Type**: Offline Reading Debug and Fixes
+### 2026-04-13 04:00 - Service Worker Cache Fix
+
+- **Action**: Fixed `reader.html` not being served offline due to cache key mismatch with query parameters
+- **Status**: Completed
+- **Files Modified**: `sw.js`
+- **Key Changes**:
+  - Added `{ ignoreSearch: true }` to all `cache.match()` calls in `handleNavigation`
+  - Implemented offline-first logic that skips network when `!navigator.onLine`
+  - Cache now stores pages with clean paths (no query params) for consistent retrieval
+  - All cache lookups now match regardless of query parameters
+- **Impact**: Reader pages now load correctly when offline, even with query parameters (`?id=...&manga=...`)
+
+---
+
+**Last Updated**: 2026-04-13 04:00
+**Session Type**: Service Worker Navigation Cache Fix

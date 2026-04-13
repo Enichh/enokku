@@ -494,58 +494,77 @@ async function handleNavigation(request) {
 
   console.log("[SW] Navigation request:", request.url);
 
-  try {
-    // Try network first with shorter timeout for mobile
-    const timeout = url.pathname.includes("mangadex.org") ? 3000 : 5000;
-    const networkResponse = await Promise.race([
-      fetch(request),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("timeout")), timeout),
-      ),
-    ]);
+  // If offline, skip network and go straight to cache with ignoreSearch
+  if (!navigator.onLine) {
+    console.log("[SW] Offline detected, serving from cache immediately");
 
-    if (networkResponse.ok) {
-      await cache.put(request, networkResponse.clone());
-      return networkResponse;
+    // Try cache with ignoreSearch to match regardless of query params
+    let cached = await cache.match(request, { ignoreSearch: true });
+    if (!cached) {
+      cached = await cache.match(url.pathname, { ignoreSearch: true });
     }
-  } catch (error) {
-    console.log(
-      "[SW] Network failed for navigation:",
-      request.url,
-      error.message,
-    );
-  }
+    if (!cached) {
+      const cleanUrl = url.origin + url.pathname;
+      cached = await cache.match(cleanUrl, { ignoreSearch: true });
+    }
 
-  // Fall back to cache immediately when network fails
-  console.log("[SW] Checking cache for:", request.url);
+    if (cached) {
+      console.log("[SW] Serving cached page (offline):", url.pathname);
+      return cached;
+    }
 
-  // Try exact match first
-  let cached = await cache.match(request);
-  if (!cached) {
-    // Try without query string
-    const cleanUrl = url.origin + url.pathname;
-    cached = await cache.match(cleanUrl);
-  }
-  if (!cached) {
-    // Try relative path
-    cached = await cache.match(url.pathname);
-  }
-  if (!cached) {
-    // Try with just path (some caches store relative paths)
-    cached = await cache.match(
-      new Request(url.pathname, { headers: request.headers }),
-    );
-  }
+    console.log("[SW] Cache miss while offline for:", request.url);
+    // Continue to offline.html fallback below
+  } else {
+    // Online: try network first with shorter timeout for mobile
+    try {
+      const timeout = url.pathname.includes("mangadex.org") ? 3000 : 5000;
+      const networkResponse = await Promise.race([
+        fetch(request),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("timeout")), timeout),
+        ),
+      ]);
 
-  if (cached) {
-    console.log("[SW] Serving from cache:", cached.url || request.url);
-    return cached;
-  }
+      if (networkResponse.ok) {
+        // Cache with clean path (no query params) for consistent retrieval
+        const cleanRequest = new Request(url.origin + url.pathname);
+        await cache.put(cleanRequest, networkResponse.clone());
+        console.log("[SW] Cached and served from network:", url.pathname);
+        return networkResponse;
+      }
+    } catch (error) {
+      console.log(
+        "[SW] Network failed for navigation:",
+        request.url,
+        error.message,
+      );
+    }
 
-  console.log("[SW] Cache miss for:", request.url);
+    // Network failed, fall back to cache with ignoreSearch
+    console.log("[SW] Checking cache for:", request.url);
+
+    let cached = await cache.match(request, { ignoreSearch: true });
+    if (!cached) {
+      cached = await cache.match(url.pathname, { ignoreSearch: true });
+    }
+    if (!cached) {
+      const cleanUrl = url.origin + url.pathname;
+      cached = await cache.match(cleanUrl, { ignoreSearch: true });
+    }
+
+    if (cached) {
+      console.log("[SW] Serving from cache (network failed):", url.pathname);
+      return cached;
+    }
+
+    console.log("[SW] Cache miss for:", request.url);
+  }
 
   // Ultimate fallback to offline page
-  const offlinePage = await cache.match("/offline.html");
+  const offlinePage = await cache.match("/offline.html", {
+    ignoreSearch: true,
+  });
   if (offlinePage) {
     console.log("[SW] Serving offline page for:", request.url);
     return offlinePage;
