@@ -126,7 +126,14 @@ async function migrateOldHistoryEntry(entry) {
       entry.mangaId,
     );
 
-  if (!isValidUUID && entry.source === "atsumaru" && entry.mangaTitle) {
+  // If already a valid MangaDex UUID, keep it as-is (don't remigrate)
+  if (isValidUUID) {
+    console.log(`[Home] Entry already has MangaDex UUID: ${entry.mangaId}`);
+    return entry;
+  }
+
+  // Only migrate if it's an Atsumaru short ID
+  if (entry.source === "atsumaru" && entry.mangaTitle) {
     console.log(
       `[Home] Migrating old entry: ${entry.mangaTitle} (ID: ${entry.mangaId})`,
     );
