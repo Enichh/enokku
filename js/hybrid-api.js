@@ -43,7 +43,7 @@ async function findAtsumaruManga(title) {
 
 async function searchAtsumaru(query, limit = 30) {
   try {
-    const data = await fetchAtsumaru("/search", { query, limit });
+    const data = await fetchAtsumaru("/search", { q: query, limit });
     return data?.results || [];
   } catch (error) {
     console.error("[Atsumaru] Search error:", error);
