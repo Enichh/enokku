@@ -248,7 +248,7 @@ function renderMangaDetailsHTML(
 
   mangaDetailsContainer.innerHTML = `
     <div class="manga-cover">
-      <img id="mangaCoverImg" src="${coverUrl}" alt="${title}" referrerpolicy="no-referrer" crossorigin="anonymous">
+      <img id="mangaCoverImg" src="${coverUrl}" alt="${title}" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="console.error('[Details] Image load error:', this.src);">
       <button id="startReadingBtn" class="start-reading-btn">
         <span class="btn-text">▶ Start Reading</span>
         <span class="btn-text-mobile">▶ Read</span>
