@@ -1,14 +1,4 @@
-import {
-  fetchChapterDetails,
-  fetchChapterPages,
-  fetchMangaFeed,
-  fetchMangaDetails,
-  getCoverUrl,
-  findRelationship,
-  getEnglishTitle,
-  searchManga,
-} from "./api.js";
-import { getChapterPagesHybrid, getSourceStyle } from "./hybrid-api.js";
+import { getChapterPagesHybrid, SOURCES } from "./hybrid-api.js";
 import { getUrlParam, getPlaceholderImage, debounce } from "./utils.js";
 import { saveReadingProgress, getLastReadChapter } from "./reading-history.js";
 
@@ -74,9 +64,7 @@ async function loadChapter() {
     try {
       await loadChapterNavigation();
     } catch (navError) {
-      console.warn(
-        "[Reader] Navigation unavailable, using cached metadata",
-      );
+      console.warn("[Reader] Navigation unavailable, using cached metadata");
       allChapters = [];
       currentChapterIndex = -1;
     }
@@ -96,63 +84,22 @@ async function loadChapter() {
 }
 
 async function loadMangaDetailsForHistory() {
-  const navigationMangaId = source === "atsumaru" ? atsumaruMangaId : mangaId;
+  const navigationMangaId = atsumaruMangaId;
   if (!navigationMangaId) return;
 
   try {
-    if (source === "atsumaru") {
-      // Fetch Atsumaru manga details from Atsumaru API
-      const response = await fetch(`/atsumaru/manga?id=${navigationMangaId}`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data) {
-          mangaTitleForHistory =
-            data.title || data.englishTitle || `Manga ${navigationMangaId}`;
-
-          // Also search MangaDex by title to get canonical ID and proper cover
-          try {
-            const searchResults = await searchManga(mangaTitleForHistory, 5);
-            if (searchResults?.data?.length > 0) {
-              // Find best match by chapter count (prefer main series over doujinshi)
-              const bestMatch = searchResults.data.reduce((best, current) => {
-                const bestChapters =
-                  parseInt(best.attributes?.lastChapter) || 0;
-                const currentChapters =
-                  parseInt(current.attributes?.lastChapter) || 0;
-                return currentChapters > bestChapters ? current : best;
-              });
-              // Store canonical MangaDex UUID
-              canonicalMangaDexId = bestMatch.id;
-
-              const coverArt = findRelationship(bestMatch, "cover_art");
-              if (coverArt) {
-                coverUrlForHistory = getCoverUrl(bestMatch.id, coverArt, "256");
-              } else {
-                coverUrlForHistory = getPlaceholderImage(256, 384, "No Cover");
-              }
-            } else {
-              canonicalMangaDexId = "";
-              coverUrlForHistory = getPlaceholderImage(256, 384, "No Cover");
-            }
-          } catch (searchError) {
-            console.error("[Reader] MangaDex search failed:", searchError);
-            canonicalMangaDexId = "";
-            coverUrlForHistory = getPlaceholderImage(256, 384, "No Cover");
-          }
-        }
-      } else {
-        console.error(`[Reader] Atsumaru API failed: ${response.status}`);
+    const response = await fetch(`/atsumaru/manga?id=${navigationMangaId}`);
+    if (response.ok) {
+      const data = await response.json();
+      if (data) {
+        mangaTitleForHistory =
+          data.title || data.englishTitle || `Manga ${navigationMangaId}`;
+        coverUrlForHistory =
+          data.image || getPlaceholderImage(256, 384, "No Cover");
+        canonicalMangaDexId = mangaId; // Use the mangaId from URL as canonical
       }
     } else {
-      // Fetch MangaDex manga details
-      const mangaData = await fetchMangaDetails(navigationMangaId);
-      if (mangaData?.data) {
-        mangaTitleForHistory = getEnglishTitle(mangaData.data);
-        const coverArt = findRelationship(mangaData.data, "cover_art");
-        coverUrlForHistory = coverArt
-          ? getCoverUrl(mangaData.data.id, coverArt, "256")
-          : getPlaceholderImage(256, 384, "No Cover");
-      }
+      console.error(`[Reader] Atsumaru API failed: ${response.status}`);
     }
   } catch (error) {
     console.error("[Reader] Failed to load manga details for history:", error);
@@ -165,34 +112,25 @@ async function loadChapterBySource() {
   // Set fallback floating bar chapter info
   updateFloatingChapterInfo("?", "", false, false);
 
-  // Get chapter data from URL params based on source
-  // For Atsumaru, strip the atsu- prefix from chapterId for API calls
-  const rawChapterId =
-    source === "atsumaru" && chapterId?.startsWith("atsu-")
-      ? chapterId.replace("atsu-", "")
-      : chapterId;
+  // Atsumaru-only: strip the atsu- prefix from chapterId for API calls
+  const rawChapterId = chapterId?.startsWith("atsu-")
+    ? chapterId.replace("atsu-", "")
+    : chapterId;
 
   const chapterData = {
-    source: source,
-    mangadexId: source === "mangadex" ? chapterId : null,
+    source: SOURCES.ATSUMARU,
     mangaId: atsumaruMangaId,
-    chapterId: rawChapterId, // Use raw ID for Atsumaru API
-    mangaSlug: getUrlParam("mangaSlug"),
-    chapterSlug: getUrlParam("chapterSlug"),
+    chapterId: rawChapterId,
   };
 
   const pageUrls = await getChapterPagesHybrid(chapterData);
 
   if (!pageUrls || pageUrls.length === 0) {
-    throw new Error(`No pages found from ${source}`);
+    throw new Error("No pages found from Atsumaru");
   }
 
   pages = pageUrls.map((url, index) => ({
-    // Use proxy for Atsumaru, direct for MangaDex
-    url:
-      source === "atsumaru"
-        ? `/api/proxy?imageUrl=${encodeURIComponent(url)}`
-        : url,
+    url: `/api/proxy?imageUrl=${encodeURIComponent(url)}`,
     alt: `Page ${index + 1}`,
   }));
 
@@ -200,49 +138,32 @@ async function loadChapterBySource() {
 }
 
 async function loadChapterNavigation() {
-  // Use correct manga ID based on source
-  const navigationMangaId = source === "atsumaru" ? atsumaruMangaId : mangaId;
+  // Atsumaru-only navigation
+  const navigationMangaId = atsumaruMangaId;
 
   if (!navigationMangaId) {
     return;
   }
 
   try {
-    if (source === "atsumaru") {
-      // For Atsumaru, we need to fetch chapters differently
-      // Use the Atsumaru API to get chapters
-      const response = await fetch(`/atsumaru/manga?id=${navigationMangaId}`);
-      const data = await response.json();
-      const chapters = data?.chapters || [];
+    const response = await fetch(`/atsumaru/manga?id=${navigationMangaId}`);
+    const data = await response.json();
+    const chapters = data?.chapters || [];
 
-      allChapters = chapters
-        .map((ch) => ({
-          id: `atsu-${ch.id}`,
-          attributes: {
-            chapter: ch.number,
-            title: ch.title,
-            publishAt: ch.createdAt,
-          },
-        }))
-        .sort((a, b) => {
-          const aNum = parseFloat(a.attributes?.chapter) || 0;
-          const bNum = parseFloat(b.attributes?.chapter) || 0;
-          return aNum - bNum;
-        });
-    } else {
-      // For MangaDex, use existing logic
-      const { data: chapters } = await fetchMangaFeed(navigationMangaId);
-
-      allChapters = chapters.sort((a, b) => {
+    allChapters = chapters
+      .map((ch) => ({
+        id: `atsu-${ch.id}`,
+        attributes: {
+          chapter: ch.number,
+          title: ch.title,
+          publishAt: ch.createdAt,
+        },
+      }))
+      .sort((a, b) => {
         const aNum = parseFloat(a.attributes?.chapter) || 0;
         const bNum = parseFloat(b.attributes?.chapter) || 0;
-        if (aNum !== bNum) return aNum - bNum;
-        return (
-          new Date(a.attributes?.publishAt || 0) -
-          new Date(b.attributes?.publishAt || 0)
-        );
+        return aNum - bNum;
       });
-    }
 
     currentChapterIndex = allChapters.findIndex((c) => c.id === chapterId);
     console.log("[Reader] Current chapter index:", currentChapterIndex);
@@ -254,11 +175,8 @@ async function loadChapterNavigation() {
       const chapterTitleText = chapter.attributes?.title || "";
       const hasPrev = currentChapterIndex > 0;
       const hasNext = currentChapterIndex < allChapters.length - 1;
-      // Update header title with chapter number
       chapterTitle.textContent = `Chapter ${chapterNum}`;
       updateFloatingChapterInfo(chapterNum, chapterTitleText, hasPrev, hasNext);
-    } else {
-      // console.log("[Reader] Chapter not found in chapters array!");
     }
 
     console.log("[Reader] === loadChapterNavigation SUCCESS ===");
@@ -283,14 +201,7 @@ function updateChapterButtons() {
 function goToPrev() {
   if (currentChapterIndex > 0) {
     const prevChapter = allChapters[currentChapterIndex - 1];
-    const navigationMangaId = source === "atsumaru" ? atsumaruMangaId : mangaId;
-
-    if (source === "atsumaru") {
-      // Keep atsu- prefix in URL for consistent ID matching
-      window.location.href = `reader.html?id=${prevChapter.id}&manga=${navigationMangaId}&source=atsumaru&mangaId=${atsumaruMangaId}`;
-    } else {
-      window.location.href = `reader.html?id=${prevChapter.id}&manga=${navigationMangaId}&source=mangadex`;
-    }
+    window.location.href = `reader.html?id=${prevChapter.id}&manga=${mangaId}&source=atsumaru&mangaId=${atsumaruMangaId}`;
   }
 }
 
@@ -300,14 +211,7 @@ function goToNext() {
     currentChapterIndex < allChapters.length - 1
   ) {
     const nextChapter = allChapters[currentChapterIndex + 1];
-    const navigationMangaId = source === "atsumaru" ? atsumaruMangaId : mangaId;
-
-    if (source === "atsumaru") {
-      // Keep atsu- prefix in URL for consistent ID matching
-      window.location.href = `reader.html?id=${nextChapter.id}&manga=${navigationMangaId}&source=atsumaru&mangaId=${atsumaruMangaId}`;
-    } else {
-      window.location.href = `reader.html?id=${nextChapter.id}&manga=${navigationMangaId}&source=mangadex`;
-    }
+    window.location.href = `reader.html?id=${nextChapter.id}&manga=${mangaId}&source=atsumaru&mangaId=${atsumaruMangaId}`;
   }
 }
 
