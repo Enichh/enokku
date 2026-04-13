@@ -16,7 +16,9 @@ exports.handler = async (event, context) => {
     return { statusCode: 200, headers, body: "" };
   }
 
-  const path = event.path.replace("/.netlify/functions/atsumaru", "").replace("/atsumaru", "");
+  const path = event.path
+    .replace("/.netlify/functions/atsumaru", "")
+    .replace("/atsumaru", "");
   const params = event.queryStringParameters || {};
 
   try {
@@ -29,7 +31,10 @@ exports.handler = async (event, context) => {
             body: JSON.stringify({ error: "Query parameter 'q' required" }),
           };
         }
-        const searchResults = await scraper.searchManga(params.q, parseInt(params.limit) || 10);
+        const searchResults = await scraper.searchManga(
+          params.q,
+          parseInt(params.limit) || 10,
+        );
         return {
           statusCode: 200,
           headers,
@@ -56,10 +61,15 @@ exports.handler = async (event, context) => {
           return {
             statusCode: 400,
             headers,
-            body: JSON.stringify({ error: "Parameters 'mangaId' and 'chapterId' required" }),
+            body: JSON.stringify({
+              error: "Parameters 'mangaId' and 'chapterId' required",
+            }),
           };
         }
-        const chapter = await scraper.getChapterPages(params.mangaId, params.chapterId);
+        const chapter = await scraper.getChapterPages(
+          params.mangaId,
+          params.chapterId,
+        );
         return {
           statusCode: 200,
           headers,

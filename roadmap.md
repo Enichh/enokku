@@ -8,9 +8,9 @@
 - **Hybrid Chapter System**: Multi-source chapter aggregation with visual indicators
 - **Reading Progress Tracking**: localStorage-based progress persistence with scroll percentage tracking
 - **Home Page**: Dynamic sections (Trending, Recently Updated, Continue Reading)
-- **Manga Details**: Atsumaru-first chapter loading with pagination
+- **Manga Details**: Atsumaru-first chapter loading with pagination, Atsumaru API details fetching
 - **Chapter Reader**: Source-aware page loading, keyboard navigation, progress tracking
-- **Search System**: Advanced filtering, genre selection, content type filtering
+- **Search System**: Advanced filtering, genre selection, content type filtering, Atsumaru search integration
 - **PWA Support**: Service worker for static asset caching, installability, manifest
 - **Version Management**: Git commit hash tracking with update notification system
 - **MSI Theme**: Red/black aesthetic with CSS custom properties

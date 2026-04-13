@@ -1,10 +1,11 @@
-## Checkpoint: [15:48] - Cache-busting and CSS Cleanup Applied
+## Checkpoint: [17:31] - Atsumaru API Integration Fixes
 
-- **Completed**: Added `?v=2` cache-busting to all JS module URLs across all HTML files
-- **Completed**: Removed unused download button CSS from `details.css`
-- **Verified**: No download references remain in code (only data export in settings.js)
-- **Status**: All changes pushed to production (commits `0e3fdda`, `469ff26`)
-- **Note**: Users may need hard refresh to clear browser cache and see changes
+- **Completed**: Fixed Atsumaru search API parameter mismatch (query → q)
+- **Completed**: Added Atsumaru manga details fetching when atsumaruId is present
+- **Completed**: Created renderAtsumaruDetails function with webp image support
+- **Status**: All changes pushed to production (commits c8e78fb, b99f691)
+- **Files Modified**: js/hybrid-api.js, js/details-hybrid.js, gotchas.md
+- **Note**: Users may need hard refresh to load updated hybrid-api.js script
 
 ---
 
@@ -12,7 +13,7 @@
 
 ## Active Focus
 
-**Offline Reading Removed** - The offline reading functionality and chapter downloading have been completely removed from the codebase. The PWA shell remains intact with service worker for static asset caching and installability preserved.
+**Atsumaru Integration Polish** - Fixed Atsumaru search API parameter mismatch and added proper manga details loading for Atsumaru-sourced manga with webp image support.
 
 ## Recent Actions
 
@@ -74,7 +75,6 @@
 
 **Last Updated**: 2026-04-13 15:32
 **Session Type**: Commit - Offline reading functionality removed
-
 
 - Chapter download performance could be optimized with concurrent processing
 - Error handling could be enhanced with automatic retry mechanisms
