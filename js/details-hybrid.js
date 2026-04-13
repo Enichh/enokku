@@ -204,9 +204,7 @@ async function renderMangaDexDetails(manga) {
 async function renderAtsumaruDetails(manga) {
   console.log("[Details] Atsumaru manga object:", manga);
   console.log("[Details] manga.image:", manga.image);
-  const coverUrl = manga.image
-    ? `/api/proxy?imageUrl=${encodeURIComponent(manga.image)}`
-    : getPlaceholderImage(512, 768, "No Cover");
+  const coverUrl = manga.image || getPlaceholderImage(512, 768, "No Cover");
   console.log("[Details] coverUrl:", coverUrl);
   const title = manga.title || manga.englishTitle || "Unknown Title";
   const description = manga.description || "No description available";
