@@ -9,6 +9,7 @@ import {
   getChaptersHybrid,
   findAtsumaruManga,
   getAtsumaruChapters,
+  fetchAtsumaru,
 } from "./hybrid-api.js";
 import {
   getUrlParam,
@@ -47,6 +48,22 @@ function isValidMangaDexId(id) {
 
 async function loadMangaDetails() {
   showLoading("mangaDetails");
+
+  // If atsumaruIdParam is present, fetch from Atsumaru API
+  if (atsumaruIdParam) {
+    console.log(`[Details] Manga from Atsumaru, ID: ${atsumaruIdParam}`);
+    try {
+      const atsumaruManga = await fetchAtsumaru("/manga", {
+        id: atsumaruIdParam,
+      });
+      if (atsumaruManga) {
+        await renderAtsumaruDetails(atsumaruManga);
+        return;
+      }
+    } catch (error) {
+      console.error(`[Details] Atsumaru API error:`, error);
+    }
+  }
 
   // If ID is not a valid MangaDex UUID, try to find by title
   if (!isValidMangaDexId(mangaId) && titleParam) {
@@ -162,6 +179,39 @@ async function renderMangaDexDetails(manga) {
     author?.attributes?.name,
     manga.attributes.year,
     manga.attributes.status,
+    description,
+    tags,
+    allTitles,
+  );
+
+  await loadChapters(allTitles);
+}
+
+async function renderAtsumaruDetails(manga) {
+  const BASE_URL = "https://atsu.moe";
+  const coverUrl = manga.poster?.mediumImage
+    ? `${BASE_URL}/${manga.poster.mediumImage}`
+    : manga.poster?.image
+      ? `${BASE_URL}/${manga.poster.image}`
+      : getPlaceholderImage(512, 768, "No Cover");
+  const title = manga.title || manga.englishTitle || "Unknown Title";
+  const description = manga.synopsis || "No description available";
+  const status = manga.status || "Unknown";
+  const year = null;
+  const authorName = "Unknown";
+  const tags =
+    manga.genres
+      ?.map((genre) => `<span class="status">${genre.name || genre}</span>`)
+      .join(" ") || "";
+
+  const allTitles = [title, ...(manga.otherNames || [])].filter(Boolean);
+
+  renderMangaDetailsHTML(
+    title,
+    coverUrl,
+    authorName,
+    year,
+    status,
     description,
     tags,
     allTitles,
