@@ -266,4 +266,10 @@ export function getSourceStyle(source) {
   return styles[source] || { color: "#888", name: source };
 }
 
-export { SOURCES, SOURCE_PRIORITY, findAtsumaruManga, getAtsumaruChapters };
+export {
+  SOURCES,
+  SOURCE_PRIORITY,
+  findAtsumaruManga,
+  getAtsumaruChapters,
+  fetchAtsumaru,
+};
