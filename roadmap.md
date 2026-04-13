@@ -11,16 +11,20 @@
 - **Manga Details**: Atsumaru-first chapter loading with pagination
 - **Chapter Reader**: Source-aware page loading, keyboard navigation, progress tracking
 - **Search System**: Advanced filtering, genre selection, content type filtering
-- **PWA Support**: COMPLETE - Service worker, offline reading, caching, background sync, manifest
-- **Chapter Downloading**: Individual and bulk chapter downloads with storage management
+- **PWA Support**: Service worker for static asset caching, installability, manifest
 - **Version Management**: Git commit hash tracking with update notification system
 - **MSI Theme**: Red/black aesthetic with CSS custom properties
 
 ### 🚧 Active Development Areas
 
-- **Performance Optimization**: Image loading, chapter preloading, API response caching
+- **Performance Optimization**: Image loading, API response caching
 - **UI/UX Refinements**: Mobile responsiveness, loading states, error handling
-- **Testing**: Comprehensive testing of offline reading and chapter downloads
+- **PWA Polish**: Install prompts, version updates, service worker improvements
+
+### ❌ Removed Features (2026-04-13)
+
+- **Offline Reading**: Chapter downloading, IndexedDB storage, background sync removed
+- **Rationale**: Simplified architecture - app now requires internet connection to read manga
 
 ### 📋 Planned Features
 

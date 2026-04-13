@@ -1,3 +1,13 @@
+## Checkpoint: [15:48] - Cache-busting and CSS Cleanup Applied
+
+- **Completed**: Added `?v=2` cache-busting to all JS module URLs across all HTML files
+- **Completed**: Removed unused download button CSS from `details.css`
+- **Verified**: No download references remain in code (only data export in settings.js)
+- **Status**: All changes pushed to production (commits `0e3fdda`, `469ff26`)
+- **Note**: Users may need hard refresh to clear browser cache and see changes
+
+---
+
 # Enokku Manga Reader - Current State
 
 ## Active Focus
