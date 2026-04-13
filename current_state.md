@@ -1,11 +1,14 @@
-## Checkpoint: [17:31] - Atsumaru API Integration Fixes
+## Checkpoint: [17:54] - Atsumaru API Integration Complete
 
 - **Completed**: Fixed Atsumaru search API parameter mismatch (query → q)
 - **Completed**: Added Atsumaru manga details fetching when atsumaruId is present
-- **Completed**: Created renderAtsumaruDetails function with webp image support
-- **Status**: All changes pushed to production (commits c8e78fb, b99f691)
-- **Files Modified**: js/hybrid-api.js, js/details-hybrid.js, gotchas.md
-- **Note**: Users may need hard refresh to load updated hybrid-api.js script
+- **Completed**: Created renderAtsumaruDetails function
+- **Completed**: Added fetchAtsumaru export to hybrid-api.js
+- **Completed**: Fixed 404 error when pressing back button on Atsumaru manga
+- **Limitation**: Atsumaru cover images blocked by CORS/anti-bot protections - accepting placeholders
+- **Status**: All changes pushed to production (commits through 1d10d15)
+- **Files Modified**: js/hybrid-api.js, js/details-hybrid.js, netlify/functions/atsumaru.js, gotchas.md
+- **Note**: Chapters load correctly (91 chapters found, 47 unique), cover images show placeholder
 
 ---
 
