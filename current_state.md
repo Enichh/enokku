@@ -2,52 +2,69 @@
 
 ## Active Focus
 
-**Offline Reading Flow Fixed** - Critical offline reading accessibility issues have been resolved. Users can now properly access cached chapters when offline through the offline.html interface. Service worker cache fallback logic has been corrected and all required exports are properly configured.
+**Offline Reading Removed** - The offline reading functionality and chapter downloading have been completely removed from the codebase. The PWA shell remains intact with service worker for static asset caching and installability preserved.
 
 ## Recent Actions
 
-### 2026-04-13 - Chapter Downloading Implementation
+### 2026-04-13 - Remove Offline Reading Functionality
 
-- **Action**: Implemented complete chapter downloading functionality on manga details page
-- **Status**: Successfully completed with all critical fixes applied
-- **Files Modified**: `manga.html`, `js/details-hybrid.js`, `css/details.css`, `js/hybrid-api.js`
-- **Changes**: Added download buttons per chapter, download all functionality, storage limit warnings, sequential downloads with delays, and comprehensive CSS styling
-- **Next**: Ready for testing and deployment
+- **Action**: Completely removed offline reading and chapter downloading functionality
+- **Status**: Successfully committed and pushed to production (commit e54cf97)
+- **Files Deleted**: `js/offline-manager.js`, `js/db.js`, `offline.html`
+- **Files Modified**: `sw.js`, `js/pwa.js`, `js/details-hybrid.js`, `js/reader-hybrid.js`, `js/settings.js`, `manga.html`, `settings.html`
+- **Changes**:
+  - Simplified service worker to static asset caching only
+  - Removed all chapter download buttons and related UI
+  - Removed offline loading logic from reader
+  - Removed background sync and offline indicators
+  - Removed offline chapters management from settings
+  - Updated install hint to remove "offline reading" reference
+- **Next**: PWA installability preserved, app requires internet to read manga
 
-### 2026-04-13 - Code Review and Critical Fixes
+### 2026-04-13 - PWA Version & Update Fixes (Previous)
 
-- **Action**: Fixed all critical issues identified in code review including missing imports, hardcoded values, and Atsumaru chapter data structure
-- **Status**: All high and medium priority issues resolved, codebase now production-ready
-- **Files Modified**: `js/details-hybrid.js`, `js/hybrid-api.js`
-- **Key Fixes Applied**:
-  - Added missing imports: `preloadChapter`, `getOfflineChapterCount`, `MAX_CACHED_CHAPTERS`
-  - Removed dynamic import in favor of static imports
-  - Replaced hardcoded cache limit with constant
-  - Fixed button icon structure to use proper emoji styling
-  - Enhanced Atsumaru chapter data mapping with required fields
-  - Added dedicated MangaDex chapter fetching function for improved reliability
-- **Next**: Implementation complete and ready for testing
+- **Action**: Fixed version display and update notification loop issues
+- **Status**: Completed and deployed to production
+- **Key Changes**:
+  - Created `scripts/update-version.js` to populate version.json with git commit hash
+  - Fixed update notification loop by setting localStorage version in `applyUpdate()`
+  - Added npm deployment scripts: `version:update`, `predeploy`, `deploy`, `deploy:preview`
+- **Impact**: Users now see actual commit hash instead of "GIT_COMMIT_HASH"
 
 ## Current Technical State
 
 ### Core Systems Status
 
-- ✅ **Chapter Downloading**: Fully implemented with individual and bulk download capabilities
-- ✅ **Storage Management**: 10-chapter cache limit with warnings and automatic cleanup
-- ✅ **Visual Feedback**: Complete button states (Download, Downloading, Downloaded)
-- ✅ **Error Handling**: Retry mechanisms and graceful failure recovery
-- ✅ **Offline Integration**: Seamless integration with existing offline manager
-- ✅ **Multi-Source Support**: Enhanced MangaDex and Atsumaru compatibility
-- ✅ **PWA Foundation**: Service worker and manifest configured
+- ✅ **PWA Shell**: Static asset caching, installability, version updates preserved
+- ✅ **Online Reading**: MangaDex and Atsumaru chapter loading fully functional
+- ✅ **Reading Progress**: localStorage-based tracking with Continue Reading section
+- ✅ **Library**: Favorites, bookmarks, reading history (localStorage)
+- ❌ **Chapter Downloading**: Removed
+- ❌ **Offline Reading**: Removed
+- ❌ **Background Sync**: Removed
 
-### Recent File Changes
+### Files Modified in Latest Commit
 
-- `manga.html` - Added download all container with button and status
-- `js/details-hybrid.js` - Complete chapter downloading implementation with all fixes
-- `css/details.css` - Comprehensive styling for download buttons and containers
-- `js/hybrid-api.js` - Added dedicated MangaDex chapter fetching function
+- `sw.js` - Simplified to static asset caching only
+- `js/pwa.js` - Removed offline features, kept install and updates
+- `js/details-hybrid.js` - Removed chapter download functionality
+- `js/reader-hybrid.js` - Removed offline loading and preloading
+- `js/settings.js` - Removed offline management functions
+- `manga.html` - Removed download all button container
+- `settings.html` - Removed offline sections, simplified storage display
 
-### Known Issues & Technical Debt
+### Architecture Changes
+
+- **Storage**: Removed IndexedDB dependency entirely
+- **Caching**: Service worker now only caches static assets (HTML/CSS/JS)
+- **User Expectation**: App requires internet connection to read manga
+- **PWA Benefits**: Installable app with fast loading from cached assets
+
+---
+
+**Last Updated**: 2026-04-13 15:32
+**Session Type**: Commit - Offline reading functionality removed
+
 
 - Chapter download performance could be optimized with concurrent processing
 - Error handling could be enhanced with automatic retry mechanisms
