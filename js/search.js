@@ -11,6 +11,7 @@ import {
 } from "./tag-map.js";
 
 import { getCoverUrl, findRelationship, getEnglishTitle } from "./api.js";
+import { searchMangaHybrid } from "./hybrid-api.js";
 import { getPlaceholderImage, debounce } from "./utils.js";
 
 // ============================================
@@ -245,16 +246,31 @@ async function fetchResults(append = false) {
   showLoading(append);
 
   try {
-    const params = buildApiParams();
-    // console.log("[Search] Fetching with params:", params.toString());
+    let data;
 
-    const response = await fetch(`/api/manga?${params.toString()}`);
-    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    // Use hybrid search for basic text queries without complex filters
+    const hasComplexFilters =
+      state.genres.length > 0 ||
+      state.excludedGenres.length > 0 ||
+      state.year !== null ||
+      state.status.length > 0 ||
+      state.contentType !== CONTENT_TYPES.ALL;
 
-    const data = await response.json();
+    if (state.query && !hasComplexFilters) {
+      // Use hybrid search (MangaDex + Atsumaru merged)
+      data = await searchMangaHybrid(state.query, pagination.limit);
+      pagination.total = data.data?.length || 0;
+      pagination.hasMore = false; // Hybrid search doesn't support pagination yet
+    } else {
+      // Use MangaDex API for filtered searches (Atsumaru doesn't support tags/filters)
+      const params = buildApiParams();
+      const response = await fetch(`/api/manga?${params.toString()}`);
+      if (!response.ok) throw new Error(`API error: ${response.status}`);
+      data = await response.json();
+      pagination.total = data.total || 0;
+      pagination.hasMore = data.data?.length === pagination.limit;
+    }
 
-    pagination.total = data.total || 0;
-    pagination.hasMore = data.data?.length === pagination.limit;
     pagination.offset += data.data?.length || 0;
 
     updateResultsCount();
@@ -293,6 +309,7 @@ function renderResults(mangaList, append = false) {
 
       const title = getEnglishTitle(manga);
       const status = manga.attributes.status || "Unknown";
+      const atsumaruId = manga.atsumaruId || "";
 
       // Determine badge
       let badge = "";
@@ -302,7 +319,7 @@ function renderResults(mangaList, append = false) {
         badge = '<span class="manga-card-badge">Manhua</span>';
 
       return `
-        <div class="manga-card" data-manga-id="${manga.id}" style="animation-delay: ${index * 50}ms">
+        <div class="manga-card" data-manga-id="${manga.id}" data-atsumaru-id="${atsumaruId}" style="animation-delay: ${index * 50}ms">
           <div class="manga-card-cover">
             <img src="${coverUrl}" alt="${title}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="this.src='${getPlaceholderImage(256, 384, "No Cover")}'">
             <div class="manga-card-overlay"></div>
@@ -327,7 +344,11 @@ function renderResults(mangaList, append = false) {
   elements.resultsGrid.querySelectorAll(".manga-card").forEach((card) => {
     card.addEventListener("click", () => {
       const mangaId = card.dataset.mangaId;
-      window.location.href = `manga.html?id=${mangaId}`;
+      const atsumaruId = card.dataset.atsumaruId;
+      const url = atsumaruId
+        ? `manga.html?id=${mangaId}&atsumaruId=${atsumaruId}`
+        : `manga.html?id=${mangaId}`;
+      window.location.href = url;
     });
   });
 
