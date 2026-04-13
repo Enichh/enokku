@@ -156,12 +156,15 @@ async function migrateOldHistoryEntry(entry) {
         }
 
         console.log(`[Home] Migrated to MangaDex ID: ${bestMatch.id}`);
+        return entry;
       } else {
-        // No MangaDex match found, keep Atsumaru ID and original cover
-        console.log(`[Home] No MangaDex match, keeping Atsumaru entry`);
+        // No MangaDex match found, remove entry from history
+        console.log(`[Home] No MangaDex match, removing Atsumaru-only entry`);
+        return null; // Return null to filter out
       }
     } catch (error) {
       console.error(`[Home] Failed to migrate entry:`, error);
+      return null; // Remove on error
     }
   }
   return entry;
@@ -182,20 +185,30 @@ async function loadContinueReading() {
     history.map((entry) => migrateOldHistoryEntry(entry)),
   );
 
-  // Save migrated entries back to localStorage if any changed
-  const hasChanges = migratedHistory.some(
-    (entry, index) =>
-      entry.mangaId !== history[index].mangaId ||
-      entry.coverUrl !== history[index].coverUrl,
-  );
+  // Filter out null entries (Atsumaru-only manga with no MangaDex match)
+  const filteredHistory = migratedHistory.filter((entry) => entry !== null);
+
+  // Save filtered entries back to localStorage if any changed
+  const hasChanges =
+    filteredHistory.length !== history.length ||
+    filteredHistory.some(
+      (entry, index) =>
+        entry.mangaId !== history[index].mangaId ||
+        entry.coverUrl !== history[index].coverUrl,
+    );
 
   if (hasChanges) {
-    localStorage.setItem("reading_history", JSON.stringify(migratedHistory));
-    console.log("[Home] Saved migrated reading history");
+    localStorage.setItem("reading_history", JSON.stringify(filteredHistory));
+    console.log("[Home] Saved filtered reading history");
+  }
+
+  if (filteredHistory.length === 0) {
+    continueReadingSection?.classList.add("hidden");
+    return;
   }
 
   continueReadingRow.innerHTML = "";
-  migratedHistory.forEach((entry) => {
+  filteredHistory.forEach((entry) => {
     continueReadingRow.appendChild(renderHistoryCard(entry));
   });
 
