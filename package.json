@@ -12,6 +12,10 @@
   },
   "scripts": {
     "dev": "netlify dev",
-    "build": "echo 'No build step required'"
+    "build": "echo 'No build step required'",
+    "version:update": "node scripts/update-version.js",
+    "predeploy": "npm run version:update",
+    "deploy": "npm run predeploy && netlify deploy --prod",
+    "deploy:preview": "npm run predeploy && netlify deploy"
   }
 }
