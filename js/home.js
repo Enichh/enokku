@@ -94,7 +94,7 @@ function renderHistoryCard(entry) {
   const card = document.createElement("div");
   card.className = "manga-card history-card";
   card.innerHTML = `
-    <img src="${entry.coverUrl}" alt="${entry.mangaTitle}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous">
+    <img src="${entry.coverUrl}" alt="${entry.mangaTitle}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="this.closest('.manga-card').style.display='none'">
     <div class="info">
       <div class="title">${entry.mangaTitle}</div>
       <div class="meta">${entry.scrollPercent}% • Ch. ${entry.chapterNumber}</div>
