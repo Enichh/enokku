@@ -31,17 +31,24 @@ exports.handler = async (event, context) => {
     const imageUrl = decodeURIComponent(queryParams.imageUrl);
 
     console.log("[Proxy] Image URL:", imageUrl);
-    console.log("[Proxy] Headers:", {
-      "User-Agent": "MangaDex-Static-Client/1.0",
-      Referer: "https://mangadex.org/",
-    });
+
+    // Determine appropriate headers based on image source
+    let headers = {
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    };
+
+    if (imageUrl.includes("mangadex.org")) {
+      headers.Referer = "https://mangadex.org/";
+    } else if (imageUrl.includes("atsu.moe")) {
+      headers.Referer = "https://atsu.moe/";
+    }
+
+    console.log("[Proxy] Headers:", headers);
 
     try {
       const response = await fetch(imageUrl, {
-        headers: {
-          "User-Agent": "MangaDex-Static-Client/1.0",
-          Referer: "https://mangadex.org/",
-        },
+        headers,
       });
 
       console.log("[Proxy] Response status:", response.status);
