@@ -94,8 +94,10 @@ async function loadMangaDetailsForHistory() {
       if (data) {
         mangaTitleForHistory =
           data.title || data.englishTitle || `Manga ${navigationMangaId}`;
-        coverUrlForHistory =
-          data.image || getPlaceholderImage(256, 384, "No Cover");
+        // Proxy Atsumaru images to fix CORS
+        coverUrlForHistory = data.image
+          ? `/api/proxy?imageUrl=${encodeURIComponent(data.image)}`
+          : getPlaceholderImage(256, 384, "No Cover");
         canonicalMangaDexId = mangaId; // Use the mangaId from URL as canonical
       }
     } else {
