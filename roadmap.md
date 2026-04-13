@@ -12,13 +12,15 @@
 - **Chapter Reader**: Source-aware page loading, keyboard navigation, progress tracking
 - **Search System**: Advanced filtering, genre selection, content type filtering
 - **PWA Support**: COMPLETE - Service worker, offline reading, caching, background sync, manifest
+- **Chapter Downloading**: Individual and bulk chapter downloads with storage management
+- **Version Management**: Git commit hash tracking with update notification system
 - **MSI Theme**: Red/black aesthetic with CSS custom properties
 
 ### 🚧 Active Development Areas
 
-- **PWA Enhancements**: Offline reading capabilities, caching strategies
 - **Performance Optimization**: Image loading, chapter preloading, API response caching
 - **UI/UX Refinements**: Mobile responsiveness, loading states, error handling
+- **Testing**: Comprehensive testing of offline reading and chapter downloads
 
 ### 📋 Planned Features
 
@@ -51,17 +53,20 @@ c:\Users\Enoch Gabriel Astor\Desktop\enokku/
 │   ├── reader-hybrid.js    # Reader with progress tracking
 │   └── [6 more modules]    # Page-specific logic
 ├── netlify/functions/       # Serverless API endpoints
-└── assets/                 # Static assets
+├── scripts/                 # Build/deployment scripts
+│   └── update-version.js   # Git commit hash versioning
+└── assets/                  # Static assets
 ```
 
 ## Development Priorities
 
 ### High Priority
 
-1. **Settings Module Production-Ready**: All critical and medium priority issues resolved
+1. **PWA Implementation**: ✅ COMPLETE - Service worker, offline reading, version management
 2. **Performance Optimization**: Image lazy loading, API caching, bundle optimization
 3. **Mobile UX**: Touch gestures, responsive improvements, floating bar polish
 4. **Error Resilience**: Robust fallback mechanisms, user feedback
+5. **Testing**: Comprehensive testing of offline reading and chapter downloads
 
 ### Medium Priority
 

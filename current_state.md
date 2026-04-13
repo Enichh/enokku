@@ -155,5 +155,31 @@
 
 ---
 
-**Last Updated**: 2026-04-13 04:00
-**Session Type**: Service Worker Navigation Cache Fix
+### 2026-04-13 14:47 - Checkpoint: Offline Reading Complete
+
+- **Action**: Service worker navigation fix committed and pushed to production
+- **Status**: Deployed to Netlify (commit 4e45e5e)
+- **Files Modified**: `sw.js`, `current_state.md`, `gotchas.md`
+- **Summary**: Fixed `reader.html` offline access with query parameters via `{ ignoreSearch: true }` cache matching
+- **Active Focus**: Offline reading capabilities complete - ready for testing phase
+
+---
+
+### 2026-04-13 15:01 - Checkpoint: PWA Version & Update Fixes
+
+- **Action**: Fixed version display and update notification loop issues
+- **Status**: Completed and deployed to production
+- **Files Modified**: `scripts/update-version.js`, `js/pwa.js`, `package.json`, `gotchas.md`
+- **Key Changes**:
+  - Created `scripts/update-version.js` to populate version.json with git commit hash
+  - Fixed update notification loop by setting localStorage version in `applyUpdate()`
+  - Added `data-version` attribute to notification element
+  - Always sync localStorage version in `checkForVersionUpdate()`
+  - Added npm scripts: `version:update`, `predeploy`, `deploy`, `deploy:preview`
+- **Impact**: Users now see actual commit hash instead of "GIT_COMMIT_HASH", update notifications don't reappear after applying
+- **Active Focus**: PWA polish complete - ready for comprehensive testing phase
+
+---
+
+**Last Updated**: 2026-04-13 15:01
+**Session Type**: Checkpoint - PWA Version & Update Notification Fixes
