@@ -93,8 +93,12 @@ function renderMangaCard(manga) {
 function renderHistoryCard(entry) {
   const card = document.createElement("div");
   card.className = "manga-card history-card";
+  // Proxy Atsumaru images to fix CORS
+  const proxiedCoverUrl = entry.coverUrl?.includes("atsu.moe")
+    ? `/api/proxy?imageUrl=${encodeURIComponent(entry.coverUrl)}`
+    : entry.coverUrl;
   card.innerHTML = `
-    <img src="${entry.coverUrl}" alt="${entry.mangaTitle}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous">
+    <img src="${proxiedCoverUrl}" alt="${entry.mangaTitle}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous">
     <div class="info">
       <div class="title">${entry.mangaTitle}</div>
       <div class="meta">${entry.scrollPercent}% • Ch. ${entry.chapterNumber}</div>
@@ -110,10 +114,15 @@ function renderHistoryCard(entry) {
   });
 
   card.addEventListener("click", () => {
+    const source = entry.source || "mangadex";
     const mangaId = entry.mangaId;
     const chapterId = entry.chapterId;
-    // After migration, always use MangaDex ID for navigation
-    window.location.href = `reader.html?id=${chapterId}&manga=${mangaId}&source=mangadex`;
+
+    if (source === "atsumaru" && entry.atsumaruMangaId) {
+      window.location.href = `reader.html?id=${chapterId}&manga=${mangaId}&source=atsumaru&mangaId=${entry.atsumaruMangaId}`;
+    } else {
+      window.location.href = `reader.html?id=${chapterId}&manga=${mangaId}&source=mangadex`;
+    }
   });
 
   return card;
@@ -126,14 +135,7 @@ async function migrateOldHistoryEntry(entry) {
       entry.mangaId,
     );
 
-  // If already a valid MangaDex UUID, keep it as-is (don't remigrate)
-  if (isValidUUID) {
-    console.log(`[Home] Entry already has MangaDex UUID: ${entry.mangaId}`);
-    return entry;
-  }
-
-  // Only migrate if it's an Atsumaru short ID
-  if (entry.source === "atsumaru" && entry.mangaTitle) {
+  if (!isValidUUID && entry.source === "atsumaru" && entry.mangaTitle) {
     console.log(
       `[Home] Migrating old entry: ${entry.mangaTitle} (ID: ${entry.mangaId})`,
     );
@@ -151,7 +153,7 @@ async function migrateOldHistoryEntry(entry) {
         // Update entry with canonical MangaDex UUID
         entry.mangaId = bestMatch.id;
 
-        // Update cover to MangaDex cover (proxied)
+        // Also update cover to MangaDex cover
         const coverArt = findRelationship(bestMatch, "cover_art");
         if (coverArt) {
           entry.coverUrl = getCoverUrl(bestMatch.id, coverArt, "256");
@@ -159,14 +161,9 @@ async function migrateOldHistoryEntry(entry) {
 
         console.log(`[Home] Migrated to MangaDex ID: ${bestMatch.id}`);
         return entry;
-      } else {
-        // No MangaDex match found, remove entry from history
-        console.log(`[Home] No MangaDex match, removing Atsumaru-only entry`);
-        return null; // Return null to filter out
       }
     } catch (error) {
       console.error(`[Home] Failed to migrate entry:`, error);
-      return null; // Remove on error
     }
   }
   return entry;
@@ -187,30 +184,20 @@ async function loadContinueReading() {
     history.map((entry) => migrateOldHistoryEntry(entry)),
   );
 
-  // Filter out null entries (Atsumaru-only manga with no MangaDex match)
-  const filteredHistory = migratedHistory.filter((entry) => entry !== null);
-
-  // Save filtered entries back to localStorage if any changed
-  const hasChanges =
-    filteredHistory.length !== history.length ||
-    filteredHistory.some(
-      (entry, index) =>
-        entry.mangaId !== history[index].mangaId ||
-        entry.coverUrl !== history[index].coverUrl,
-    );
+  // Save migrated entries back to localStorage if any changed
+  const hasChanges = migratedHistory.some(
+    (entry, index) =>
+      entry.mangaId !== history[index].mangaId ||
+      entry.coverUrl !== history[index].coverUrl,
+  );
 
   if (hasChanges) {
-    localStorage.setItem("reading_history", JSON.stringify(filteredHistory));
-    console.log("[Home] Saved filtered reading history");
-  }
-
-  if (filteredHistory.length === 0) {
-    continueReadingSection?.classList.add("hidden");
-    return;
+    localStorage.setItem("reading_history", JSON.stringify(migratedHistory));
+    console.log("[Home] Saved migrated reading history");
   }
 
   continueReadingRow.innerHTML = "";
-  filteredHistory.forEach((entry) => {
+  migratedHistory.forEach((entry) => {
     continueReadingRow.appendChild(renderHistoryCard(entry));
   });
 
