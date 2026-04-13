@@ -383,8 +383,13 @@ async function checkForVersionUpdate() {
     if (currentVersion && currentVersion !== version) {
       console.log(`[PWA] Update available: ${currentVersion} -> ${version}`);
       showEnhancedUpdateNotification(version);
-    } else if (!currentVersion) {
-      // First time - store current version
+    } else {
+      // Versions match or first time - ensure localStorage is synced
+      if (currentVersion !== version) {
+        console.log(
+          `[PWA] Syncing localStorage version: ${currentVersion} -> ${version}`,
+        );
+      }
       localStorage.setItem("enokku_app_version", version);
     }
   } catch (error) {
@@ -508,6 +513,7 @@ function showEnhancedUpdateNotification(newVersion) {
 
   const notification = document.createElement("div");
   notification.className = "update-notification";
+  notification.dataset.version = newVersion; // Store version for applyUpdate
 
   const platform = getPlatform();
   const isMobileDevice = platform === "ios" || platform === "android";
@@ -540,13 +546,20 @@ window.applyUpdate = () => {
   // Save current state before reloading
   saveStateBeforeUpdate();
 
+  // Update localStorage with the new version to prevent re-triggering update on reload
+  const notification = document.querySelector(".update-notification");
+  const newVersion = notification?.dataset?.version;
+  if (newVersion) {
+    localStorage.setItem("enokku_app_version", newVersion);
+    console.log("[PWA] Updated localStorage version to:", newVersion);
+  }
+
   // Trigger service worker update
   if (navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({ type: "SKIP_WAITING" });
   }
 
   // Show loading state
-  const notification = document.querySelector(".update-notification");
   if (notification) {
     notification.innerHTML = `
       <div class="update-notification-content">
