@@ -59,9 +59,23 @@ async function loadMangaDetails() {
       if (atsumaruManga) {
         await renderAtsumaruDetails(atsumaruManga);
         return;
+      } else {
+        console.error(`[Details] Atsumaru API returned null`);
+        mangaDetailsContainer.innerHTML = `
+          <div class="error">
+            <p>Failed to load manga details from Atsumaru</p>
+          </div>
+        `;
+        return;
       }
     } catch (error) {
       console.error(`[Details] Atsumaru API error:`, error);
+      mangaDetailsContainer.innerHTML = `
+        <div class="error">
+          <p>Error loading manga details: ${error.message}</p>
+        </div>
+      `;
+      return;
     }
   }
 
@@ -188,20 +202,15 @@ async function renderMangaDexDetails(manga) {
 }
 
 async function renderAtsumaruDetails(manga) {
-  const BASE_URL = "https://atsu.moe";
-  const coverUrl = manga.poster?.mediumImage
-    ? `${BASE_URL}/${manga.poster.mediumImage}`
-    : manga.poster?.image
-      ? `${BASE_URL}/${manga.poster.image}`
-      : getPlaceholderImage(512, 768, "No Cover");
+  const coverUrl = manga.image || getPlaceholderImage(512, 768, "No Cover");
   const title = manga.title || manga.englishTitle || "Unknown Title";
-  const description = manga.synopsis || "No description available";
+  const description = manga.description || "No description available";
   const status = manga.status || "Unknown";
   const year = null;
   const authorName = "Unknown";
   const tags =
     manga.genres
-      ?.map((genre) => `<span class="status">${genre.name || genre}</span>`)
+      ?.map((genre) => `<span class="status">${genre}</span>`)
       .join(" ") || "";
 
   const allTitles = [title, ...(manga.otherNames || [])].filter(Boolean);
