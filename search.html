@@ -10,11 +10,6 @@
       name="description"
       content="Search and discover manga, manhwa, and manhua on Enokku"
     />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
     <meta name="theme-color" content="#ff0000" />
 
     <meta property="og:title" content="Search Manga - Enokku" />
@@ -22,8 +17,7 @@
 
     <title>Search Manga - Enokku</title>
 
-    <link rel="manifest" href="manifest.json" />
-    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="src/assets/favicon.svg" />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -34,14 +28,14 @@
     />
 
     <!-- CSS -->
-    <link rel="stylesheet" href="css/reset.css" />
-    <link rel="stylesheet" href="css/variables.css" />
-    <link rel="stylesheet" href="css/base.css" />
-    <link rel="stylesheet" href="css/utilities.css" />
-    <link rel="stylesheet" href="css/cards.css" />
-    <link rel="stylesheet" href="css/search.css" />
-    <link rel="stylesheet" href="css/responsive.css" />
-    <link rel="stylesheet" href="css/bottom-nav.css" />
+    <link rel="stylesheet" href="src/css/base/reset.css" />
+    <link rel="stylesheet" href="src/css/base/variables.css" />
+    <link rel="stylesheet" href="src/css/pages/home.css" />
+    <link rel="stylesheet" href="src/css/base/utilities.css" />
+    <link rel="stylesheet" href="src/css/components/cards.css" />
+    <link rel="stylesheet" href="src/css/pages/search.css" />
+    <link rel="stylesheet" href="src/css/responsive.css" />
+    <link rel="stylesheet" href="src/css/components/bottom-nav.css" />
   </head>
   <body class="search-page">
     <!-- Header -->
@@ -182,7 +176,11 @@
       class="mobile-filter-toggle"
       id="mobileFilterToggle"
       aria-label="Open filters"
-    ></button>
+    >
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+        <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" />
+      </svg>
+    </button>
 
     <!-- NoScript Warning -->
     <noscript>
@@ -228,7 +226,6 @@
     </nav>
 
     <!-- Scripts -->
-    <script type="module" src="js/pwa.js?v=2"></script>
-    <script type="module" src="js/search.js?v=3"></script>
+    <script type="module" src="src/js/pages/search.js?v=3"></script>
   </body>
 </html>

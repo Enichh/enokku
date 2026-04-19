@@ -1,0 +1,378 @@
+{
+  "version": "1.0.0",
+  "generated_at": "2025-04-20T02:14:00Z",
+  "description": "API endpoint payload documentation for Enokku manga reader application",
+  "apis": {
+    "mangadex": {
+      "base_url": "/api",
+      "description": "MangaDex API proxy endpoints",
+      "endpoints": [
+        {
+          "name": "Get Manga List",
+          "method": "GET",
+          "path": "/api/manga",
+          "description": "Fetches a list of manga with optional filtering parameters",
+          "request_params": {
+            "query": {
+              "limit": {
+                "type": "integer",
+                "default": 30,
+                "description": "Number of results to return"
+              },
+              "offset": {
+                "type": "integer",
+                "default": 0,
+                "description": "Offset for pagination"
+              },
+              "availableTranslatedLanguage": {
+                "type": "array",
+                "default": ["en"],
+                "description": "Filter by available translated languages"
+              },
+              "hasAvailableChapters": {
+                "type": "boolean",
+                "default": "true",
+                "description": "Filter manga with available chapters"
+              },
+              "includes": {
+                "type": "array",
+                "default": ["cover_art", "author"],
+                "description": "Relationships to include in response"
+              },
+              "order": {
+                "type": "object",
+                "default": { "rating": "desc" },
+                "description": "Sort order (e.g., {rating: desc}, {latestUploadedChapter: desc})"
+              },
+              "title": {
+                "type": "string",
+                "optional": true,
+                "description": "Search by title"
+              },
+              "originalLanguage": {
+                "type": "array",
+                "optional": true,
+                "description": "Filter by original language (e.g., [ja], [ko])"
+              }
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "result": "ok",
+              "response": "collection",
+              "data": [
+                {
+                  "id": "string (UUID)",
+                  "type": "manga",
+                  "attributes": {
+                    "title": {
+                      "language_code": "string"
+                    },
+                    "altTitles": [
+                      {
+                        "language_code": "string"
+                      }
+                    ],
+                    "description": {
+                      "language_code": "string"
+                    },
+                    "isLocked": "boolean",
+                    "links": {
+                      "raw": "string",
+                      "al": "string",
+                      "ap": "string",
+                      "bw": "string",
+                      "kt": "string",
+                      "mu": "string",
+                      "mal": "string",
+                      "engtl": "string"
+                    },
+                    "originalLanguage": "string",
+                    "status": "string (ongoing/completed)",
+                    "year": "integer",
+                    "contentRating": "string (safe/suggestive/erotica)",
+                    "tags": [
+                      {
+                        "id": "string",
+                        "type": "tag",
+                        "attributes": {
+                          "name": { "en": "string" },
+                          "group": "string (genre/theme/format/content)"
+                        }
+                      }
+                    ],
+                    "availableTranslatedLanguages": ["string"],
+                    "latestUploadedChapter": "string (UUID)"
+                  },
+                  "relationships": [
+                    { "id": "string", "type": "author" },
+                    { "id": "string", "type": "artist" },
+                    { "id": "string", "type": "cover_art" }
+                  ]
+                }
+              ],
+              "limit": "integer",
+              "offset": "integer",
+              "total": "integer"
+            }
+          }
+        },
+        {
+          "name": "Get Manga Details",
+          "method": "GET",
+          "path": "/api/manga/{mangaId}",
+          "description": "Fetches detailed information for a specific manga",
+          "request_params": {
+            "path": {
+              "mangaId": {
+                "type": "string (UUID)",
+                "required": true,
+                "description": "Manga ID"
+              }
+            },
+            "query": {
+              "includes": {
+                "type": "array",
+                "optional": true,
+                "description": "Relationships to include (e.g., cover_art, author, artist)"
+              }
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "result": "ok",
+              "response": "entity",
+              "data": {
+                "id": "string (UUID)",
+                "type": "manga",
+                "attributes": {
+                  "title": { "language_code": "string" },
+                  "altTitles": [{ "language_code": "string" }],
+                  "description": { "language_code": "string" },
+                  "originalLanguage": "string",
+                  "status": "string",
+                  "year": "integer",
+                  "contentRating": "string",
+                  "tags": ["object"],
+                  "availableTranslatedLanguages": ["string"]
+                },
+                "relationships": [
+                  {
+                    "id": "string",
+                    "type": "cover_art",
+                    "attributes": {
+                      "fileName": "string",
+                      "volume": "string",
+                      "locale": "string"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "name": "Image Proxy",
+          "method": "GET",
+          "path": "/api/proxy",
+          "description": "Proxies image requests to handle CORS and referrer policies",
+          "request_params": {
+            "query": {
+              "imageUrl": {
+                "type": "string (URL-encoded)",
+                "required": true,
+                "description": "URL of the image to proxy"
+              }
+            }
+          },
+          "response": {
+            "status": 200,
+            "headers": {
+              "Content-Type": "image/jpeg or image/png",
+              "Cache-Control": "public, max-age=3600"
+            },
+            "body": "binary image data (base64 encoded in Lambda response)",
+            "note": "Returns image binary data with proper CORS headers"
+          }
+        }
+      ]
+    },
+    "atsumaru": {
+      "base_url": "/atsumaru",
+      "description": "Atsumaru (atsu.moe) API endpoints for chapter reading",
+      "endpoints": [
+        {
+          "name": "Search Manga",
+          "method": "GET",
+          "path": "/atsumaru/search",
+          "description": "Search for manga by title",
+          "request_params": {
+            "query": {
+              "q": {
+                "type": "string",
+                "required": true,
+                "description": "Search query string"
+              },
+              "limit": {
+                "type": "integer",
+                "default": 10,
+                "description": "Number of results to return"
+              }
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "id": "string",
+                  "title": "string",
+                  "url": "string (https://atsu.moe/manga/{id})",
+                  "image": "string (https://atsu.moe/posters/{filename})",
+                  "type": "string (Manga/Manhwa/Manhua)",
+                  "isAdult": "boolean",
+                  "source": "atsumaru"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Manga Details",
+          "method": "GET",
+          "path": "/atsumaru/manga",
+          "description": "Fetches detailed manga information including chapters",
+          "request_params": {
+            "query": {
+              "id": {
+                "type": "string",
+                "required": true,
+                "description": "Manga ID from Atsumaru"
+              }
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "id": "string",
+              "title": "string",
+              "englishTitle": "string or null",
+              "description": "string",
+              "type": "string",
+              "status": "string (Completed/Ongoing)",
+              "isAdult": "boolean",
+              "image": "string (poster URL)",
+              "otherNames": ["string"],
+              "genres": ["string"],
+              "chapters": [
+                {
+                  "id": "string",
+                  "number": "number",
+                  "title": "string",
+                  "pageCount": "integer",
+                  "createdAt": "number (timestamp)"
+                }
+              ],
+              "totalChapterCount": "integer",
+              "source": "atsumaru"
+            }
+          }
+        },
+        {
+          "name": "Get Chapter Pages",
+          "method": "GET",
+          "path": "/atsumaru/chapter",
+          "description": "Fetches page images for a specific chapter",
+          "request_params": {
+            "query": {
+              "mangaId": {
+                "type": "string",
+                "required": true,
+                "description": "Manga ID"
+              },
+              "chapterId": {
+                "type": "string",
+                "required": true,
+                "description": "Chapter ID"
+              }
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "id": "string",
+              "title": "string",
+              "pages": [
+                {
+                  "id": "string",
+                  "image": "string (https://atsu.moe/static/pages/{mangaId}/{chapterId}/{number}.webp)",
+                  "number": "integer",
+                  "width": "integer",
+                  "height": "integer",
+                  "aspectRatio": "number"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Find Manga by Title",
+          "method": "GET",
+          "path": "/atsumaru/find",
+          "description": "Finds a manga by exact or partial title match",
+          "request_params": {
+            "query": {
+              "title": {
+                "type": "string",
+                "required": true,
+                "description": "Title to search for"
+              }
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "result": {
+                "id": "string",
+                "title": "string",
+                "url": "string",
+                "image": "string",
+                "type": "string",
+                "isAdult": "boolean",
+                "source": "atsumaru"
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Library",
+          "method": "GET",
+          "path": "/atsumaru/library",
+          "description": "Fetches user's library from Atsumaru",
+          "request_params": {},
+          "response": {
+            "status": 200,
+            "body": {
+              "items": []
+            }
+          }
+        }
+      ]
+    }
+  },
+  "common_response_codes": {
+    "200": "Success",
+    "400": "Bad Request - Missing required parameters",
+    "404": "Not Found - Invalid endpoint or resource",
+    "500": "Internal Server Error"
+  },
+  "notes": {
+    "mangadex": "All MangaDex requests are proxied through Netlify function to handle CORS",
+    "atsumaru": "Atsumaru provides chapter pages that are not available on MangaDex",
+    "image_proxy": "Use /api/proxy for all MangaDex cover images to handle referrer policy",
+    "authentication": "No authentication required for public endpoints",
+    "rate_limiting": "Consider implementing client-side rate limiting for API calls"
+  }
+}

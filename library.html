@@ -10,11 +10,6 @@
       name="description"
       content="Your manga library - Continue reading, favorites, and bookmarks on Enokku"
     />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
     <meta name="theme-color" content="#ff0000" />
 
     <meta property="og:title" content="Library - Enokku" />
@@ -25,8 +20,7 @@
     <meta property="og:type" content="website" />
 
     <title>Library - Enokku</title>
-    <link rel="manifest" href="manifest.json" />
-    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="src/assets/favicon.svg" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -35,14 +29,14 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="css/reset.css" />
-    <link rel="stylesheet" href="css/variables.css" />
-    <link rel="stylesheet" href="css/base.css" />
-    <link rel="stylesheet" href="css/utilities.css" />
-    <link rel="stylesheet" href="css/cards.css" />
-    <link rel="stylesheet" href="css/responsive.css" />
-    <link rel="stylesheet" href="css/bottom-nav.css" />
-    <link rel="stylesheet" href="css/library.css" />
+    <link rel="stylesheet" href="src/css/base/reset.css" />
+    <link rel="stylesheet" href="src/css/base/variables.css" />
+    <link rel="stylesheet" href="src/css/pages/home.css" />
+    <link rel="stylesheet" href="src/css/base/utilities.css" />
+    <link rel="stylesheet" href="src/css/components/cards.css" />
+    <link rel="stylesheet" href="src/css/responsive.css" />
+    <link rel="stylesheet" href="src/css/components/bottom-nav.css" />
+    <link rel="stylesheet" href="src/css/pages/library.css" />
   </head>
   <body>
     <header class="site-header">
@@ -234,6 +228,6 @@
       </div>
     </noscript>
 
-    <script type="module" src="js/library.js?v=2"></script>
+    <script type="module" src="src/js/pages/library.js?v=2"></script>
   </body>
 </html>

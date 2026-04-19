@@ -17,21 +17,11 @@ class AtsumaruScraper {
   }
 
   async searchManga(query, limit = 10) {
-    console.log(`[Atsumaru] Searching for: "${query}"`);
     try {
       const searchUrl = `${BASE_URL}/api/search/page`;
-      console.log(
-        `[Atsumaru] Requesting: ${searchUrl}?query=${encodeURIComponent(query)}`,
-      );
       const response = await this.session.get(searchUrl, {
         params: { query, limit },
       });
-
-      console.log(`[Atsumaru] Response status: ${response.status}`);
-      console.log(
-        `[Atsumaru] Response data:`,
-        JSON.stringify(response.data, null, 2)?.substring(0, 2000),
-      );
 
       if (response.data?.hits) {
         return response.data.hits.map((item) => ({
@@ -47,49 +37,31 @@ class AtsumaruScraper {
 
       return [];
     } catch (error) {
-      console.error("[Atsumaru] Search error:", error.message);
       return [];
     }
   }
 
   async getMangaDetails(mangaId) {
-    console.log(`[Atsumaru] Getting manga details: ${mangaId}`);
     try {
       const url = `${BASE_URL}/api/manga/page?id=${mangaId}`;
-      console.log(`[Atsumaru] Requesting: ${url}`);
       const response = await this.session.get(url);
-
-      console.log(`[Atsumaru] Response status: ${response.status}`);
-      console.log(
-        `[Atsumaru] Response data:`,
-        JSON.stringify(response.data, null, 2)?.substring(0, 2000),
-      );
 
       const data = response.data?.mangaPage;
       if (!data) {
-        console.log("[Atsumaru] No manga data found");
         return null;
       }
 
       let chapters = data.chapters || [];
 
       if (data.hasMoreChapters && chapters.length < data.totalChapterCount) {
-        console.log(
-          `[Atsumaru] Fetching all ${data.totalChapterCount} chapters...`,
-        );
         const allChaptersUrl = `${BASE_URL}/api/manga/allChapters?mangaId=${mangaId}`;
-        console.log(`[Atsumaru] Requesting: ${allChaptersUrl}`);
 
         const allChaptersResponse = await this.session.get(allChaptersUrl);
         const allChaptersData = allChaptersResponse.data;
 
         if (allChaptersData?.chapters) {
           chapters = allChaptersData.chapters;
-          console.log(`[Atsumaru] Fetched ${chapters.length} total chapters`);
         } else {
-          console.log(
-            `[Atsumaru] allChapters endpoint returned no chapters, using initial ${chapters.length}`,
-          );
         }
       }
 
@@ -115,27 +87,17 @@ class AtsumaruScraper {
         source: "atsumaru",
       };
     } catch (error) {
-      console.error("[Atsumaru] Manga details error:", error.message);
       return null;
     }
   }
 
   async getChapterPages(mangaId, chapterId) {
-    console.log(`[Atsumaru] Getting chapter pages: ${chapterId}`);
     try {
       const url = `${BASE_URL}/api/read/chapter?mangaId=${mangaId}&chapterId=${chapterId}`;
-      console.log(`[Atsumaru] Requesting: ${url}`);
       const response = await this.session.get(url);
-
-      console.log(`[Atsumaru] Response status: ${response.status}`);
-      console.log(
-        `[Atsumaru] Response data:`,
-        JSON.stringify(response.data, null, 2)?.substring(0, 2000),
-      );
 
       const data = response.data?.readChapter;
       if (!data) {
-        console.log("[Atsumaru] No chapter data found");
         return null;
       }
 
@@ -148,14 +110,11 @@ class AtsumaruScraper {
         })),
       };
     } catch (error) {
-      console.error("[Atsumaru] Chapter pages error:", error.message);
       return null;
     }
   }
 
   async findMangaByTitle(title) {
-    console.log(`[Atsumaru] Finding manga by title: "${title}"`);
-
     // First try direct API search
     const searchResults = await this.searchManga(title, 5);
 
@@ -171,15 +130,12 @@ class AtsumaruScraper {
           normalizedTitle.includes(resultTitle) ||
           englishTitle.includes(normalizedTitle)
         ) {
-          console.log(`[Atsumaru] Found match: "${result.title}"`);
           return result;
         }
       }
       // Return first result if no exact match
       return searchResults[0];
     }
-
-    console.log("[Atsumaru] No search results, trying explore page");
 
     // Fallback: Try to get from explore/availableFilters
     try {
@@ -208,20 +164,16 @@ class AtsumaruScraper {
           source: "atsumaru",
         };
       }
-    } catch (error) {
-      console.error("[Atsumaru] Explore page error:", error.message);
-    }
+    } catch (error) {}
 
     return null;
   }
 
   async getLibrary() {
-    console.log("[Atsumaru] Getting library");
     try {
       const response = await this.session.get(`${BASE_URL}/api/read/library`);
       return response.data?.items || [];
     } catch (error) {
-      console.error("[Atsumaru] Library error:", error.message);
       return [];
     }
   }

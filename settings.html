@@ -10,11 +10,6 @@
       name="description"
       content="Settings and preferences for Enokku manga reader"
     />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
     <meta name="theme-color" content="#ff0000" />
 
     <meta property="og:title" content="Settings - Enokku" />
@@ -25,8 +20,7 @@
     <meta property="og:type" content="website" />
 
     <title>Settings - Enokku</title>
-    <link rel="manifest" href="manifest.json" />
-    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="src/assets/favicon.svg" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -35,13 +29,13 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="css/reset.css" />
-    <link rel="stylesheet" href="css/variables.css" />
-    <link rel="stylesheet" href="css/base.css" />
-    <link rel="stylesheet" href="css/utilities.css" />
-    <link rel="stylesheet" href="css/responsive.css" />
-    <link rel="stylesheet" href="css/bottom-nav.css" />
-    <link rel="stylesheet" href="css/settings.css" />
+    <link rel="stylesheet" href="src/css/base/reset.css" />
+    <link rel="stylesheet" href="src/css/base/variables.css" />
+    <link rel="stylesheet" href="src/css/pages/home.css" />
+    <link rel="stylesheet" href="src/css/base/utilities.css" />
+    <link rel="stylesheet" href="src/css/responsive.css" />
+    <link rel="stylesheet" href="src/css/components/bottom-nav.css" />
+    <link rel="stylesheet" href="src/css/pages/settings.css" />
   </head>
   <body>
     <header class="site-header">
@@ -194,39 +188,6 @@
                 <span class="settings-info-label">Version:</span>
                 <span class="settings-info-value" id="appVersion">1.0.0</span>
               </div>
-              <div class="settings-info-item">
-                <span class="settings-info-label">Service Worker:</span>
-                <span class="settings-info-value" id="swStatus">
-                  <span class="status-dot"></span> Checking...
-                </span>
-              </div>
-            </div>
-
-            <!-- PWA Install Section -->
-            <div class="settings-pwa-section">
-              <h3 class="settings-subtitle">App Installation</h3>
-              <div class="settings-pwa-buttons">
-                <button class="btn-primary settings-action-btn" id="installBtn">
-                  Install App
-                </button>
-              </div>
-              <p class="settings-hint">
-                Install Enokku for a native app experience
-              </p>
-            </div>
-
-            <!-- App Update Controls -->
-            <div class="settings-update-section">
-              <h3 class="settings-subtitle">App Updates</h3>
-              <div class="settings-update-buttons">
-                <button class="btn-secondary" onclick="checkForUpdatesManual()">
-                  Check for Updates
-                </button>
-                <button class="btn-secondary" onclick="clearAppCacheManual()">
-                  Clear Cache & Reload
-                </button>
-              </div>
-              <div class="settings-update-status" id="updateStatus"></div>
             </div>
 
             <div class="settings-about">
@@ -293,6 +254,6 @@
       </div>
     </noscript>
 
-    <script type="module" src="js/settings.js?v=2"></script>
+    <script type="module" src="src/js/pages/settings.js?v=2"></script>
   </body>
 </html>

@@ -10,14 +10,17 @@ import {
   getCoverUrl,
   findRelationship,
   getEnglishTitle,
-} from "./api.js";
+} from "../api/mangadex.js";
 import {
   debounce,
   showLoading,
   showError,
   getPlaceholderImage,
-} from "./utils.js";
-import { getReadingHistory, clearHistory } from "./reading-history.js";
+} from "../utils/utils.js";
+import {
+  getReadingHistory,
+  clearHistory,
+} from "../components/reading-history.js";
 
 const trendingRow = document.getElementById("trendingRow");
 const topMangaRow = document.getElementById("topMangaRow");
@@ -136,9 +139,6 @@ async function migrateOldHistoryEntry(entry) {
     );
 
   if (!isValidUUID && entry.source === "atsumaru" && entry.mangaTitle) {
-    console.log(
-      `[Home] Migrating old entry: ${entry.mangaTitle} (ID: ${entry.mangaId})`,
-    );
     try {
       const searchResults = await searchManga(entry.mangaTitle, 5);
       if (searchResults?.data?.length > 0) {
@@ -159,12 +159,9 @@ async function migrateOldHistoryEntry(entry) {
           entry.coverUrl = getCoverUrl(bestMatch.id, coverArt, "256");
         }
 
-        console.log(`[Home] Migrated to MangaDex ID: ${bestMatch.id}`);
         return entry;
       }
-    } catch (error) {
-      console.error(`[Home] Failed to migrate entry:`, error);
-    }
+    } catch (error) {}
   }
   return entry;
 }
@@ -193,7 +190,6 @@ async function loadContinueReading() {
 
   if (hasChanges) {
     localStorage.setItem("reading_history", JSON.stringify(migratedHistory));
-    console.log("[Home] Saved migrated reading history");
   }
 
   continueReadingRow.innerHTML = "";
@@ -355,6 +351,4 @@ mobileMenuToggle?.addEventListener("click", () => {
 clearHistoryBtn?.addEventListener("click", handleClearHistory);
 loadContinueReading();
 
-loadAllSections().catch((error) => {
-  console.error("[home] Failed to load sections:", error);
-});
+loadAllSections().catch((error) => {});

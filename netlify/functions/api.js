@@ -30,8 +30,6 @@ exports.handler = async (event, context) => {
   if (queryParams.imageUrl) {
     const imageUrl = decodeURIComponent(queryParams.imageUrl);
 
-    console.log("[Proxy] Image URL:", imageUrl);
-
     // Determine appropriate headers based on image source
     let headers = {
       "User-Agent":
@@ -44,25 +42,17 @@ exports.handler = async (event, context) => {
       headers.Referer = "https://atsu.moe/";
     }
 
-    console.log("[Proxy] Headers:", headers);
-
     try {
       const response = await fetch(imageUrl, {
         headers,
       });
 
-      console.log("[Proxy] Response status:", response.status);
       console.log(
         "[Proxy] Response content-type:",
         response.headers.get("content-type"),
       );
 
       if (!response.ok) {
-        console.error(
-          "[Proxy] Failed to fetch image:",
-          response.status,
-          response.statusText,
-        );
         return {
           statusCode: response.status,
           body: JSON.stringify({
@@ -95,7 +85,6 @@ exports.handler = async (event, context) => {
         isBase64Encoded: true,
       };
     } catch (error) {
-      console.error("Image proxy error:", error);
       return {
         statusCode: 500,
         body: JSON.stringify({ error: "Failed to fetch image" }),
@@ -141,12 +130,6 @@ exports.handler = async (event, context) => {
 
   const mangadexUrl = `https://api.mangadex.org${incomingPath}${queryString}`;
 
-  console.log("[Proxy] URL:", mangadexUrl);
-  console.log("[Proxy] incomingPath:", incomingPath);
-  console.log("[Proxy] queryString:", queryString);
-  console.log("[Proxy] multiValueParams:", JSON.stringify(params));
-  console.log("[Proxy] singleParams:", JSON.stringify(singleParams));
-
   try {
     const response = await fetch(mangadexUrl, {
       headers: {
@@ -168,7 +151,6 @@ exports.handler = async (event, context) => {
       body: data,
     };
   } catch (error) {
-    console.error("Proxy error:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Failed to fetch from MangaDex API" }),

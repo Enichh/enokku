@@ -109,14 +109,11 @@ async function fetchMangaDetails(mangaId) {
 
 function getCoverUrl(mangaId, coverArt, size = "256") {
   if (!coverArt?.attributes?.fileName) {
-    console.log("[getCoverUrl] No cover art fileName for manga:", mangaId);
     return null;
   }
   const filename = coverArt.attributes.fileName;
   const directUrl = `${COVER_BASE_URL}/${mangaId}/${filename}.${size}.jpg`;
-  const proxyUrl = `/api/proxy?imageUrl=${encodeURIComponent(directUrl)}`;
-  console.log("[getCoverUrl] mangaId:", mangaId, "-> proxyUrl:", proxyUrl);
-  return proxyUrl;
+  return directUrl;
 }
 
 function findRelationship(item, type) {

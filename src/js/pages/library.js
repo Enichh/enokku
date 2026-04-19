@@ -1,4 +1,7 @@
-import { getReadingHistory, clearHistory } from "./reading-history.js";
+import {
+  getReadingHistory,
+  clearHistory,
+} from "../components/reading-history.js";
 
 const LIBRARY_STATE = {
   activeTab: "continue",
@@ -376,9 +379,7 @@ function setupBottomNav() {
   });
 }
 
-function showCardMenu(mangaId, chapterId) {
-  console.log("[Library] Show menu for", mangaId, chapterId);
-}
+function showCardMenu(mangaId, chapterId) {}
 
 window.switchTab = switchTab;
 window.loadContinueReading = loadContinueReading;

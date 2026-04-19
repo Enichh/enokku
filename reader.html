@@ -14,11 +14,6 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
     <meta
       name="description"
       content="Read manga chapters online - Enokku reader"
@@ -30,8 +25,7 @@
 
     <title>Reader - Enokku</title>
 
-    <link rel="manifest" href="manifest.json" />
-    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="src/assets/favicon.svg" />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -41,12 +35,12 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="css/reset.css" />
-    <link rel="stylesheet" href="css/variables.css" />
-    <link rel="stylesheet" href="css/base.css" />
-    <link rel="stylesheet" href="css/utilities.css" />
-    <link rel="stylesheet" href="css/reader.css" />
-    <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="src/css/base/reset.css" />
+    <link rel="stylesheet" href="src/css/base/variables.css" />
+    <link rel="stylesheet" href="src/css/pages/home.css" />
+    <link rel="stylesheet" href="src/css/base/utilities.css" />
+    <link rel="stylesheet" href="src/css/pages/reader.css" />
+    <link rel="stylesheet" href="src/css/responsive.css" />
   </head>
   <body class="reader-page">
     <header class="reader-header">
@@ -114,8 +108,7 @@
       </div>
     </noscript>
 
-    <script type="module" src="js/pwa.js?v=2"></script>
-    <script type="module" src="js/reader-hybrid.js?v=2"></script>
+    <script type="module" src="src/js/pages/reader.js?v=2"></script>
     <!-- Floating Reader Bar (Collapsible) -->
     <div id="floatingReaderBar" class="floating-reader-bar collapsed">
       <!-- Collapsed State Content -->

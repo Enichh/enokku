@@ -8,11 +8,15 @@ import {
   SORT_OPTIONS,
   SORT_API_PARAMS,
   CONTENT_RATINGS,
-} from "./tag-map.js";
+} from "../utils/tag-map.js";
 
-import { getCoverUrl, findRelationship, getEnglishTitle } from "./api.js";
-import { searchMangaHybrid } from "./hybrid-api.js";
-import { getPlaceholderImage, debounce } from "./utils.js";
+import {
+  getCoverUrl,
+  findRelationship,
+  getEnglishTitle,
+} from "../api/mangadex.js";
+import { searchMangaHybrid } from "../api/hybrid.js";
+import { getPlaceholderImage, debounce } from "../utils/utils.js";
 
 // ============================================
 // STATE MANAGEMENT

@@ -436,17 +436,12 @@
   border: none;
   border-radius: 50%;
   color: white;
-  font-size: 1.5rem;
   cursor: pointer;
   box-shadow: 0 4px 20px var(--accent-glow);
   z-index: 1001;
   transition: all 0.2s ease;
-}
-
-.mobile-filter-toggle::before {
-  content: "";
-  font-size: 1.8rem;
-  line-height: 1;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Hide toggle when filter sidebar is active */
@@ -467,8 +462,6 @@
 @media (max-width: 1024px) {
   .mobile-filter-toggle {
     display: flex;
-    align-items: center;
-    justify-content: center;
   }
 }
 

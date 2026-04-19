@@ -36,7 +36,6 @@ async function findAtsumaruManga(title) {
     const data = await fetchAtsumaru("/find", { title });
     return data.result;
   } catch (error) {
-    console.error("[Atsumaru] Find error:", error);
     return null;
   }
 }
@@ -46,7 +45,6 @@ async function searchAtsumaru(query, limit = 30) {
     const data = await fetchAtsumaru("/search", { q: query, limit });
     return data?.results || [];
   } catch (error) {
-    console.error("[Atsumaru] Search error:", error);
     return [];
   }
 }
@@ -125,9 +123,6 @@ export async function searchMangaHybrid(query, limit = 30) {
     }
   }
 
-  console.log(
-    `[Hybrid Search] Merged ${mergedResults.length} results from both sources`,
-  );
   return { data: mergedResults };
 }
 
@@ -136,7 +131,34 @@ export async function searchMangaHybrid(query, limit = 30) {
 async function getAtsumaruChapters(mangaId) {
   try {
     const data = await fetchAtsumaru("/manga", { id: mangaId });
-    return (data?.chapters || []).map((c) => ({
+    const rawChapters = data?.chapters || [];
+
+    // Deduplicate by chapter number, preferring higher page count (older/higher resolution format)
+    const chapterMap = new Map();
+
+    for (const c of rawChapters) {
+      const chapterNum = c.number;
+      const existing = chapterMap.get(chapterNum);
+
+      if (!existing) {
+        // First occurrence, add to map
+        chapterMap.set(chapterNum, c);
+      } else {
+        // Duplicate exists, prefer higher page count (older higher resolution format)
+        if (c.pageCount > existing.pageCount) {
+          chapterMap.set(chapterNum, c);
+        } else if (c.pageCount === existing.pageCount) {
+          // Same page count, prefer older timestamp
+          if (c.createdAt < existing.createdAt) {
+            chapterMap.set(chapterNum, c);
+          }
+        }
+      }
+    }
+
+    const deduplicatedChapters = Array.from(chapterMap.values());
+
+    return deduplicatedChapters.map((c) => ({
       id: `atsu-${c.id}`,
       chapter: c.number.toString(),
       title: c.title,
@@ -146,7 +168,6 @@ async function getAtsumaruChapters(mangaId) {
       pageCount: c.pageCount,
     }));
   } catch (error) {
-    console.error("[Atsumaru] Chapters error:", error);
     return [];
   }
 }
@@ -158,7 +179,6 @@ export async function getAtsumaruPages(mangaId, chapterId) {
     const data = await fetchAtsumaru("/chapter", { mangaId, chapterId });
     return data?.pages?.map((p) => p.image) || [];
   } catch (error) {
-    console.error("[Atsumaru] Pages error:", error);
     return [];
   }
 }
@@ -175,7 +195,6 @@ export async function getMangaDexPages(chapterId) {
     }
     return [];
   } catch (error) {
-    console.error("[MangaDex] Pages error:", error);
     return [];
   }
 }
@@ -184,24 +203,18 @@ export async function getMangaDexPages(chapterId) {
 
 export async function getChaptersHybrid(mangaTitles, mangaDexChapters = []) {
   const titles = Array.isArray(mangaTitles) ? mangaTitles : [mangaTitles];
-  console.log(
-    `[Hybrid] Starting Atsumaru-only search with ${titles.length} titles`,
-  );
 
   // Try Atsumaru only
-  console.log(`[Hybrid] Searching Atsumaru...`);
   let atsumaruManga = null;
   for (const title of titles) {
     if (!title) continue;
     atsumaruManga = await findAtsumaruManga(title);
     if (atsumaruManga) {
-      console.log(`[Hybrid] Atsumaru match: "${atsumaruManga.title}"`);
       break;
     }
   }
 
   if (!atsumaruManga) {
-    console.log(`[Hybrid] No Atsumaru manga found for any title`);
     return {
       source: SOURCES.ATSUMARU,
       chapters: [],
@@ -216,7 +229,6 @@ export async function getChaptersHybrid(mangaTitles, mangaDexChapters = []) {
   const atsumaruChapters = await getAtsumaruChapters(atsumaruManga.id);
 
   if (atsumaruChapters.length === 0) {
-    console.log(`[Hybrid] No chapters found on Atsumaru`);
     return {
       source: SOURCES.ATSUMARU,
       chapters: [],
@@ -231,10 +243,6 @@ export async function getChaptersHybrid(mangaTitles, mangaDexChapters = []) {
   // Sort by chapter number descending
   atsumaruChapters.sort(
     (a, b) => parseFloat(b.chapter) - parseFloat(a.chapter),
-  );
-
-  console.log(
-    `[Hybrid] Final: ${atsumaruChapters.length} chapters from Atsumaru`,
   );
 
   return {

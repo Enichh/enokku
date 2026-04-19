@@ -1,11 +1,3 @@
-import {
-  getCacheStats,
-  clearAppCache,
-  checkForVersionUpdate,
-  getDeferredInstallPrompt,
-  triggerInstall,
-} from "./pwa.js";
-
 const SETTINGS_DEFAULTS = {
   readingDirection: "rtl",
   imageQuality: "auto",
@@ -107,11 +99,6 @@ function setupEventListeners() {
   if (importFileInput) {
     importFileInput.addEventListener("change", handleImportData);
   }
-
-  const installBtn = document.getElementById("installBtn");
-  if (installBtn) {
-    installBtn.addEventListener("click", triggerInstall);
-  }
 }
 
 async function loadSettingsUI() {
@@ -126,65 +113,14 @@ async function loadSettingsUI() {
       versionElement.textContent = "1.0.0";
     }
   }
-
-  const swStatus = document.getElementById("swStatus");
-  if (swStatus) {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.ready
-        .then(() => {
-          swStatus.innerHTML = '<span class="status-dot active"></span> Active';
-        })
-        .catch(() => {
-          swStatus.innerHTML = '<span class="status-dot"></span> Inactive';
-        });
-    } else {
-      swStatus.innerHTML = '<span class="status-dot"></span> Not Supported';
-    }
-  }
-
-  // Setup install button state
-  updateInstallButtonState();
-}
-
-function updateInstallButtonState() {
-  const installBtn = document.getElementById("installBtn");
-  if (!installBtn) return;
-
-  // Check if app is already installed
-  const isStandalone =
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.navigator.standalone === true;
-  const isInstalled = localStorage.getItem("enokku_installed") === "true";
-
-  if (isStandalone || isInstalled) {
-    installBtn.textContent = "Already Installed";
-    installBtn.disabled = true;
-    installBtn.innerHTML = "Already Installed";
-  } else {
-    // Check if install prompt is available
-    setTimeout(() => {
-      if (getDeferredInstallPrompt()) {
-        installBtn.disabled = false;
-      } else {
-        installBtn.textContent = "Install Unavailable";
-        installBtn.disabled = true;
-        installBtn.innerHTML = "Install Unavailable";
-      }
-    }, 2000); // Wait a bit for install prompt to be captured
-  }
 }
 
 async function updateCacheStats() {
   const usageElement = document.getElementById("storageUsage");
 
   try {
-    // Get total storage stats from browser
-    const totalStats = await getCacheStats();
-    const usageMB = (totalStats.usage / 1024 / 1024).toFixed(1);
-    const quotaMB = (totalStats.quota / 1024 / 1024).toFixed(0);
-
     if (usageElement) {
-      usageElement.textContent = `${usageMB} MB / ${quotaMB} MB`;
+      usageElement.textContent = "N/A (PWA disabled)";
     }
   } catch (error) {
     console.error("[Settings] Failed to get cache stats:", error);
@@ -193,22 +129,9 @@ async function updateCacheStats() {
 }
 
 async function handleClearCache() {
-  if (
-    !confirm(
-      "Clear all cached data? This will remove cached assets but keep your settings and reading history.",
-    )
-  ) {
-    return;
-  }
-
-  try {
-    await clearAppCache();
-    await updateCacheStats();
-    showSettingSaved("Cache cleared successfully");
-  } catch (error) {
-    console.error("[Settings] Failed to clear cache:", error);
-    alert("Failed to clear cache. Please try again.");
-  }
+  alert(
+    "Cache clearing is disabled (PWA removed). Please clear your browser cache manually.",
+  );
 }
 
 function showSettingSaved(message) {
@@ -307,106 +230,6 @@ function handleImportData(event) {
 
   event.target.value = "";
 }
-
-// ============================================
-// MANUAL UPDATE CONTROLS
-// ============================================
-
-window.checkForUpdatesManual = async () => {
-  const statusEl = document.getElementById("updateStatus");
-  if (!statusEl) return;
-
-  statusEl.innerHTML =
-    '<span class="update-checking">Checking for updates...</span>';
-
-  try {
-    await checkForVersionUpdate();
-
-    // Check if we got an update notification
-    const hasNotification = document.querySelector(".update-notification");
-    if (!hasNotification) {
-      statusEl.innerHTML =
-        '<span class="update-current">App is up to date</span>';
-
-      // Clear status after 3 seconds
-      setTimeout(() => {
-        statusEl.innerHTML = "";
-      }, 3000);
-    } else {
-      statusEl.innerHTML =
-        '<span class="update-available">Update available! Click "Update Now" above.</span>';
-    }
-  } catch (error) {
-    console.error("Manual update check failed:", error);
-    statusEl.innerHTML =
-      '<span class="update-error">Check failed. Try again.</span>';
-
-    setTimeout(() => {
-      statusEl.innerHTML = "";
-    }, 3000);
-  }
-};
-
-// Clear cache only (preserve service worker)
-window.clearAppCacheManual = async () => {
-  const statusEl = document.getElementById("updateStatus");
-  if (!statusEl) return;
-
-  statusEl.innerHTML = '<span class="update-checking">Clearing cache...</span>';
-
-  try {
-    await clearAppCache();
-
-    statusEl.innerHTML = '<span class="update-success">Cache cleared!</span>';
-
-    // Update cache stats
-    setTimeout(() => {
-      updateCacheStats();
-    }, 1000);
-  } catch (error) {
-    console.error("Cache clear failed:", error);
-    statusEl.innerHTML =
-      '<span class="update-error">Clear failed. Try manually clearing browser cache.</span>';
-  }
-};
-
-// Reset app (clear cache + unregister service worker + reload)
-window.resetApp = async () => {
-  const statusEl = document.getElementById("updateStatus");
-  if (!statusEl) return;
-
-  if (
-    !confirm(
-      "Reset app? This will clear all cached data, unregister the service worker, and reload the page. Your settings and reading history will be preserved.",
-    )
-  ) {
-    return;
-  }
-
-  statusEl.innerHTML = '<span class="update-checking">Resetting app...</span>';
-
-  try {
-    await clearAppCache();
-
-    // Unregister service worker
-    const registration = await navigator.serviceWorker.getRegistration();
-    if (registration) {
-      await registration.unregister();
-    }
-
-    statusEl.innerHTML =
-      '<span class="update-success">App reset! Reloading...</span>';
-
-    // Reload after short delay
-    setTimeout(() => {
-      window.location.reload();
-    }, 1500);
-  } catch (error) {
-    console.error("App reset failed:", error);
-    statusEl.innerHTML =
-      '<span class="update-error">Reset failed. Try manually clearing browser cache.</span>';
-  }
-};
 
 function setupBottomNav() {
   const currentPage =
